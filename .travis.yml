@@ -1,0 +1,14 @@
+language: python
+python:
+    - "3.8"
+before_install:
+    - pip install pytest pytest-cov
+    - pip install codecov
+    - pip install torch
+    - pip install pandas
+    - pip install matplotlib
+    - pip install sklearn
+script:
+    - pytest --cov=./
+after_success:
+        - bash <(curl -s https://codecov.io/bash)
