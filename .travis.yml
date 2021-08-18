@@ -6,3 +6,5 @@ before_install:
     - pip install pandas
     - pip install matplotlib
     - pip install sklearn
+script:
+    - pytest
