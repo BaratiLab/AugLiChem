@@ -3,9 +3,12 @@ codecov:
   token: e4ce0139-cc7f-476b-a393-1a675838eab6
 
 coverage:
-  precision: 2
+  precision: 3
   round: down
   range: "70...100"
+
+ignore:
+  - "./setup.py"
 
 parsers:
   gcov:
