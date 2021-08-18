@@ -4,10 +4,12 @@ python:
 before_install:
     - pip install pytest pytest-cov
     - pip install codecov
-    - pip install torch
     - pip install pandas
     - pip install matplotlib
     - pip install sklearn
+    - pip install rdkit rdkit
+    - pip install torch
+    - pip install torch-geometric
 script:
     - pytest --cov=./
 after_success:
