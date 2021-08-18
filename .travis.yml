@@ -7,7 +7,7 @@ before_install:
     - pip install pandas
     - pip install matplotlib
     - pip install sklearn
-    - pip install rdkit rdkit
+    - pip install rdkit-pypi
     - pip install torch
     - pip install torch-geometric
 script:
