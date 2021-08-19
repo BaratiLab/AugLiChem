@@ -9,13 +9,14 @@ from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import add_self_loops, degree, softmax
 from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool
 
-from data_aug.dataset import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
+#from data_aug.dataset import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
+from auglichem.utils import NUM_ATOM_TYPE, NUM_CHIRALITY_TAG, NUM_BOND_TYPE, NUM_BOND_DIRECTION
 
 
-num_atom_type = len(ATOM_LIST) + 1 # including the extra mask tokens
-num_chirality_tag = len(CHIRALITY_LIST)
-num_bond_type = len(BOND_LIST) + 1 # including aromatic and self-loop edge
-num_bond_direction = len(BONDDIR_LIST)
+#num_atom_type = len(ATOM_LIST) + 1 # including the extra mask tokens
+#num_chirality_tag = len(CHIRALITY_LIST)
+#num_bond_type = len(BOND_LIST) + 1 # including aromatic and self-loop edge
+#num_bond_direction = len(BONDDIR_LIST)
 
 
 class GINEConv(MessagePassing):
@@ -26,8 +27,8 @@ class GINEConv(MessagePassing):
             nn.ReLU(), 
             nn.Linear(2*emb_dim, emb_dim)
         )
-        self.edge_embedding1 = nn.Embedding(num_bond_type, emb_dim)
-        self.edge_embedding2 = nn.Embedding(num_bond_direction, emb_dim)
+        self.edge_embedding1 = nn.Embedding(NUM_BOND_TYPE, emb_dim)
+        self.edge_embedding2 = nn.Embedding(NUM_BOND_DIRECTION, emb_dim)
 
         nn.init.xavier_uniform_(self.edge_embedding1.weight.data)
         nn.init.xavier_uniform_(self.edge_embedding2.weight.data)
@@ -82,8 +83,8 @@ class GINE(nn.Module):
         if self.num_layer < 2:
             raise ValueError("Number of GNN layers must be greater than 1.")
 
-        self.x_embedding1 = nn.Embedding(num_atom_type, emb_dim)
-        self.x_embedding2 = nn.Embedding(num_chirality_tag, emb_dim)
+        self.x_embedding1 = nn.Embedding(NUM_ATOM_TYPE, emb_dim)
+        self.x_embedding2 = nn.Embedding(NUM_CHIRALITY_TAG, emb_dim)
 
         nn.init.xavier_uniform_(self.x_embedding1.weight.data)
         nn.init.xavier_uniform_(self.x_embedding2.weight.data)
