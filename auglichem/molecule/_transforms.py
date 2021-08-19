@@ -14,30 +14,7 @@ import torch
 import torch_geometric
 from torch_geometric.data import Data as PyG_Data
 
-
-ATOM_LIST = list(range(1,119))
-
-CHIRALITY_LIST = [
-    Chem.rdchem.ChiralType.CHI_UNSPECIFIED,
-    Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW,
-    Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW,
-    Chem.rdchem.ChiralType.CHI_OTHER
-]
-
-BOND_LIST = [
-    BT.SINGLE, 
-    BT.DOUBLE, 
-    BT.TRIPLE, 
-    BT.AROMATIC,
-    BT.UNSPECIFIED,
-]
-
-BONDDIR_LIST = [
-    Chem.rdchem.BondDir.NONE,
-    Chem.rdchem.BondDir.ENDUPRIGHT,
-    Chem.rdchem.BondDir.ENDDOWNRIGHT,
-    Chem.rdchem.BondDir.EITHERDOUBLE
-]
+from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 
 
 def smiles2graph(smiles):
