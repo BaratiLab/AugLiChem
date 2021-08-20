@@ -6,6 +6,7 @@ from tqdm import tqdm
 import csv
 import gzip
 from rdkit import Chem
+import numpy as np
 
 #TODO:
 #  1) Add functionality to download csv.gz datasets (which looks like most of them)
@@ -133,21 +134,33 @@ def _process_csv(csv_file, target, task):
         labels[t] = []
 
     for i, row in enumerate(csv_reader):
-        if i != 0:
-            # smiles = row[3]
+        # Skip header
+        if i == 0:
+            continue
+
+        # smiles = row[3]
+        try:
             smiles = row['smiles']
-            for t in target:
-                label = row[t]
-                mol = Chem.MolFromSmiles(smiles)
-                if mol != None and label != '':
+        except KeyError:
+            smiles = row['mol']
+        for idx, t in enumerate(target):
+            label = row[t]
+            mol = Chem.MolFromSmiles(smiles)
+            if mol != None and label != '':
+                if(idx == 0):
                     smiles_data.append(smiles)
-                    if task == 'classification':
-                        labels[t].append(int(label))
-                    elif task == 'regression':
-                        labels[t].append(float(label))
-                    else:
-                        ValueError('task must be either regression or classification')
-    return smiles_data, labels
+                if task == 'classification':
+                    labels[t].append(int(label))
+                elif task == 'regression':
+                    labels[t].append(float(label))
+                else:
+                    ValueError('task must be either regression or classification')
+
+    # Recast lables to numpy arrays
+    for t in target:
+        labels[t] = np.array(labels[t])
+
+    return smiles_data, labels, task
 
 
 def read_smiles(dataset, data_path):
@@ -167,25 +180,5 @@ def read_smiles(dataset, data_path):
         with open(csv_file_path) as csv_file:
             return _process_csv(csv_file, target, task)
 
-    if True:
-        with open(csv_file_path) as csv_file:
-            # csv_reader = csv.reader(csv_file, delimiter=',')
-            csv_reader = csv.DictReader(csv_file, delimiter=',')
-            for i, row in enumerate(csv_reader):
-                if i != 0:
-                    # smiles = row[3]
-                    smiles = row['mol']
-                    for t in target:
-                        label = row[t]
-                        mol = Chem.MolFromSmiles(smiles)
-                        if mol != None and label != '':
-                            smiles_data.append(smiles)
-                            if task == 'classification':
-                                labels[t].append(int(label))
-                            elif task == 'regression':
-                                labels[t].append(float(label))
-                            else:
-                                ValueError('task must be either regression or classification')
-    return smiles_data, labels
-
+    return smiles_data, np.array(labels)
 
