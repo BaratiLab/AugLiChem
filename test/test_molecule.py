@@ -17,7 +17,7 @@ def test_smiles2graph():
     assert True
 
 def test_molecule_data():
-    MoleculeData("BACE")
+    MoleculeData("SIDER")
     shutil.rmtree("./data_download")
 
 if __name__ == '__main__':

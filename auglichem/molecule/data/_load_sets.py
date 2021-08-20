@@ -4,6 +4,7 @@ import pathlib
 import urllib
 from tqdm import tqdm
 import csv
+import gzip
 from rdkit import Chem
 
 #TODO:
@@ -87,14 +88,66 @@ def _load_data(dataset=None, data_path='./data_download/'):
                     "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/bace.csv",
                     data_path)
 
-    if(dataset == 'ClinTox'):
+    elif(dataset == 'ClinTox'):
         task = 'classification'
         target = ['CT_TOX', 'FDA_APPROVED']
         csv_file_path = download_url(
                     "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/clintox.csv.gz",
                     data_path)
 
+    elif(dataset == 'BBBP'):
+        task = 'classification'
+        target = ['p_np']
+        csv_file_path = download_url(
+                   "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/BBBP.csv",
+                   data_path)
+
+    elif(dataset == 'SIDER'):
+        task = 'classification'
+        target = [
+            "Hepatobiliary disorders", "Metabolism and nutrition disorders", "Product issues", "Eye disorders", "Investigations",
+            "Musculoskeletal and connective tissue disorders", "Gastrointestinal disorders", "Social circumstances",
+            "Immune system disorders", "Reproductive system and breast disorders",
+            "Neoplasms benign, malignant and unspecified (incl cysts and polyps)",
+            "General disorders and administration site conditions",
+            "Endocrine disorders", "Surgical and medical procedures", "Vascular disorders",
+"Blood and lymphatic system disorders",
+            "Skin and subcutaneous tissue disorders", "Congenital, familial and genetic disorders", "Infections and infestations",
+            "Respiratory, thoracic and mediastinal disorders", "Psychiatric disorders",
+"Renal and urinary disorders",
+            "Pregnancy, puerperium and perinatal conditions", "Ear and labyrinth disorders",
+"Cardiac disorders",
+            "Nervous system disorders", "Injury, poisoning and procedural complications"
+        ]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/sider.csv.gz",
+                data_path)
+
     return csv_file_path, target, task
+
+
+def _process_csv(csv_file, target, task):
+    csv_reader = csv.DictReader(csv_file, delimiter=',')
+    smiles_data, labels = [], {}
+    for t in target:
+        labels[t] = []
+
+    for i, row in enumerate(csv_reader):
+        if i != 0:
+            # smiles = row[3]
+            smiles = row['smiles']
+            for t in target:
+                label = row[t]
+                mol = Chem.MolFromSmiles(smiles)
+                if mol != None and label != '':
+                    smiles_data.append(smiles)
+                    if task == 'classification':
+                        labels[t].append(int(label))
+                    elif task == 'regression':
+                        labels[t].append(float(label))
+                    else:
+                        ValueError('task must be either regression or classification')
+    return smiles_data, labels
 
 
 def read_smiles(dataset, data_path):
@@ -107,28 +160,32 @@ def read_smiles(dataset, data_path):
 
     # Download files if not already there
     csv_file_path, target, task = _load_data(dataset, data_path)
-    smiles_data, labels = [], {}
-    for t in target:
-        labels[t] = []
+    if(".gz" in csv_file_path):
+        with gzip.open(csv_file_path, 'rt') as csv_file:
+            return _process_csv(csv_file, target, task)
+    else:
+        with open(csv_file_path) as csv_file:
+            return _process_csv(csv_file, target, task)
 
-    with open(csv_file_path) as csv_file:
-        # csv_reader = csv.reader(csv_file, delimiter=',')
-        csv_reader = csv.DictReader(csv_file, delimiter=',')
-        for i, row in enumerate(csv_reader):
-            if i != 0:
-                # smiles = row[3]
-                smiles = row['mol']
-                for t in target:
-                    label = row[t]
-                    mol = Chem.MolFromSmiles(smiles)
-                    if mol != None and label != '':
-                        smiles_data.append(smiles)
-                        if task == 'classification':
-                            labels[t].append(int(label))
-                        elif task == 'regression':
-                            labels[t].append(float(label))
-                        else:
-                            ValueError('task must be either regression or classification')
+    if True:
+        with open(csv_file_path) as csv_file:
+            # csv_reader = csv.reader(csv_file, delimiter=',')
+            csv_reader = csv.DictReader(csv_file, delimiter=',')
+            for i, row in enumerate(csv_reader):
+                if i != 0:
+                    # smiles = row[3]
+                    smiles = row['mol']
+                    for t in target:
+                        label = row[t]
+                        mol = Chem.MolFromSmiles(smiles)
+                        if mol != None and label != '':
+                            smiles_data.append(smiles)
+                            if task == 'classification':
+                                labels[t].append(int(label))
+                            elif task == 'regression':
+                                labels[t].append(float(label))
+                            else:
+                                ValueError('task must be either regression or classification')
     return smiles_data, labels
 
 
