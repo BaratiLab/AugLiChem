@@ -28,9 +28,9 @@ from ._load_sets import read_smiles
 
 #TODO docstrings for MoleculeData
 
-class Data(Dataset):
-    def __init__(self, smiles_data, labels, task, test_mode=True, aug_time=1,
-                 node_mask_ratio=[0, 0.25], edge_mask_ratio=[0, 0.25]):
+class MolData(Dataset):
+    def __init__(self, smiles_data, labels=None, task=None, test_mode=True, aug_time=1,
+                 node_mask_ratio=[0, 0.25], edge_mask_ratio=[0, 0.25], **kwargs):
         '''
             Initialize Molecular Data set object. This object tracks data, labels,
             task, test, and augmentation
@@ -205,9 +205,14 @@ class Data(Dataset):
         num_bonds = mol.GetNumBonds()
 
         # Mask according to initialized rules
-        x_mask = self.mask_nodes(x, num_atoms)
-        edge_index_mask, edge_attr_mask = self.mask_edges(edge_index, edge_attr, num_bonds)
 
+        #TODO: Update this to do transforms
+        #x_mask = RandomAtomMask()(x)
+        #edge_index_mask, edge_attr_mask = RandomBondDelete(edge_index, edge_attr, num_bonds)
+
+        x_mask = x.clone()
+        edge_index_mask = edge_index.clone()
+        edge_attr_mask = edge_attr.clone()
         return Data(x=x_mask, y=y, edge_index=edge_index_mask, edge_attr=edge_attr_mask)
 
 
@@ -217,25 +222,29 @@ class Data(Dataset):
 
 class MoleculeData(Data):
     def __init__(self, dataset, split="scaffold", batch_size=64, num_workers=0,
-                 valid_size=0.1, test_size=0.1, aug_time=1, data_path=None):
+                 valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
+                 **kwargs):
         '''
             Input:
             ---
             dataset (str): One of the datasets available from MoleculeNet
                            (http://moleculenet.ai/datasets-1)
-            split (str, default=scaffold): random or scaffold. The splitting strategy used for
-                         train/test/validation set creation.
-            batch_size (int, default=64): Batch size used in training
-            num_workers (int, default=0): Number of workers used in loading data
-            valid_size (float in [0,1], default=0.1): 
+            split (str, optional default=scaffold): random or scaffold. The splitting strategy
+                                                    used for train/test/validation set creation.
+            batch_size (int, optional default=64): Batch size used in training
+            num_workers (int, optional default=0): Number of workers used in loading data
+            valid_size (float in [0,1], optional default=0.1): 
+            test_size (float in [0,1],  optional default=0.1): 
+            aug_time (int, optional default=1):
+            data_path (str, optional default=None): specify path to save/lookup data. Default
+                        creates `data_download` directory and stores data there/
 
 
             Output:
             ---
             None
         '''
-        super(object, self).__init__()
-        self.dataset = dataset
+        super().__init__(dataset)
         self.split = split
         self.data_path = data_path
         self.batch_size = batch_size
@@ -243,20 +252,21 @@ class MoleculeData(Data):
         self.valid_size = valid_size
         self.test_size = test_size
         self.aug_time = aug_time
-        self.smiles_data, self.labels = read_smiles(dataset, data_path)
+        self.smiles_data, self.labels, self.task = read_smiles(dataset, data_path)
         self.smiles_data = np.asarray(self.smiles_data)
-        self.labels = np.asarray(self.labels)
+        self.target = target
+
 
     def get_data_loaders(self):
         train_idx, valid_idx, test_idx = scaffold_split(self.smiles_data, self.valid_size,
                                                         self.test_size)
 
         # define dataset
-        train_set = MolDataset(self.smiles_data[train_idx], self.labels[train_idx],
+        train_set = MolData(self.smiles_data[train_idx], self.labels[self.target][train_idx],
                                test_mode=False, aug_time=self.aug_time, task=self.task)
-        valid_set = MolDataset(self.smiles_data[valid_idx], self.labels[valid_idx],
+        valid_set = MolData(self.smiles_data[valid_idx], self.labels[self.target][valid_idx],
                                test_mode=True, task=self.task)
-        test_set = MolDataset(self.smiles_data[test_idx], self.labels[test_idx],
+        test_set = MolData(self.smiles_data[test_idx], self.labels[self.target][test_idx],
                               test_mode=True, task=self.task)
 
         train_loader = DataLoader(
