@@ -1,0 +1,24 @@
+run:
+  batch_size: 1024
+  epochs: 2
+  eval_every_n_epochs: 50
+  log_every_n_steps: 5
+  weight_decay: 1e-6
+  init_lr: 0.001
+  gpu: cuda:0
+  dataset: BACE
+  restarts: 3
+  
+model: 
+  type: gin
+  num_layer: 5
+  emb_dim: 128
+  feat_dim: 256
+  pool: mean
+  drop_ratio: 0.2
+
+dataset:
+  num_workers: 0
+  valid_size: 0.1
+  test_size: 0.1
+  aug_time: 3
