@@ -66,6 +66,15 @@ def test_atom_mask():
     atom_masked = RandomAtomMask(p=1)(data, 0)
     assert all(atom_masked.x[:,0].numpy() == [118]*len(data.x))
 
+    # Check seed setting (same)
+    data = smiles2graph("C"*50)
+    atom_mask = RandomAtomMask(p=0.5)
+    atom_masked1 = atom_mask(data, 42)
+    atom_masked2 = atom_mask(data, 42)
+    atom_masked3 = atom_mask(data, 4)
+    assert all(atom_masked1.x[:,0].numpy() == atom_masked2.x[:,0].numpy())
+    assert any(atom_masked1.x[:,0].numpy() != atom_masked3.x[:,0].numpy())
+
 
 def test_atom_mask_mol():
 
@@ -74,14 +83,9 @@ def test_atom_mask_mol():
     data.target = 'target'
 
     # Mask every atom
-    atom_masked = RandomAtomMask(p=1)(data.__getitem__(0), 0)
+    atom_masked = RandomAtomMask(p=1)(data.__getitem__(0), seed=0)
     assert all(atom_masked.x[:,0].numpy() == [118]*5)
 
-    # Do the same with methane
-    #mol = Chem.AddHs(mol)
-    #x = data._get_data_x(mol)
-    #x_mask = data.mask_nodes(x, len(x), 1)
-    #assert all(x_mask[:,0].numpy() == [99]*5) # Mask every atom
 
 
 def test_bond_delete():
@@ -104,6 +108,14 @@ def test_bond_delete():
     assert bond_masked.edge_index.numel() == 0
     assert bond_masked.edge_attr.numel() == 0
 
+    # Check seed setting
+    data = smiles2graph("C"*50)
+    bond_masked1 = RandomBondDelete(p=0.5)(data, 42)
+    bond_masked2 = RandomBondDelete(p=0.5)(data, 42)
+    bond_masked3 = RandomBondDelete(p=0.5)(data, 4)
+    assert torch.all(torch.eq(bond_masked1.edge_index, bond_masked2.edge_index))
+    assert torch.any(torch.eq(bond_masked1.edge_index, bond_masked3.edge_index))
+
 
 def test_bond_delete_mol():
 
@@ -112,7 +124,7 @@ def test_bond_delete_mol():
     data.target = 'target'
 
     # Mask every atom
-    atom_masked = RandomBondDelete(p=1)(data.__getitem__(0), 0)
+    atom_masked = RandomBondDelete(p=1)(data.__getitem__(0))
     assert atom_masked.edge_index.numel() == 0
     assert atom_masked.edge_attr.numel() == 0
 
@@ -130,9 +142,9 @@ def test_molecule_data():
     #    print(b)
 
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
     #test_atom_mask()
-    #test_bond_delete()
+    test_bond_delete()
     #test_atom_mask_mol()
     #test_bond_delete_mol()
     #test_molecule_data()
