@@ -7,7 +7,9 @@ from copy import deepcopy
 
 import torch
 import torch.nn.functional as F
-from torch_geometric.data import Data, Dataset, DataLoader
+from torch_geometric.data import Dataset, DataLoader
+from torch_geometric.data import Data as PyG_Data
+
 
 import rdkit
 from rdkit import Chem
@@ -22,29 +24,31 @@ from auglichem.utils import (
         scaffold_split
 )
 from auglichem.molecule import RandomAtomMask, RandomBondDelete
-#from auglichem.molecule.data import read_smiles
 from ._load_sets import read_smiles
 
 
 #TODO docstrings for MoleculeData
 
 class MolData(Dataset):
-    def __init__(self, smiles_data, labels=None, task=None, test_mode=True, aug_time=1,
-                 node_mask_ratio=[0, 0.25], edge_mask_ratio=[0, 0.25], **kwargs):
+    def __init__(self, dataset, data_path=None, smiles_data=None, labels=None, task=None,
+                 test_mode=False, aug_time=1, atom_mask_ratio=[0, 0.25],
+                 bond_delete_ratio=[0, 0.25], target=None, class_labels=None, **kwargs):
         '''
             Initialize Molecular Data set object. This object tracks data, labels,
             task, test, and augmentation
 
             Input:
             -----------------------------------
+            dataset (str): Name of data set
+            data_path (str, optional default=None): path to store or load data
             smiles_data (np.ndarray of str): Data set in smiles format
             labels (np.ndarray of float): Data labels, maybe optional if unsupervised?
             task (str): 'regression' or 'classification' indicating the learning task
-            test_mode (boolean, default=True): Does no augmentations if true
+            test_mode (boolean, default=False): Does no augmentations if true
             aug_time (int, optional, default=1): Controls augmentations (not quite sure how yet)
-            node_mask_ratio (list, float): If list, sample mask ratio uniformly over [a, b]
+            atom_mask_ratio (list, float): If list, sample mask ratio uniformly over [a, b]
                                            where a < b, if float, set ratio to input.
-            edge_mask_ratio (list, float): If list, sample mask ratio uniformly over [a, b]
+            bond_delete_ratio (list, float): If list, sample mask ratio uniformly over [a, b]
                                            where a < b, if float, set ratio to input.
 
 
@@ -55,9 +59,16 @@ class MolData(Dataset):
         super(Dataset, self).__init__()
 
         # Store class attributes
-        self.smiles_data = smiles_data
-        self.labels = labels
-        self.task = task
+        self.dataset = dataset
+        self.data_path = data_path
+
+        if(smiles_data is None):
+            self.smiles_data, self.labels, self.task = read_smiles(dataset, data_path)
+        else:
+            self.smiles_data = smiles_data
+            self.labels = labels
+            self.task = task
+
         self.test_mode = test_mode
         self.aug_time = aug_time
         if self.test_mode:
@@ -70,8 +81,18 @@ class MolData(Dataset):
         np.random.shuffle(self.reproduce_seeds)
 
         # Store mask ratios
-        self.node_mask_ratio = node_mask_ratio
-        self.edge_mask_ratio = edge_mask_ratio
+        self.atom_mask_ratio = atom_mask_ratio
+        self.bond_delete_ratio = bond_delete_ratio
+
+        if(target is not None):
+            self.target = target
+        else:
+            self.target = list(self.labels.keys())[0]
+
+        if(class_labels is not None):
+            self.class_labels = class_labels
+        else:
+            self.class_labels = self.labels[self.target]
 
 
     def _get_data_x(self, mol):
@@ -117,10 +138,18 @@ class MolData(Dataset):
             y (torch.Tensor, long if classification, float if regression): Data label
         '''
 
+        # Target defined 
+        #if(isinstance(self.labels, dict)):
+        #    if self.task == 'classification':
+        #        y = torch.tensor(self.labels[self.target][index], dtype=torch.long).view(1,-1)
+        #    elif self.task == 'regression':
+        #        y = torch.tensor(self.labels[self.target][index], dtype=torch.float).view(1,-1)
+        #else:
         if self.task == 'classification':
-            y = torch.tensor(self.labels[index], dtype=torch.long).view(1,-1)
+            y = torch.tensor(self.class_labels[index], dtype=torch.long).view(1,-1)
         elif self.task == 'regression':
-            y = torch.tensor(self.labels[index], dtype=torch.float).view(1,-1)
+            y = torch.tensor(self.class_labels[index], dtype=torch.float).view(1,-1)
+
 
         return y
 
@@ -181,16 +210,14 @@ class MolData(Dataset):
             masked_data (Data object): data that has been augmented with node and edge masking
 
         '''
-
         # If augmentation is done, actual dataset is smaller than given indices
         if self.test_mode:
             true_index = index
         else:
             true_index = index // self.aug_time
 
-
         # Create initial data set
-        mol = Chem.MolFromSmiles(self.smiles_data[true_index]) # Need an index somehow
+        mol = Chem.MolFromSmiles(self.smiles_data[true_index])
         mol = Chem.AddHs(mol)
 
         # Get data x and y
@@ -206,21 +233,37 @@ class MolData(Dataset):
 
         # Mask according to initialized rules
 
-        #TODO: Update this to do transforms
-        #x_mask = RandomAtomMask()(x)
-        #edge_index_mask, edge_attr_mask = RandomBondDelete(edge_index, edge_attr, num_bonds)
+        # Set up PyG data object
+        molecule = PyG_Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr)
 
-        x_mask = x.clone()
-        edge_index_mask = edge_index.clone()
-        edge_attr_mask = edge_attr.clone()
-        return Data(x=x_mask, y=y, edge_index=edge_index_mask, edge_attr=edge_attr_mask)
+        # Set up atom masking object
+        if(isinstance(self.atom_mask_ratio, list)):
+            amr = random.uniform(self.atom_mask_ratio[0], self.atom_mask_ratio[1])
+        else:
+            amr = self.atom_mask_ratio
+
+        atom_mask = RandomAtomMask(amr)
+
+        # Set up bond deletion object
+        if(isinstance(self.bond_delete_ratio, list)):
+            bdr = random.uniform(self.bond_delete_ratio[0], self.bond_delete_ratio[1])
+        else:
+            bdr = self.bond_delete_ratio
+
+        edge_mask = RandomBondDelete(bdr)
+
+        # Do masking
+        molecule = atom_mask(molecule, self.reproduce_seeds[index])
+        molecule = edge_mask(molecule, self.reproduce_seeds[index])
+
+        return molecule
 
 
     def __len__(self):
         return len(self.smiles_data) * self.aug_time
 
 
-class MoleculeData(Data):
+class MoleculeData(MolData):
     def __init__(self, dataset, split="scaffold", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
                  **kwargs):
@@ -252,22 +295,38 @@ class MoleculeData(Data):
         self.valid_size = valid_size
         self.test_size = test_size
         self.aug_time = aug_time
-        self.smiles_data, self.labels, self.task = read_smiles(dataset, data_path)
         self.smiles_data = np.asarray(self.smiles_data)
         self.target = target
 
 
-    def get_data_loaders(self):
-        train_idx, valid_idx, test_idx = scaffold_split(self.smiles_data, self.valid_size,
-                                                        self.test_size)
+    def get_data_loaders(self, target=None):
+        '''
 
-        # define dataset
-        train_set = MolData(self.smiles_data[train_idx], self.labels[self.target][train_idx],
-                               test_mode=False, aug_time=self.aug_time, task=self.task)
-        valid_set = MolData(self.smiles_data[valid_idx], self.labels[self.target][valid_idx],
-                               test_mode=True, task=self.task)
-        test_set = MolData(self.smiles_data[test_idx], self.labels[self.target][test_idx],
-                              test_mode=True, task=self.task)
+        '''
+        if(not target):
+            self.target = list(self.labels.keys())[0]
+
+        # Get indices of data splits
+        #TODO: Include different splits
+        if(self.split == 'scaffold'):
+            train_idx, valid_idx, test_idx = scaffold_split(self.smiles_data, self.valid_size,
+                                                            self.test_size)
+        elif(self.split == 'random'):
+            raise NotImplementedError("Random splitting not supported yet")
+        else:
+            raise ValueError("Please select scaffold or random split")
+
+        # Split
+        #TODO: Fix this redundency of passing in dataset name?
+        train_set = MolData(self.dataset, smiles_data=self.smiles_data[train_idx],
+                            class_labels=self.labels[self.target][train_idx], test_mode=False,
+                            aug_time=self.aug_time, task=self.task, target=self.target)
+        valid_set = MolData(self.dataset, smiles_data=self.smiles_data[valid_idx],
+                            class_labels=self.labels[self.target][valid_idx],
+                            test_mode=True, task=self.task, target=self.target)
+        test_set = MolData(self.dataset, smiles_data=self.smiles_data[test_idx],
+                           class_labels=self.labels[self.target][test_idx],
+                           test_mode=True, task=self.task, target=self.target)
 
         train_loader = DataLoader(
             train_set, batch_size=self.batch_size,

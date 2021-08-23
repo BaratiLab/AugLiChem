@@ -1,1 +1,1 @@
-from auglichem.molecule._transforms import smiles2graph, RandomAtomMask, RandomBondDelete
+from auglichem.molecule._transforms import RandomAtomMask, RandomBondDelete

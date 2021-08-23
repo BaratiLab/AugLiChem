@@ -36,5 +36,8 @@ setuptools.setup(
                       'torchvision==0.2.2',
                       'torch-geometric==1.7.2',
                       'pytorch_scatter==2.0.',
+
+                      'ase>=3.22.0',
+                      'pymatgen>=2022.0.11',
                      ],
 )
