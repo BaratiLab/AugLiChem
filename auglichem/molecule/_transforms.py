@@ -17,45 +17,6 @@ from torch_geometric.data import Data as PyG_Data
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 
 
-def smiles2graph(smiles):
-    mol = Chem.MolFromSmiles(smiles)
-    mol = Chem.AddHs(mol)
-
-    N = mol.GetNumAtoms()
-    M = mol.GetNumBonds()
-
-    type_idx = []
-    chirality_idx = []
-    atomic_number = []
-    for atom in mol.GetAtoms():
-        type_idx.append(ATOM_LIST.index(atom.GetAtomicNum()))
-        chirality_idx.append(CHIRALITY_LIST.index(atom.GetChiralTag()))
-        atomic_number.append(atom.GetAtomicNum())
-
-    x1 = torch.tensor(type_idx, dtype=torch.long).view(-1,1)
-    x2 = torch.tensor(chirality_idx, dtype=torch.long).view(-1,1)
-    x = torch.cat([x1, x2], dim=-1)
-
-    row, col, edge_feat = [], [], []
-    for bond in mol.GetBonds():
-        start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
-        row += [start, end]
-        col += [end, start]
-        edge_feat.append([
-            BOND_LIST.index(bond.GetBondType()),
-            BONDDIR_LIST.index(bond.GetBondDir())
-        ])
-        edge_feat.append([
-            BOND_LIST.index(bond.GetBondType()),
-            BONDDIR_LIST.index(bond.GetBondDir())
-        ])
-    edge_index = torch.tensor([row, col], dtype=torch.long)
-    edge_attr = torch.tensor(np.array(edge_feat), dtype=torch.long)
-
-    data = PyG_Data(x=x, edge_index=edge_index, edge_attr=edge_attr)
-    return data
-
-
 class BaseTransform(object):
     def __init__(self, p: float = 1.0):
         """
@@ -64,7 +25,8 @@ class BaseTransform(object):
         assert 0 <= p <= 1.0, "p must be a value in the range [0, 1]"
         self.p = p
 
-    def __call__(self, mol_graph: PyG_Data) -> PyG_Data:
+    def __call__(self, mol_graph: PyG_Data, seed=None) -> PyG_Data:
+        #TODO Fix this to use Optional[None]?
         """
         @param mol_graph: PyG Data to be augmented
         @param metadata: if set to be a list, metadata about the function execution
@@ -73,7 +35,7 @@ class BaseTransform(object):
         @returns: Augmented PyG Data
         """
         assert isinstance(mol_graph, PyG_Data), "mol_graph passed in must be a PyG Data"
-        return self.apply_transform(mol_graph)
+        return self.apply_transform(mol_graph, seed)
 
     def apply_transform(self, mol_graph: PyG_Data) -> PyG_Data:
         """
@@ -91,19 +53,22 @@ class RandomAtomMask(BaseTransform):
         """
         super().__init__(p)
 
-    def apply_transform(self, mol_graph: PyG_Data) -> PyG_Data:
+    def apply_transform(self, mol_graph: PyG_Data, seed: Optional[None]) -> PyG_Data:
         """
         Transform that randomly mask atoms given a certain ratio
         @param mol_graph: PyG Data to be augmented
+        @param seed: 
         @returns: Augmented PyG Data
         """
+        if(seed):
+            random.seed(seed)
         N = mol_graph.x.size(0)
         num_mask_nodes = max([1, math.floor(self.p*N)])
         mask_nodes = random.sample(list(range(N)), num_mask_nodes)
 
         aug_mol_graph = deepcopy(mol_graph)
         for atom_idx in mask_nodes:
-            aug_mol_graph.x[atom_idx,:] = torch.tensor([len(ATOM_LIST), 0])
+            aug_mol_graph.x[atom_idx,:] = torch.tensor([len(ATOM_LIST)-1, 0])
         
         return aug_mol_graph
 
@@ -115,12 +80,14 @@ class RandomBondDelete(BaseTransform):
         """
         super().__init__(p)
 
-    def apply_transform(self, mol_graph: PyG_Data) -> PyG_Data:
+    def apply_transform(self, mol_graph: PyG_Data, seed: Optional[None]) -> PyG_Data:
         """
         Transform that randomly delete chemical bonds given a certain ratio
         @param mol_graph: PyG Data to be augmented
         @returns: Augmented PyG Data
         """
+        if(seed):
+            random.seed(seed)
         M = mol_graph.edge_index.size(1) // 2
         num_mask_edges = max([0, math.floor(self.p*M)])
         mask_edges_single = random.sample(list(range(M)), num_mask_edges)
