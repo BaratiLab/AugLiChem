@@ -8,7 +8,7 @@ import torch
 from torch_geometric.data import Data as PyG_Data
 
 from auglichem.molecule import RandomAtomMask, RandomBondDelete
-from auglichem.molecule.data import MoleculeData
+from auglichem.molecule.data import MoleculeDataset
 from auglichem.molecule.data._molecule_dataset import MolData
 
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
@@ -134,7 +134,7 @@ def test_smiles2graph():
 
 
 def test_molecule_data():
-    data = MoleculeData("BACE")
+    data = MoleculeDataset("BACE")
     train, valid, test = data.get_data_loaders()
     shutil.rmtree("./data_download")
 

@@ -263,7 +263,8 @@ class MolData(Dataset):
         return len(self.smiles_data) * self.aug_time
 
 
-class MoleculeData(MolData):
+class MoleculeDataset(MolData):
+    #TODO: Take in transformation/composition object as argument to match crystal?
     def __init__(self, dataset, split="scaffold", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
                  **kwargs):
