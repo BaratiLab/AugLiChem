@@ -7,13 +7,13 @@ before_install:
     - pip install pandas
     - pip install matplotlib
     - pip install sklearn
+    - pip install ase
+    - pip install pymatgen
     - pip install rdkit-pypi
     - pip install torch
     - pip install torch_scatter
     - pip install torch-sparse
     - pip install torch-geometric
-    - pip install ase
-    - piip install pymatgen
 script:
     - pytest --cov=./
 after_success:
