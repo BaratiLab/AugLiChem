@@ -1,8 +1,27 @@
 from rdkit import Chem
 from rdkit.Chem.Scaffolds.MurckoScaffold import MurckoScaffoldSmiles
+import random
 
-def random_split(smiles_data, valid_size, test_size, seed=None):
-    raise NotImplementedError("Random splitting is not supported yet.")
+def random_split(dataset, valid_size, test_size, seed=None):
+
+    # Set seed
+    if(seed is not None):
+        random.seed(seed)
+
+    # Get indices
+    total_size = len(dataset)
+    indices = list(range(total_size))
+    random.shuffle(indices)
+
+    train_size = 1.0 - valid_size - test_size
+
+    train_cutoff = int(train_size * total_size)
+    valid_cutoff = int((train_size + valid_size) * total_size)
+
+    train_idx = indices[:train_cutoff]
+    valid_idx = indices[train_cutoff:valid_cutoff]
+    test_idx = indices[valid_cutoff:]
+    return train_idx, valid_idx, test_idx
 
 
 def _generate_scaffold(smiles, include_chirality=False):
