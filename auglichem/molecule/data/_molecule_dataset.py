@@ -138,18 +138,10 @@ class MolData(Dataset):
             y (torch.Tensor, long if classification, float if regression): Data label
         '''
 
-        # Target defined 
-        #if(isinstance(self.labels, dict)):
-        #    if self.task == 'classification':
-        #        y = torch.tensor(self.labels[self.target][index], dtype=torch.long).view(1,-1)
-        #    elif self.task == 'regression':
-        #        y = torch.tensor(self.labels[self.target][index], dtype=torch.float).view(1,-1)
-        #else:
         if self.task == 'classification':
             y = torch.tensor(self.class_labels[index], dtype=torch.long).view(1,-1)
         elif self.task == 'regression':
             y = torch.tensor(self.class_labels[index], dtype=torch.float).view(1,-1)
-
 
         return y
 
@@ -263,7 +255,8 @@ class MolData(Dataset):
         return len(self.smiles_data) * self.aug_time
 
 
-class MoleculeData(MolData):
+class MoleculeDataset(MolData):
+    #TODO: Take in transformation/composition object as argument to match crystal?
     def __init__(self, dataset, split="scaffold", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
                  **kwargs):
@@ -280,14 +273,14 @@ class MoleculeData(MolData):
             test_size (float in [0,1],  optional default=0.1): 
             aug_time (int, optional default=1):
             data_path (str, optional default=None): specify path to save/lookup data. Default
-                        creates `data_download` directory and stores data there/
+                        creates `data_download` directory and stores data there
 
 
             Output:
             ---
             None
         '''
-        super().__init__(dataset)
+        super().__init__(dataset, data_path)
         self.split = split
         self.data_path = data_path
         self.batch_size = batch_size
@@ -296,7 +289,6 @@ class MoleculeData(MolData):
         self.test_size = test_size
         self.aug_time = aug_time
         self.smiles_data = np.asarray(self.smiles_data)
-        self.target = target
 
 
     def get_data_loaders(self, target=None):
@@ -342,3 +334,4 @@ class MoleculeData(MolData):
         )
 
         return train_loader, valid_loader, test_loader
+

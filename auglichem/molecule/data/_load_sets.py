@@ -180,10 +180,10 @@ def _process_csv(csv_file, target, task):
 def read_smiles(dataset, data_path):
 
     # Create data download directory if it does not exist
-    if(not os.path.exists("./data_download/")):
-        os.mkdir("./data_download/")
     if(data_path is None):
         data_path = './data_download'
+    if(not os.path.exists(data_path)):
+        os.mkdir(data_path)
 
     # Download files if not already there
     csv_file_path, target, task = _load_data(dataset, data_path)

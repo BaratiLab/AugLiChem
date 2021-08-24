@@ -26,54 +26,6 @@ import math
 from typing import Optional, Union
 from pymatgen.core.structure import Molecule, Structure
                 
-class AseAtomsAdaptor:
-    """
-    Adaptor serves as a bridge between ASE Atoms and pymatgen objects.
-    """
-
-    @staticmethod
-    def get_atoms(structure, **kwargs):
-        """
-        Returns ASE Atoms object from pymatgen structure or molecule.
-        Args:
-            structure: pymatgen.core.structure.Structure or pymatgen.core.structure.Molecule
-            **kwargs: other keyword args to pass into the ASE Atoms constructor
-        Returns:
-            ASE Atoms object
-        """
-        if not structure.is_ordered:
-            raise ValueError("ASE Atoms only supports ordered structures")
-        if not ase_loaded:
-            raise ImportError(
-                "AseAtomsAdaptor requires ase package.\n" "Use `pip install ase` or `conda install ase -c conda-forge`"
-            )
-        symbols = [str(site.specie.symbol) for site in structure]
-        positions = [site.coords for site in structure]
-        if hasattr(structure, "lattice"):
-            cell = structure.lattice.matrix
-            pbc = True
-        else:
-            cell = None
-            pbc = None
-        return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell, **kwargs)
-
-    @staticmethod
-    def get_structure(atoms, cls=None):
-        """
-        Returns pymatgen structure from ASE Atoms.
-        Args:
-            atoms: ASE Atoms object
-            cls: The Structure class to instantiate (defaults to pymatgen structure)
-        Returns:
-            Equivalent pymatgen.core.structure.Structure
-        """
-        symbols = atoms.get_chemical_symbols()
-        positions = atoms.get_positions()
-        lattice = atoms.get_cell()
-
-        cls = Structure if cls is None else cls
-        return cls(lattice, symbols, positions, coords_are_cartesian=True)
-
 
 class RandomRotationTransformation(AbstractTransformation):
     """
@@ -223,85 +175,7 @@ class RandomRemoveSitesTransformation(AbstractTransformation):
     def is_one_to_many(self):
         """Return: False"""
         return False
-
-
-def _proj(b, a):
-    """
-    Returns vector projection (np.ndarray) of vector b (np.ndarray)
-    onto vector a (np.ndarray)
-    """
-    return (b.T @ (a / np.linalg.norm(a))) * (a / np.linalg.norm(a))
-
-def _round_and_make_arr_singular(arr: np.ndarray) -> np.ndarray:
-    """
-    This function rounds all elements of a matrix to the nearest integer,
-    unless the rounding scheme causes the matrix to be singular, in which
-    case elements of zero rows or columns in the rounded matrix with the
-    largest absolute valued magnitude in the unrounded matrix will be
-    rounded to the next integer away from zero rather than to the
-    nearest integer.
-    The transformation is as follows. First, all entries in 'arr' will be
-    rounded to the nearest integer to yield 'arr_rounded'. If 'arr_rounded'
-    has any zero rows, then one element in each zero row of 'arr_rounded'
-    corresponding to the element in 'arr' of that row with the largest
-    absolute valued magnitude will be rounded to the next integer away from
-    zero (see the '_round_away_from_zero(x)' function) rather than the
-    nearest integer. This process is then repeated for zero columns. Also
-    note that if 'arr' already has zero rows or columns, then this function
-    will not change those rows/columns.
-    Args:
-        arr: Input matrix
-    Returns:
-        Transformed matrix.
-    """
-
-    def round_away_from_zero(x):
-        """
-        Returns 'x' rounded to the next integer away from 0.
-        If 'x' is zero, then returns zero.
-        E.g. -1.2 rounds to -2.0. 1.2 rounds to 2.0.
-        """
-        abs_x = abs(x)
-        return math.ceil(abs_x) * (abs_x / x) if x != 0 else 0
-
-    arr_rounded = np.around(arr)
-
-    # Zero rows in 'arr_rounded' make the array singular, so force zero rows to
-    # be nonzero
-    if (~arr_rounded.any(axis=1)).any():
-        # Check for zero rows in T_rounded
-
-        # indices of zero rows
-        zero_row_idxs = np.where(~arr_rounded.any(axis=1))[0]
-
-        for zero_row_idx in zero_row_idxs:  # loop over zero rows
-            zero_row = arr[zero_row_idx, :]
-
-            # Find the element of the zero row with the largest absolute
-            # magnitude in the original (non-rounded) array (i.e. 'arr')
-            matches = np.absolute(zero_row) == np.amax(np.absolute(zero_row))
-            col_idx_to_fix = np.where(matches)[0]
-
-            # Break ties for the largest absolute magnitude
-            r_idx = np.random.randint(len(col_idx_to_fix))
-            col_idx_to_fix = col_idx_to_fix[r_idx]
-
-            # Round the chosen element away from zero
-            arr_rounded[zero_row_idx, col_idx_to_fix] = round_away_from_zero(arr[zero_row_idx, col_idx_to_fix])
-
-    # Repeat process for zero columns
-    if (~arr_rounded.any(axis=0)).any():
-
-        # Check for zero columns in T_rounded
-        zero_col_idxs = np.where(~arr_rounded.any(axis=0))[0]
-        for zero_col_idx in zero_col_idxs:
-            zero_col = arr[:, zero_col_idx]
-            matches = np.absolute(zero_col) == np.amax(np.absolute(zero_col))
-            row_idx_to_fix = np.where(matches)[0]
-
-            for i in row_idx_to_fix:
-                arr_rounded[i, zero_col_idx] = round_away_from_zero(arr[i, zero_col_idx])
-    return arr_rounded.astype(int)
+    
 
 class SupercellTransformation(AbstractTransformation):
     """
@@ -517,12 +391,14 @@ class CubicSupercellTransformation(AbstractTransformation):
             b = proposed_sc_lat_vecs[1]
             c = proposed_sc_lat_vecs[2]
 
-            length1_vec = c - _proj(c, a)  # a-c plane
-            length2_vec = a - _proj(a, c)
-            length3_vec = b - _proj(b, a)  # b-a plane
-            length4_vec = a - _proj(a, b)
-            length5_vec = b - _proj(b, c)  # b-c plane
-            length6_vec = c - _proj(c, b)
+
+            length1_vec = c - self._proj(c, a)  # a-c plane
+            length2_vec = a - self._proj(a, c)
+            length3_vec = b - self._proj(b, a)  # b-a plane
+            length4_vec = a - self._proj(a, b)
+            length5_vec = b - self._proj(b, c)  # b-c plane
+            length6_vec = c - self._proj(c, b)
+
             length_vecs = np.array(
                 [
                     length1_vec,
@@ -570,6 +446,88 @@ class CubicSupercellTransformation(AbstractTransformation):
             False
         """
         return False
+      
+
+    def _proj(b, a):
+        """
+        Returns vector projection (np.ndarray) of vector b (np.ndarray)
+        onto vector a (np.ndarray)
+        """
+        return (b.T @ (a / np.linalg.norm(a))) * (a / np.linalg.norm(a))
+
+
+    def _round_and_make_arr_singular(arr: np.ndarray) -> np.ndarray:
+        """
+        This function rounds all elements of a matrix to the nearest integer,
+        unless the rounding scheme causes the matrix to be singular, in which
+        case elements of zero rows or columns in the rounded matrix with the
+        largest absolute valued magnitude in the unrounded matrix will be
+        rounded to the next integer away from zero rather than to the
+        nearest integer.
+        The transformation is as follows. First, all entries in 'arr' will be
+        rounded to the nearest integer to yield 'arr_rounded'. If 'arr_rounded'
+        has any zero rows, then one element in each zero row of 'arr_rounded'
+        corresponding to the element in 'arr' of that row with the largest
+        absolute valued magnitude will be rounded to the next integer away from
+        zero (see the '_round_away_from_zero(x)' function) rather than the
+        nearest integer. This process is then repeated for zero columns. Also
+        note that if 'arr' already has zero rows or columns, then this function
+        will not change those rows/columns.
+        Args:
+            arr: Input matrix
+        Returns:
+            Transformed matrix.
+        """
+    
+        def round_away_from_zero(x):
+            """
+            Returns 'x' rounded to the next integer away from 0.
+            If 'x' is zero, then returns zero.
+            E.g. -1.2 rounds to -2.0. 1.2 rounds to 2.0.
+            """
+            abs_x = abs(x)
+            return math.ceil(abs_x) * (abs_x / x) if x != 0 else 0
+    
+        arr_rounded = np.around(arr)
+    
+        # Zero rows in 'arr_rounded' make the array singular, so force zero rows to
+        # be nonzero
+        if (~arr_rounded.any(axis=1)).any():
+            # Check for zero rows in T_rounded
+    
+            # indices of zero rows
+            zero_row_idxs = np.where(~arr_rounded.any(axis=1))[0]
+    
+            for zero_row_idx in zero_row_idxs:  # loop over zero rows
+                zero_row = arr[zero_row_idx, :]
+    
+                # Find the element of the zero row with the largest absolute
+                # magnitude in the original (non-rounded) array (i.e. 'arr')
+                matches = np.absolute(zero_row) == np.amax(np.absolute(zero_row))
+                col_idx_to_fix = np.where(matches)[0]
+    
+                # Break ties for the largest absolute magnitude
+                r_idx = np.random.randint(len(col_idx_to_fix))
+                col_idx_to_fix = col_idx_to_fix[r_idx]
+    
+                # Round the chosen element away from zero
+                arr_rounded[zero_row_idx, col_idx_to_fix] = round_away_from_zero(arr[zero_row_idx, col_idx_to_fix])
+    
+        # Repeat process for zero columns
+        if (~arr_rounded.any(axis=0)).any():
+    
+            # Check for zero columns in T_rounded
+            zero_col_idxs = np.where(~arr_rounded.any(axis=0))[0]
+            for zero_col_idx in zero_col_idxs:
+                zero_col = arr[:, zero_col_idx]
+                matches = np.absolute(zero_col) == np.amax(np.absolute(zero_col))
+                row_idx_to_fix = np.where(matches)[0]
+    
+                for i in row_idx_to_fix:
+                    arr_rounded[i, zero_col_idx] = round_away_from_zero(arr[i, zero_col_idx])
+        return arr_rounded.astype(int)
+
+
 
 class PrimitiveCellTransformation(AbstractTransformation):
     """
