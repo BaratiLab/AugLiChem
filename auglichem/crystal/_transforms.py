@@ -175,8 +175,7 @@ class RandomRemoveSitesTransformation(AbstractTransformation):
     def is_one_to_many(self):
         """Return: False"""
         return False
-
-
+    
 
 class SupercellTransformation(AbstractTransformation):
     """
@@ -392,12 +391,14 @@ class CubicSupercellTransformation(AbstractTransformation):
             b = proposed_sc_lat_vecs[1]
             c = proposed_sc_lat_vecs[2]
 
+
             length1_vec = c - self._proj(c, a)  # a-c plane
             length2_vec = a - self._proj(a, c)
             length3_vec = b - self._proj(b, a)  # b-a plane
             length4_vec = a - self._proj(a, b)
             length5_vec = b - self._proj(b, c)  # b-c plane
             length6_vec = c - self._proj(c, b)
+
             length_vecs = np.array(
                 [
                     length1_vec,
@@ -445,7 +446,7 @@ class CubicSupercellTransformation(AbstractTransformation):
             False
         """
         return False
-
+      
 
     def _proj(b, a):
         """
@@ -525,6 +526,7 @@ class CubicSupercellTransformation(AbstractTransformation):
                 for i in row_idx_to_fix:
                     arr_rounded[i, zero_col_idx] = round_away_from_zero(arr[i, zero_col_idx])
         return arr_rounded.astype(int)
+
 
 
 class PrimitiveCellTransformation(AbstractTransformation):
