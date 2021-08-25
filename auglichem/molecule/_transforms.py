@@ -18,12 +18,17 @@ from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 
 
 class BaseTransform(object):
-    def __init__(self, p: float = 1.0):
+    def __init__(self, prob: float = 1.0):
         """
         @param p: the probability of the transform being applied; default value is 1.0
         """
-        assert 0 <= p <= 1.0, "p must be a value in the range [0, 1]"
-        self.p = p
+        if(isinstance(prob, list)):
+            assert 0 <= prob[0] <= 1.0
+            assert 0 <= prob[1] <= 1.0
+            assert prob[0] < prob[1]
+        else:
+            assert 0 <= prob <= 1.0, "p must be a value in the range [0, 1]"
+        self.prob = prob
 
     def __call__(self, mol_graph: PyG_Data, seed=None) -> PyG_Data:
         #TODO Fix this to use Optional[None]?
@@ -34,6 +39,11 @@ class BaseTransform(object):
             the inputted list. If set to None, no metadata will be appended or returned
         @returns: Augmented PyG Data
         """
+        if(isinstance(self.prob, list)):
+            self.p = random.uniform(self.prob[0], self.prob[1])
+        else:
+            self.p = self.prob
+        assert isinstance(self.p, (float, int))
         assert isinstance(mol_graph, PyG_Data), "mol_graph passed in must be a PyG Data"
         return self.apply_transform(mol_graph, seed)
 

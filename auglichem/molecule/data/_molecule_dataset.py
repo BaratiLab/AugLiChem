@@ -30,8 +30,8 @@ from ._load_sets import read_smiles
 #TODO docstrings for MoleculeData
 
 class MolData(Dataset):
-    def __init__(self, dataset, data_path=None, smiles_data=None, labels=None, task=None,
-                 test_mode=False, aug_time=1, atom_mask_ratio=[0, 0.25],
+    def __init__(self, dataset, data_path=None, transform=None, smiles_data=None, labels=None,
+                 task=None, test_mode=False, aug_time=1, atom_mask_ratio=[0, 0.25],
                  bond_delete_ratio=[0, 0.25], target=None, class_labels=None, **kwargs):
         '''
             Initialize Molecular Data set object. This object tracks data, labels,
@@ -61,6 +61,7 @@ class MolData(Dataset):
         # Store class attributes
         self.dataset = dataset
         self.data_path = data_path
+        self.transform = transform
 
         if(smiles_data is None):
             self.smiles_data, self.labels, self.task = read_smiles(dataset, data_path)
@@ -69,10 +70,16 @@ class MolData(Dataset):
             self.labels = labels
             self.task = task
 
-        self.test_mode = test_mode
-        self.aug_time = aug_time
+        # No augmentation if no transform is specified
+        if(self.transform is None):
+            self.test_mode = True
+        else:
+            self.test_mode = test_mode
+            self.aug_time = aug_time
+
         if self.test_mode:
             self.aug_time = 1
+
         assert type(aug_time) == int
         assert aug_time >= 1
 
@@ -227,28 +234,33 @@ class MolData(Dataset):
 
         # Set up PyG data object
         molecule = PyG_Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr)
+        if(not self.test_mode):
+            aug_molecule = self.transform(molecule, seed=self.reproduce_seeds[index])
+            return aug_molecule
+        else:
+            return molecule
 
         # Set up atom masking object
-        if(isinstance(self.atom_mask_ratio, list)):
-            amr = random.uniform(self.atom_mask_ratio[0], self.atom_mask_ratio[1])
-        else:
-            amr = self.atom_mask_ratio
+        #if(isinstance(self.atom_mask_ratio, list)):
+        #    amr = random.uniform(self.atom_mask_ratio[0], self.atom_mask_ratio[1])
+        #else:
+        #    amr = self.atom_mask_ratio
 
-        atom_mask = RandomAtomMask(amr)
+        #atom_mask = RandomAtomMask(amr)
 
-        # Set up bond deletion object
-        if(isinstance(self.bond_delete_ratio, list)):
-            bdr = random.uniform(self.bond_delete_ratio[0], self.bond_delete_ratio[1])
-        else:
-            bdr = self.bond_delete_ratio
+        ## Set up bond deletion object
+        #if(isinstance(self.bond_delete_ratio, list)):
+        #    bdr = random.uniform(self.bond_delete_ratio[0], self.bond_delete_ratio[1])
+        #else:
+        #    bdr = self.bond_delete_ratio
 
-        edge_mask = RandomBondDelete(bdr)
+        #edge_mask = RandomBondDelete(bdr)
 
-        # Do masking
-        molecule = atom_mask(molecule, self.reproduce_seeds[index])
-        molecule = edge_mask(molecule, self.reproduce_seeds[index])
+        ## Do masking
+        #molecule = atom_mask(molecule, self.reproduce_seeds[index])
+        #molecule = edge_mask(molecule, self.reproduce_seeds[index])
 
-        return molecule
+        #return molecule
 
 
     def __len__(self):
@@ -257,7 +269,7 @@ class MolData(Dataset):
 
 class MoleculeDataset(MolData):
     #TODO: Take in transformation/composition object as argument to match crystal?
-    def __init__(self, dataset, split="scaffold", batch_size=64, num_workers=0,
+    def __init__(self, dataset, transform=None, split="scaffold", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
                  **kwargs):
         '''
@@ -265,6 +277,8 @@ class MoleculeDataset(MolData):
             ---
             dataset (str): One of the datasets available from MoleculeNet
                            (http://moleculenet.ai/datasets-1)
+            transform (Compose, OneOf, RandomAtomMask, RandomBondDelete object): transormations
+                           to apply to the data at call time.
             split (str, optional default=scaffold): random or scaffold. The splitting strategy
                                                     used for train/test/validation set creation.
             batch_size (int, optional default=64): Batch size used in training
@@ -280,7 +294,8 @@ class MoleculeDataset(MolData):
             ---
             None
         '''
-        super().__init__(dataset, data_path)
+        print("TRANSFORM IN MOLECULE DATASET: {}".format(transform))
+        super().__init__(dataset, data_path, transform)
         self.split = split
         self.data_path = data_path
         self.batch_size = batch_size
@@ -310,13 +325,13 @@ class MoleculeDataset(MolData):
 
         # Split
         #TODO: Fix this redundency of passing in dataset name?
-        train_set = MolData(self.dataset, smiles_data=self.smiles_data[train_idx],
+        train_set = MolData(self.dataset, transform=self.transform, smiles_data=self.smiles_data[train_idx],
                             class_labels=self.labels[self.target][train_idx], test_mode=False,
                             aug_time=self.aug_time, task=self.task, target=self.target)
-        valid_set = MolData(self.dataset, smiles_data=self.smiles_data[valid_idx],
+        valid_set = MolData(self.dataset, transform=self.transform, smiles_data=self.smiles_data[valid_idx],
                             class_labels=self.labels[self.target][valid_idx],
                             test_mode=True, task=self.task, target=self.target)
-        test_set = MolData(self.dataset, smiles_data=self.smiles_data[test_idx],
+        test_set = MolData(self.dataset, transform=self.transform, smiles_data=self.smiles_data[test_idx],
                            class_labels=self.labels[self.target][test_idx],
                            test_mode=True, task=self.task, target=self.target)
 
