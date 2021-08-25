@@ -83,7 +83,7 @@ def collate_pool(dataset_list):
         batch_cif_ids
 
 
-class CrysData(Dataset):
+class CrystalDataset(Dataset):
     """
     The CIFData dataset is a wrapper for a dataset where the crystal structures
     are stored in the form of CIF files. The dataset should have the following
@@ -229,7 +229,7 @@ class CrysData(Dataset):
         return (atom_fea, nbr_fea, nbr_fea_idx), target, cif_id
 
 
-class CrystalDataset(CrysData):
+class CrystalDatasetWrapper(CrystalDataset):
     def __init__(self, dataset, transform=None, split="random", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
                  **kwargs):
@@ -263,23 +263,23 @@ class CrystalDataset(CrysData):
             raise ValueError("Please select scaffold or random split")
 
         # Need to pass in id_prop_augment with indices
-        train_set = CrysData(self.dataset, self.data_path, self.transform, self.id_prop_augment[train_idx],
+        train_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[train_idx],
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
-        valid_set = CrysData(self.dataset, self.data_path, self.transform, self.id_prop_augment[valid_idx],
+        valid_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[valid_idx],
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
-        test_set = CrysData(self.dataset, self.data_path, self.transform, self.id_prop_augment[test_idx],
+        test_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[test_idx],
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
 
         train_loader = DataLoader(train_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
-        valid_loader = DataLoader(valid_set, batch_size=self.batch_size,
+        valid_loader = DataLoader(valid_set, batch_size=len(valid_set),
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
-        test_loader = DataLoader(test_set, batch_size=self.batch_size,
+        test_loader = DataLoader(test_set, batch_size=len(test_set),
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
         return train_loader, valid_loader, test_loader

@@ -18,7 +18,7 @@ from auglichem.crystal._transforms import (
 )
 from auglichem.crystal._compositions import Compose, OneOf
 from auglichem.crystal.data import CrystalDataset
-from auglichem.crystal.data._crystal_dataset import CrysData
+from auglichem.crystal.data._crystal_dataset import CrystalDataset
 
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 

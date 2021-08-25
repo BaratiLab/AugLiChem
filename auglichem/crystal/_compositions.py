@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from pymatgen.transformations.transformation_abc import AbstractTransformation
 
-from auglichem.crystal.data._crystal_dataset import CrysData
+from auglichem.crystal.data._crystal_dataset import CrystalDataset
 from auglichem.crystal._transforms import (
         RandomRotationTransformation,
         RandomPerturbStructureTransformation,
@@ -57,7 +57,7 @@ class BaseComposition(object):
 
 
 class Compose(BaseComposition):
-    def __call__(self, crystal: CrysData, seed: Optional[int] = None) -> CrysData:
+    def __call__(self, crystal: CrystalDataset, seed: Optional[int] = None) -> CrystalDataset:
         """
         Applies the list of transforms in order to the crystal
         @param crystal: PIL Image to be augmented
@@ -87,7 +87,7 @@ class OneOf(BaseComposition):
         probs_sum = sum(transform_probs)
         self.transform_probs = [t / probs_sum for t in transform_probs]
 
-    def __call__(self, crystal: CrysData, seed: Optional[int] = None) -> CrysData:
+    def __call__(self, crystal: CrystalDataset, seed: Optional[int] = None) -> CrystalDataset:
         """
         Applies one of the transforms to the crystal
         @param crystal: PIL Image to be augmented
