@@ -270,8 +270,7 @@ class MolData(Dataset):
 class MoleculeDataset(MolData):
     #TODO: Take in transformation/composition object as argument to match crystal?
     def __init__(self, dataset, transform=None, split="scaffold", batch_size=64, num_workers=0,
-                 valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
-                 **kwargs):
+                 valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None):
         '''
             Input:
             ---
@@ -340,11 +339,11 @@ class MoleculeDataset(MolData):
             num_workers=self.num_workers, drop_last=True, shuffle=True
         )
         valid_loader = DataLoader(
-            valid_set, batch_size=self.batch_size,
+            valid_set, batch_size=len(valid_set),
             num_workers=self.num_workers, drop_last=False
         )
         test_loader = DataLoader(
-            test_set, batch_size=self.batch_size,
+            test_set, batch_size=len(test_set),
             num_workers=self.num_workers, drop_last=False
         )
 
