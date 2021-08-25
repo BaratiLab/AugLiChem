@@ -25,7 +25,7 @@ from pymatgen.transformations.transformation_abc import AbstractTransformation
 import math
 from typing import Optional, Union
 from pymatgen.core.structure import Molecule, Structure
-                
+
 
 class RandomRotationTransformation(AbstractTransformation):
     """
