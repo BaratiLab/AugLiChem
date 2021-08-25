@@ -4,7 +4,7 @@
 import random
 from typing import Any, Dict, List, Optional
 
-from auglichem.molecule.data._molecule_dataset import MolData
+from auglichem.molecule.data._molecule_dataset import MoleculeDataset
 from auglichem.molecule._transforms import BaseTransform
 
 """
@@ -47,7 +47,7 @@ class BaseComposition(object):
 
 
 class Compose(BaseComposition):
-    def __call__(self, molecule: MolData, seed: Optional[int] = None) -> MolData:
+    def __call__(self, molecule: MoleculeDataset, seed: Optional[int] = None) -> MoleculeDataset:
         """
         Applies the list of transforms in order to the molecule
         @param molecule: PIL Image to be augmented
@@ -77,7 +77,7 @@ class OneOf(BaseComposition):
         probs_sum = sum(transform_probs)
         self.transform_probs = [t / probs_sum for t in transform_probs]
 
-    def __call__(self, molecule: MolData, seed: Optional[int] = None) -> MolData:
+    def __call__(self, molecule: MoleculeDataset, seed: Optional[int] = None) -> MoleculeDataset:
         """
         Applies one of the transforms to the molecule
         @param molecule: PIL Image to be augmented

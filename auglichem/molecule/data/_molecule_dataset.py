@@ -29,7 +29,7 @@ from ._load_sets import read_smiles
 
 #TODO docstrings for MoleculeData
 
-class MolData(Dataset):
+class MoleculeDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, smiles_data=None, labels=None,
                  task=None, test_mode=False, aug_time=1, atom_mask_ratio=[0, 0.25],
                  bond_delete_ratio=[0, 0.25], target=None, class_labels=None, **kwargs):
@@ -267,7 +267,7 @@ class MolData(Dataset):
         return len(self.smiles_data) * self.aug_time
 
 
-class MoleculeDataset(MolData):
+class MoleculeDatasetWrapper(MoleculeDataset):
     #TODO: Take in transformation/composition object as argument to match crystal?
     def __init__(self, dataset, transform=None, split="scaffold", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None):
@@ -324,13 +324,13 @@ class MoleculeDataset(MolData):
 
         # Split
         #TODO: Fix this redundency of passing in dataset name?
-        train_set = MolData(self.dataset, transform=self.transform, smiles_data=self.smiles_data[train_idx],
+        train_set = MoleculeDataset(self.dataset, transform=self.transform, smiles_data=self.smiles_data[train_idx],
                             class_labels=self.labels[self.target][train_idx], test_mode=False,
                             aug_time=self.aug_time, task=self.task, target=self.target)
-        valid_set = MolData(self.dataset, transform=self.transform, smiles_data=self.smiles_data[valid_idx],
+        valid_set = MoleculeDataset(self.dataset, transform=self.transform, smiles_data=self.smiles_data[valid_idx],
                             class_labels=self.labels[self.target][valid_idx],
                             test_mode=True, task=self.task, target=self.target)
-        test_set = MolData(self.dataset, transform=self.transform, smiles_data=self.smiles_data[test_idx],
+        test_set = MoleculeDataset(self.dataset, transform=self.transform, smiles_data=self.smiles_data[test_idx],
                            class_labels=self.labels[self.target][test_idx],
                            test_mode=True, task=self.task, target=self.target)
 
