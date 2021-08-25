@@ -7,9 +7,8 @@ import numpy as np
 import torch
 from torch_geometric.data import Data as PyG_Data
 
-from auglichem.molecule import RandomAtomMask, RandomBondDelete
-from auglichem.molecule.data import MoleculeDataset
-from auglichem.molecule.data._molecule_dataset import MolData
+from auglichem.molecule import RandomAtomMask, RandomBondDelete, Compose, OneOf
+from auglichem.molecule.data import MoleculeDataset, MoleculeDatasetWrapper
 
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 
@@ -79,7 +78,7 @@ def test_atom_mask():
 def test_atom_mask_mol():
 
     # Dummy data set
-    data = MolData("", smiles_data=["C"], labels={'target': [1]}, task='classification')
+    data = MoleculeDataset("", smiles_data=["C"], labels={'target': [1]}, task='classification')
     data.target = 'target'
 
     # Mask every atom
@@ -120,7 +119,7 @@ def test_bond_delete():
 def test_bond_delete_mol():
 
     # Dummy data set
-    data = MolData("", smiles_data=["C"], labels={'target': [1]}, task='classification')
+    data = MoleculeDataset("", smiles_data=["C"], labels={'target': [1]}, task='classification')
     data.target = 'target'
 
     # Mask every atom
@@ -134,17 +133,33 @@ def test_smiles2graph():
 
 
 def test_molecule_data():
-    data = MoleculeDataset("BACE")
+    data = MoleculeDatasetWrapper("BACE")
     train, valid, test = data.get_data_loaders()
     shutil.rmtree("./data_download")
 
     #for b, t in enumerate(train):
     #    print(b)
+    assert True
 
 
-if __name__ == '__main__':
+def test_composition():
+    #TODO Actually test the various functionality rather than simply check it runs
+    transform = Compose([
+        RandomAtomMask(p=[0.1, 0.5]),
+        RandomBondDelete(p=[0.6, 0.7])
+    ])
+    data = MoleculeDatasetWrapper("BACE", transform=transform, batch_size=1024, aug_time=3)
+    train, valid, test = data.get_data_loaders()
+    shutil.rmtree("./data_download")
+    #for b, t in enumerate(train):
+    #    print(t)
+    assert True
+
+
+#if __name__ == '__main__':
     #test_atom_mask()
-    test_bond_delete()
+    #test_bond_delete()
     #test_atom_mask_mol()
     #test_bond_delete_mol()
     #test_molecule_data()
+    #test_composition()

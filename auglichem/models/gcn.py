@@ -154,10 +154,6 @@ class GCN(nn.Module):
         x = data.x
         edge_index = data.edge_index
         edge_attr = data.edge_attr
-        print("DATA: {}".format(data.x))
-        print("EDGE INDEX: {}".format(edge_index))
-        print("EDGE ATTR: {}".format(edge_attr))
-        raise
 
         h = self.x_embedding1(x[:,0]) + self.x_embedding2(x[:,1])
 

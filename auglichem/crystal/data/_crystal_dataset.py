@@ -83,7 +83,7 @@ def collate_pool(dataset_list):
         batch_cif_ids
 
 
-class CrysData(Dataset):
+class CrystalDataset(Dataset):
     """
     The CIFData dataset is a wrapper for a dataset where the crystal structures
     are stored in the form of CIF files. The dataset should have the following
@@ -131,15 +131,29 @@ class CrysData(Dataset):
     target: torch.Tensor shape (1, )
     cif_id: str or int
     """
-    def __init__(self, dataset, data_path=None, id_prop_augment=None,
+    def __init__(self, dataset, data_path=None, transform=None, id_prop_augment=None,
                  atom_init_file=None, id_prop_file=None, ari=None,fold = 0,
                  max_num_nbr=12, radius=8, dmin=0, step=0.2,
-                 random_seed=123,num_aug = 4):
+                 random_seed=123, aug_time=4, test_mode=True):
 
         super(Dataset, self).__init__()
         
         self.dataset = dataset
         self.data_path = data_path
+        self.transform = transform
+
+        # No augmentation if no transform is specified
+        if(self.transform is None):
+            self.test_mode = True
+        else:
+            self.test_mode = test_mode
+            self.aug_time = aug_time
+
+        if self.test_mode:
+            self.aug_time = 1
+
+        assert type(self.aug_time) == int
+        assert self.aug_time >= 1
 
         # After specifying data set
         if(id_prop_augment is None):
@@ -149,12 +163,8 @@ class CrysData(Dataset):
             self.id_prop_file = id_prop_file
             self.atom_init_file = atom_init_file
             self.ari = ari
-            #self.atom_init_file = os.path.join(self.data_path, 'atom_init.json')
-            #self.id_prop_file = os.path.join(self.data_path, 'id_prop.csv')
-            #self.ari = AJI(atom_init_file)
         
         self.max_num_nbr, self.radius = max_num_nbr, radius
-        #print("\nROOT DIR: {}\n".format(data_path))
 
         assert os.path.exists(self.data_path), 'root_dir does not exist!'
         assert os.path.exists(self.id_prop_file), 'id_prop_augment.csv does not exist!'.format(fold)
@@ -185,6 +195,10 @@ class CrysData(Dataset):
         cif_id, target = self.id_prop_augment[idx]
         crystal = Structure.from_file(os.path.join(self.data_path,
                                                    cif_id+'.cif'))
+
+        # Do augmentation
+        if(not self.test_mode):
+            crystal = self.transform(crystal)
         atom_fea = np.vstack([self.ari.get_atom_fea(crystal[i].specie.number)
                               for i in range(len(crystal))])
         atom_fea = torch.Tensor(atom_fea)
@@ -215,11 +229,11 @@ class CrysData(Dataset):
         return (atom_fea, nbr_fea, nbr_fea_idx), target, cif_id
 
 
-class CrystalDataset(CrysData):
-    def __init__(self, dataset, split="random", batch_size=64, num_workers=0,
+class CrystalDatasetWrapper(CrystalDataset):
+    def __init__(self, dataset, transform=None, split="random", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
                  **kwargs):
-        super().__init__(dataset, data_path)
+        super().__init__(dataset, data_path, transform)
         self.split = split
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -249,23 +263,23 @@ class CrystalDataset(CrysData):
             raise ValueError("Please select scaffold or random split")
 
         # Need to pass in id_prop_augment with indices
-        train_set = CrysData(self.dataset, self.data_path, self.id_prop_augment[train_idx],
+        train_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[train_idx],
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
-        valid_set = CrysData(self.dataset, self.data_path, self.id_prop_augment[valid_idx],
+        valid_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[valid_idx],
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
-        test_set = CrysData(self.dataset, self.data_path, self.id_prop_augment[test_idx],
+        test_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[test_idx],
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
 
         train_loader = DataLoader(train_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
-        valid_loader = DataLoader(valid_set, batch_size=self.batch_size,
+        valid_loader = DataLoader(valid_set, batch_size=len(valid_set),
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
-        test_loader = DataLoader(test_set, batch_size=self.batch_size,
+        test_loader = DataLoader(test_set, batch_size=len(test_set),
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
         return train_loader, valid_loader, test_loader
