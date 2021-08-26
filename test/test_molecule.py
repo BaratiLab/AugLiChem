@@ -133,9 +133,37 @@ def test_smiles2graph():
 
 
 def test_molecule_data():
-    data = MoleculeDatasetWrapper("BACE")
-    train, valid, test = data.get_data_loaders()
-    shutil.rmtree("./data_download")
+    datasets = [
+            "QM7",
+            ####"QM7b",
+            "QM8",
+            ####"QM9",
+
+            "ESOL",
+            "FreeSolv",
+            "Lipophilicity",
+
+            #"PCBA", # APPEARS TO BE WORKING
+            #"MUV",
+            #"HIV",
+            #"BACE",
+            ####"PDBbind",
+
+            "BBBP",
+            "Tox21",
+            ####"ToxCast",
+            "SIDER",
+            "ClinTox"
+    ]
+
+    for ds in datasets:
+        print("\nDATASET: {}".format(ds))
+        if(ds == "MUV"):
+            # It takes around 3 minutes to process
+            continue
+        data = MoleculeDatasetWrapper(ds)
+        train, valid, test = data.get_data_loaders()
+        shutil.rmtree("./data_download")
 
     #for b, t in enumerate(train):
     #    print(b)

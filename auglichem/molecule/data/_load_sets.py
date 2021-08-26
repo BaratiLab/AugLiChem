@@ -9,7 +9,6 @@ from rdkit import Chem
 import numpy as np
 
 #TODO:
-#  1) Add functionality to download csv.gz datasets (which looks like most of them)
 #  2) Clean up code and add proper comments
 #  3) Check integrity?
 
@@ -138,6 +137,279 @@ def _load_data(dataset=None, data_path='./data_download/'):
                 "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/sider.csv.gz",
                 data_path)
 
+    elif(dataset == 'Tox21'):
+        task = 'classification'
+        target = [
+            "NR-AR",
+            "NR-AR-LBD",
+            "NR-AhR",
+            "NR-Aromatase",
+            "NR-ER",
+            "NR-ER-LBD",
+            "NR-PPAR-gamma",
+            "SR-ARE",
+            "SR-ATAD5",
+            "SR-HSE",
+            "SR-MMP",
+            "SR-p53"
+        ]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/tox21.csv.gz",
+                data_path)
+
+    elif(dataset == 'HIV'):
+        task = 'classification'
+        target = ["HIV_active"]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/HIV.csv",
+                data_path)
+
+    elif(dataset == 'MUV'): # Too large to run locally
+        task = 'classification'
+        target = [
+                "MUV-466",
+                "MUV-548",
+                "MUV-600",
+                "MUV-644",
+                "MUV-652",
+                "MUV-692",
+                "MUV-712",
+                "MUV-713",
+                "MUV-733",
+                "MUV-737",
+                "MUV-810",
+                "MUV-832",
+                "MUV-846",
+                "MUV-852",
+                "MUV-858",
+                "MUV-859"
+        ]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/muv.csv.gz",
+                data_path)
+
+    elif(dataset == 'FreeSolv'): # SMILES is second column
+        task = 'regression'
+        target = ["expt"]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/SAMPL.csv",
+                data_path)
+
+    elif(dataset == 'ESOL'): # SMILES is last column
+        task = 'regression'
+        target = ["measured log solubility in mols per litre"]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/delaney-processed.csv",
+                data_path)
+
+    elif(dataset == 'Lipophilicity'):
+        task = 'regression'
+        target = ["exp"]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/Lipophilicity.csv",
+                data_path)
+
+    elif(dataset == 'QM7'):
+        task = 'regression'
+        target = ["u0_atom"]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm7.csv",
+                data_path)
+
+    elif(dataset == 'QM7b'):
+        task = 'regression'
+        target = ["u0_atom"]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm7b.csv.gz",
+                data_path)
+
+    elif(dataset == 'QM8'):
+        task = 'regression'
+        target = [
+                "E1-CC2",
+                "E2-CC2",
+                "f1-CC2",
+                "f2-CC2",
+                "E1-PBE0",
+                "E2-PBE0",
+                "f1-PBE0",
+                "f2-PBE0",
+                "E1-CAM",
+                "E2-CAM",
+                "f1-CAM",
+                "f2-CAM"
+        ]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm8.csv",
+                data_path)
+
+    elif(dataset == 'QM9'):
+        task = 'regression'
+        target = [
+                "mu",
+                "alpha",
+                "homo",
+                "lumo",
+                "gap",
+                "r2",
+                "ZPVE",
+                "U0",
+                "U",
+                "H",
+                "G",
+                "Cv",
+                "omega1",
+
+        ]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm9.csv",
+                data_path)
+
+    elif(dataset == "PCBA"):
+        task = 'classification'
+        target = [
+                "PCBA-1030",
+                "PCBA-1379",
+                "PCBA-1452",
+                "PCBA-1454",
+                "PCBA-1457",
+                "PCBA-1458",
+                "PCBA-1460",
+                "PCBA-1461",
+                "PCBA-1468",
+                "PCBA-1469",
+                "PCBA-1471",
+                "PCBA-1479",
+                "PCBA-1631",
+                "PCBA-1634",
+                "PCBA-1688",
+                "PCBA-1721",
+                "PCBA-2100",
+                "PCBA-2101",
+                "PCBA-2147",
+                "PCBA-2242",
+                "PCBA-2326",
+                "PCBA-2451",
+                "PCBA-2517",
+                "PCBA-2528",
+                "PCBA-2546",
+                "PCBA-2549",
+                "PCBA-2551",
+                "PCBA-2662",
+                "PCBA-2675",
+                "PCBA-2676",
+                "PCBA-411",
+                "PCBA-463254",
+                "PCBA-485281",
+                "PCBA-485290",
+                "PCBA-485294",
+                "PCBA-485297",
+                "PCBA-485313",
+                "PCBA-485314",
+                "PCBA-485341",
+                "PCBA-485349",
+                "PCBA-485353",
+                "PCBA-485360",
+                "PCBA-485364",
+                "PCBA-485367",
+                "PCBA-492947",
+                "PCBA-493208",
+                "PCBA-504327",
+                "PCBA-504332",
+                "PCBA-504333",
+                "PCBA-504339",
+                "PCBA-504444",
+                "PCBA-504466",
+                "PCBA-504467",
+                "PCBA-504706",
+                "PCBA-504842",
+                "PCBA-504845",
+                "PCBA-504847",
+                "PCBA-504891",
+                "PCBA-540276",
+                "PCBA-540317",
+                "PCBA-588342",
+                "PCBA-588453",
+                "PCBA-588456",
+                "PCBA-588579",
+                "PCBA-588590",
+                "PCBA-588591",
+                "PCBA-588795",
+                "PCBA-588855",
+                "PCBA-602179",
+                "PCBA-602233",
+                "PCBA-602310",
+                "PCBA-602313",
+                "PCBA-602332",
+                "PCBA-624170",
+                "PCBA-624171",
+                "PCBA-624173",
+                "PCBA-624202",
+                "PCBA-624246",
+                "PCBA-624287",
+                "PCBA-624288",
+                "PCBA-624291",
+                "PCBA-624296",
+                "PCBA-624297",
+                "PCBA-624417",
+                "PCBA-651635",
+                "PCBA-651644",
+                "PCBA-651768",
+                "PCBA-651965",
+                "PCBA-652025",
+                "PCBA-652104",
+                "PCBA-652105",
+                "PCBA-652106",
+                "PCBA-686970",
+                "PCBA-686978",
+                "PCBA-686979",
+                "PCBA-720504",
+                "PCBA-720532",
+                "PCBA-720542",
+                "PCBA-720551",
+                "PCBA-720553",
+                "PCBA-720579",
+                "PCBA-720580",
+                "PCBA-720707",
+                "PCBA-720708",
+                "PCBA-720709",
+                "PCBA-720711",
+                "PCBA-743255",
+                "PCBA-743266",
+                "PCBA-875",
+                "PCBA-881",
+                "PCBA-883",
+                "PCBA-884",
+                "PCBA-885",
+                "PCBA-887",
+                "PCBA-891",
+                "PCBA-899",
+                "PCBA-902",
+                "PCBA-903",
+                "PCBA-904",
+                "PCBA-912",
+                "PCBA-914",
+                "PCBA-915",
+                "PCBA-924",
+                "PCBA-925",
+                "PCBA-926",
+                "PCBA-927",
+                "PCBA-938",
+                "PCBA-995",
+                ]
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/pcba.csv.gz",
+                data_path)
+
+    elif(dataset == "PDBbind"):
+        task = 'regression'
+        csv_file_path = download_url(
+                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/PDBbind.csv.gz",
+                data_path)
+        target = []
+
+
+    print("DATASET: {}".format(dataset))
     return csv_file_path, target, task
 
 
@@ -147,7 +419,10 @@ def _process_csv(csv_file, target, task):
     for t in target:
         labels[t] = []
 
-    for i, row in enumerate(csv_reader):
+    for i, row in tqdm(enumerate(csv_reader)):
+        #for c in row.keys():
+        #    print("\"{}\",".format(c))
+        #raise
         # Skip header
         if i == 0:
             continue
@@ -168,7 +443,7 @@ def _process_csv(csv_file, target, task):
                 elif task == 'regression':
                     labels[t].append(float(label))
                 else:
-                    ValueError('task must be either regression or classification')
+                    raise ValueError('task must be either regression or classification')
 
     # Recast lables to numpy arrays
     for t in target:
