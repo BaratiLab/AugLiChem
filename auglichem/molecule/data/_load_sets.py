@@ -648,9 +648,6 @@ def _process_csv(csv_file, target, task):
         labels[t] = []
 
     for i, row in tqdm(enumerate(csv_reader)):
-        #for c in row.keys():
-        #    print("\"{}\",".format(c))
-        #raise
         # Skip header
         if i == 0:
             continue
@@ -662,8 +659,7 @@ def _process_csv(csv_file, target, task):
             smiles = row['mol']
         for idx, t in enumerate(target):
             label = row[t]
-            mol = Chem.MolFromSmiles(smiles)
-            if mol != None and label != '':
+            if smiles != None and label != '':
                 if(idx == 0):
                     smiles_data.append(smiles)
                 if task == 'classification':
