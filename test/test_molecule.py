@@ -13,6 +13,9 @@ from auglichem.molecule.data import MoleculeDataset, MoleculeDatasetWrapper
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 
 from rdkit import Chem
+from rdkit import RDLogger
+
+RDLogger.DisableLog('rdApp.*')
 
 
 def smiles2graph(smiles):
@@ -136,12 +139,12 @@ def test_molecule_data():
     datasets = [
             "QM7",
             ####"QM7b",
-            "QM8",
-            ####"QM9",
+            #"QM8",
+            #"QM9",
 
-            "ESOL",
-            "FreeSolv",
-            "Lipophilicity",
+            #"ESOL",
+            #"FreeSolv",
+            #"Lipophilicity",
 
             #"PCBA", # APPEARS TO BE WORKING
             #"MUV",
@@ -149,11 +152,11 @@ def test_molecule_data():
             #"BACE",
             ####"PDBbind",
 
-            "BBBP",
-            "Tox21",
-            ####"ToxCast",
-            "SIDER",
-            "ClinTox"
+            #"BBBP",
+            #"Tox21",
+            #"ToxCast",
+            #"SIDER",
+            #"ClinTox"
     ]
 
     for ds in datasets:
