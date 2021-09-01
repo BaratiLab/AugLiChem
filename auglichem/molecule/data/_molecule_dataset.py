@@ -213,7 +213,7 @@ class MoleculeDataset(Dataset):
         if self.test_mode:
             true_index = index
         else:
-            true_index = index // self.aug_time
+            true_index = index // (self.aug_time + 1)
 
         # Create initial data set
         mol = Chem.MolFromSmiles(self.smiles_data[true_index])
@@ -234,7 +234,8 @@ class MoleculeDataset(Dataset):
 
         # Set up PyG data object
         molecule = PyG_Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr)
-        if(not self.test_mode):
+        #if(not self.test_mode):
+        if((not self.test_mode) and (index % (aug_time+1) != 0)): # Now doesn't augment original
             aug_molecule = self.transform(molecule, seed=self.reproduce_seeds[index])
             return aug_molecule
         else:
@@ -242,7 +243,7 @@ class MoleculeDataset(Dataset):
 
 
     def __len__(self):
-        return len(self.smiles_data) * self.aug_time
+        return len(self.smiles_data) * (self.aug_time + 1) # Original + augmented
 
 
 class MoleculeDatasetWrapper(MoleculeDataset):

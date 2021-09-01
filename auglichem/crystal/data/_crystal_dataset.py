@@ -15,6 +15,7 @@ from pymatgen.io import cif
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 import pandas as pd
+import warnings
 
 from auglichem.crystal._transforms import (
         RandomRotationTransformation,
@@ -146,7 +147,7 @@ class CrystalDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, id_prop_augment=None,
                  atom_init_file=None, id_prop_file=None, ari=None,fold = 0,
                  max_num_nbr=12, radius=8, dmin=0, step=0.2,
-                 random_seed=123, aug_time=4, test_mode=True):
+                 random_seed=123, aug_time=4, test_mode=True, on_the_fly_augment=False):
 
         super(Dataset, self).__init__()
         
@@ -195,6 +196,10 @@ class CrystalDataset(Dataset):
         self.gdf = lambda dist: self._gaussian_distance(dist, dmin=dmin, dmax=self.radius,
                                                         step=step)
 
+        self.on_the_fly_augment = on_the_fly_augment
+        if(self.on_the_fly_augment):
+            warnings.warn("On-the-fly augmentations for crystals is untested and can lead to memory issues. Use with caution.", category=RuntimeWarning, stacklevel=2)
+
 
     def _aug_name(self, transformation):
         if(isinstance(transformation, RandomRotationTransformation)):
@@ -223,6 +228,10 @@ class CrystalDataset(Dataset):
             print("Augmentation has already been done.")
             return
 
+        if(self.on_the_fly_augment):
+            print("Augmentation will be done on-the-fly.")
+            return
+
         # Check transforms
         if(transform is None and self.transform is None):
             raise ValueError("No transform specified.")
@@ -232,7 +241,6 @@ class CrystalDataset(Dataset):
         # Do augmentations
         new_id_prop_augment = []
         for id_prop in tqdm(self.id_prop_augment):
-            #print(id_prop[0])
             new_id_prop_augment.append((id_prop[0], id_prop[1]))
             for t in transform:
 
@@ -269,6 +277,12 @@ class CrystalDataset(Dataset):
         cif_id, target = self.id_prop_augment[idx]
         crystal = Structure.from_file(os.path.join(self.data_path,
                                                    cif_id+'.cif'))
+
+        if(self.on_the_fly_augment):
+            if(self.transform is None):
+                raise ValueError("Transformations need to be specified.")
+            for t in self.transform:
+                crystal = t.apply_transfromation(crystal)
 
         atom_fea = np.vstack([self.ari.get_atom_fea(crystal[i].specie.number)
                               for i in range(len(crystal))])
