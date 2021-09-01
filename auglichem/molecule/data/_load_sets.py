@@ -1,3 +1,5 @@
+# NOTE: Uses code from torchdrug.ai
+
 import pandas as pd
 import os
 import pathlib
@@ -7,6 +9,7 @@ import csv
 import gzip
 from rdkit import Chem
 import numpy as np
+import hashlib
 
 #TODO:
 #  2) Clean up code and add proper comments
@@ -44,7 +47,51 @@ def check_integrity(fpath, md5=None):
     return check_md5(fpath, md5)
 
 
-def download_url(url, root, filename=None):
+def _make_csv(fpath, molecules):
+    # Open csv from fpath, match SMILES with data, save as new csv
+    data_csv = pd.read_csv(fpath)
+    smiles = []
+    idxs = []
+    for idx, m in enumerate(molecules):
+        if(m is not None):
+            smiles.append(Chem.MolToSmiles(m))
+            idxs.append(idx)
+
+    data_csv = data_csv.iloc[idxs]
+    data_csv['smiles'] = smiles
+
+    combined_csv_path = fpath[:-8] + ".csv"
+    data_csv.to_csv(fpath[:-8] + ".csv")
+
+    return combined_csv_path
+
+
+def _extract(fpath):
+    if(".tar.gz" in fpath):
+        import tarfile
+        with tarfile.open(fpath, "r") as fin:
+            if("gdb8" in fpath):
+                fin.extractall(fpath[:-7] + "/")
+                fpath = fpath[:-7] + "/qm8.sdf.csv"
+                molecules = Chem.SDMolSupplier(fpath[:-4], True, True, False)
+            elif("gdb9" in fpath):
+                fin.extractall(fpath[:-7] + "/")
+                fpath = fpath[:-7] + "/gdb9.sdf.csv"
+                molecules = Chem.SDMolSupplier(fpath[:-4], True, True, False)
+
+            # Need to put together smiles and data
+            fpath = _make_csv(fpath, molecules)
+
+    elif(".zip" in fpath):
+        import zipfile
+        with zipfile.ZipFile(fpath) as fin:
+            if("FreeSolv" in fpath):
+                fin.extractall(fpath[:-4])
+                fpath = fpath[:-4] + "/SAMPL.csv"
+
+    return fpath
+
+def download_url(url, root, md5, filename=None):
     """Download a file from a url and place it in root.
     Args:
         url (str): URL to download file from
@@ -58,6 +105,17 @@ def download_url(url, root, filename=None):
     fpath = os.path.join(root, filename)
 
     os.makedirs(root, exist_ok=True)
+
+    # Correct file path for extracted sets
+    if("FreeSolv.zip" in fpath):
+        if(os.path.isfile(fpath[:-4] + "/SAMPL.csv")):
+            fpath = fpath[:-4] + "/SAMPL.csv"
+    elif("gdb8.tar.gz" in fpath):
+        if(os.path.isfile(fpath[:-7] + "/qm8.sdf.csv")):
+            fpath = fpath[:-7] + "/qm8.csv"
+    elif("gdb9.tar.gz" in fpath):
+        if(os.path.isfile(fpath[:-7] + "/gdb9.sdf.csv")):
+            fpath = fpath[:-7] + "/gdb9.csv"
 
     # check if file is already present locally
     if(os.path.isfile(fpath)):
@@ -76,31 +134,36 @@ def download_url(url, root, filename=None):
             _urlretrieve(url, fpath)
         else:
             raise e
-
-    return fpath
+    
+    message = "Download failed or dataset corrupt. Please delete and try again."
+    assert check_integrity(fpath, md5), message
+    return _extract(fpath)
 
 
 def _load_data(dataset=None, data_path='./data_download/'):
     if(dataset == 'BACE'):
         task = 'classification'
         target = ['Class']
+        md5 = "ba7f8fa3fdf463a811fa7edea8c982c2"
         csv_file_path = download_url(
                     "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/bace.csv",
-                    data_path)
+                    data_path, md5)
 
     elif(dataset == 'ClinTox'):
         task = 'classification'
         target = ['CT_TOX', 'FDA_APPROVED']
+        md5 = "db4f2df08be8ae92814e9d6a2d015284"
         csv_file_path = download_url(
-                    "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/clintox.csv.gz",
-                    data_path)
+                    "http://deepchem.io.s3-website-us-west-1.amazonaws.com/datasets/clintox.csv.gz",
+                    data_path, md5)
 
     elif(dataset == 'BBBP'):
         task = 'classification'
         target = ['p_np']
+        md5 = "66286cb9e6b148bd75d80c870df580fb"
         csv_file_path = download_url(
                    "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/BBBP.csv",
-                   data_path)
+                   data_path, md5)
 
     elif(dataset == 'SIDER'):
         task = 'classification'
@@ -133,9 +196,10 @@ def _load_data(dataset=None, data_path='./data_download/'):
             "Nervous system disorders",
             "Injury, poisoning and procedural complications"
         ]
+        md5 = "77c0ef421f7cc8ce963c5836c8761fd2"
         csv_file_path = download_url(
                 "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/sider.csv.gz",
-                data_path)
+                data_path, md5)
 
     elif(dataset == 'Tox21'):
         task = 'classification'
@@ -153,16 +217,18 @@ def _load_data(dataset=None, data_path='./data_download/'):
             "SR-MMP",
             "SR-p53"
         ]
+        md5 = "2882d69e70bba0fec14995f26787cc25"
         csv_file_path = download_url(
                 "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/tox21.csv.gz",
-                data_path)
+                data_path, md5)
 
     elif(dataset == 'HIV'):
         task = 'classification'
         target = ["HIV_active"]
+        md5 = "9ad10c88f82f1dac7eb5c52b668c30a7"
         csv_file_path = download_url(
                 "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/HIV.csv",
-                data_path)
+                data_path, md5)
 
     elif(dataset == 'MUV'): # Too large to run locally
         task = 'classification'
@@ -184,44 +250,49 @@ def _load_data(dataset=None, data_path='./data_download/'):
                 "MUV-858",
                 "MUV-859"
         ]
+        md5 = "9c40bd41310991efd40f4d4868fa3ddf"
         csv_file_path = download_url(
                 "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/muv.csv.gz",
-                data_path)
+                data_path, md5)
 
     elif(dataset == 'FreeSolv'): # SMILES is second column
         task = 'regression'
         target = ["expt"]
+        md5 = "8d681babd239b15e2f8b2d29f025577a"
         csv_file_path = download_url(
-                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/SAMPL.csv",
-                data_path)
+                "https://s3-us-west-1.amazonaws.com/deepchem.io/datasets/molnet_publish/FreeSolv.zip",
+                data_path, md5)
 
     elif(dataset == 'ESOL'): # SMILES is last column
         task = 'regression'
         target = ["measured log solubility in mols per litre"]
+        md5 = "0c90a51668d446b9e3ab77e67662bd1c"
         csv_file_path = download_url(
                 "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/delaney-processed.csv",
-                data_path)
+                data_path, md5)
 
     elif(dataset == 'Lipophilicity'):
         task = 'regression'
         target = ["exp"]
+        md5 = "85a0e1cb8b38b0dfc3f96ff47a57f0ab"
         csv_file_path = download_url(
                 "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/Lipophilicity.csv",
-                data_path)
+                data_path, md5)
 
     elif(dataset == 'QM7'):
         task = 'regression'
         target = ["u0_atom"]
+        md5 = None # No md5 from torchdrug
         csv_file_path = download_url(
                 "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm7.csv",
-                data_path)
+                data_path, md5)
 
-    elif(dataset == 'QM7b'):
-        task = 'regression'
-        target = ["u0_atom"]
-        csv_file_path = download_url(
-                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm7b.csv",
-                data_path)
+    #elif(dataset == 'QM7b'):
+    #    task = 'regression'
+    #    target = ["u0_atom"]
+    #    csv_file_path = download_url(
+    #            "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm7b.mat",
+    #            data_path)
 
     elif(dataset == 'QM8'):
         task = 'regression'
@@ -239,9 +310,10 @@ def _load_data(dataset=None, data_path='./data_download/'):
                 "f1-CAM",
                 "f2-CAM"
         ]
+        md5 = "b7e2a2c823c75b35c596f3013319c86e"
         csv_file_path = download_url(
-                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm8.csv",
-                data_path)
+                "http://deepchem.io.s3-website-us-west-1.amazonaws.com/datasets/gdb8.tar.gz",
+                data_path, md5)
 
     elif(dataset == 'QM9'):
         task = 'regression'
@@ -259,9 +331,10 @@ def _load_data(dataset=None, data_path='./data_download/'):
                 "g298", 
                 "cv",
         ]
+        md5 = "560f62d8e6c992ca0cf8ed8d013f9131"
         csv_file_path = download_url(
-                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm9.csv",
-                data_path)
+                "http://deepchem.io.s3-website-us-west-1.amazonaws.com/datasets/gdb9.tar.gz",
+                data_path, md5)
 
     elif(dataset == "PCBA"):
         task = 'classification'
@@ -395,22 +468,32 @@ def _load_data(dataset=None, data_path='./data_download/'):
                 "PCBA-938",
                 "PCBA-995",
                 ]
+        md5 = None # No md5 available from torchdrug
         csv_file_path = download_url(
                 "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/pcba.csv.gz",
-                data_path)
+                data_path, md5)
 
-    elif(dataset == "PDBbind"):
-        task = 'regression'
-        csv_file_path = download_url(
-                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/PDBbind.csv.gz",
-                data_path)
-        target = []
+    #elif(dataset == "PDBbind"):
+    #    task = 'regression'
+    #    csv_file_path = download_url(
+    #"https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/pdbbindv2019/pdbbind_v2019_other_PL.tar.gz",
+    #            data_path)
+    #    target = ['-logKd/Ki']
+    #elif(dataset == "PDBbind - refined"):
+    #    task = 'regression'
+    #    csv_file_path = download_url(
+    #"https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/pdbbindv2019/pdbbind_v2019_refined.tar.gz",
+    #            data_path)
+    #    target = ['-logKd/Ki']
+    #elif(dataset == "PDBbind - core"):
+    #    task = 'regression'
+    #    csv_file_path = download_url(
+    #"https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/pdbbindv2019/pdbbind_v2013_core_set.tar.gz",
+    #            data_path)
+    #    target = ['-logKd/Ki']
 
     elif(dataset == 'ToxCast'):
         task = 'classification'
-        csv_file_path = download_url(
-                "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/toxcast_data.csv.gz",
-                data_path)
         target = [
                 'ACEA_T47D_80hr_Negative', 'ACEA_T47D_80hr_Positive',
                 'APR_HepG2_CellCycleArrest_24h_dn', 'APR_HepG2_CellCycleArrest_24h_up',
@@ -635,8 +718,13 @@ def _load_data(dataset=None, data_path='./data_download/'):
                 'Tanguay_ZF_120hpf_TRUN_up', 'Tanguay_ZF_120hpf_TR_up',
                 'Tanguay_ZF_120hpf_YSE_up'
             ]
+        md5 = "92911bbf9c1e2ad85231014859388cd6"
+        csv_file_path = download_url(
+                "http://deepchem.io.s3-website-us-west-1.amazonaws.com/datasets/toxcast_data.csv.gz",
+                data_path, md5)
 
-
+    else:
+        raise RuntimeError("{} is not supported.".format(dataset))
     print("DATASET: {}".format(dataset))
     return csv_file_path, target, task
 
@@ -659,7 +747,8 @@ def _process_csv(csv_file, target, task):
             smiles = row['mol']
         for idx, t in enumerate(target):
             label = row[t]
-            if smiles != None and label != '':
+            mol = Chem.MolFromSmiles(smiles)
+            if mol != None and label != '':
                 if(idx == 0):
                     smiles_data.append(smiles)
                 if task == 'classification':
@@ -689,7 +778,7 @@ def read_smiles(dataset, data_path):
 
     # Download files if not already there
     csv_file_path, target, task = _load_data(dataset, data_path)
-    if(".gz" in csv_file_path):
+    if("csv.gz" in csv_file_path):
         with gzip.open(csv_file_path, 'rt') as csv_file:
             return _process_csv(csv_file, target, task)
     else:

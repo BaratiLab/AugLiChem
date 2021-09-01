@@ -27,6 +27,7 @@ def test_crystal_data():
         Since automated downloading isn't supported yet, this can't be tested without
         uploading the data set
     '''
+    #data = CrystalDataset("Lanthanides", on_the_fly_augment=True)
     assert True
     #data = CrystalDatasetWrapper("Lanthanides")
     
@@ -41,7 +42,7 @@ def test_crystal_data():
     #    print(t)
 
 def test_random_rotation():
-    rotate = RandomRotationTransformation([1,0,0], 90,)
+    #rotate = RandomRotationTransformation([1,0,0], 90,)
     pass
 
 def test_random_perturb_structure_transformation():
@@ -83,6 +84,6 @@ def test_composition():
     #    print(b)
     assert True
 
-if __name__ == '__main__':
-    test_crystal_data()
+#if __name__ == '__main__':
+    #test_crystal_data()
     #test_composition()

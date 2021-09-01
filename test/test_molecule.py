@@ -138,25 +138,26 @@ def test_smiles2graph():
 def test_molecule_data():
     datasets = [
             "QM7",
-            ####"QM7b",
-            #"QM8",
-            #"QM9",
+            "QM8",
+            "QM9",
 
-            #"ESOL",
-            #"FreeSolv",
-            #"Lipophilicity",
+            "ESOL",
+            "FreeSolv",
+            "Lipophilicity",
 
-            #"PCBA", # APPEARS TO BE WORKING
-            #"MUV",
-            #"HIV",
-            #"BACE",
+            "PCBA",
+            "MUV",
+            "HIV",
+            "BACE",
             ####"PDBbind",
+            ####"PDBbind - refined",
+            ####"PDBbind - core",
 
-            #"BBBP",
-            #"Tox21",
-            #"ToxCast",
-            #"SIDER",
-            #"ClinTox"
+            "BBBP",
+            "Tox21",
+            "ToxCast",
+            "SIDER",
+            "ClinTox"
     ]
 
     for ds in datasets:
@@ -164,6 +165,7 @@ def test_molecule_data():
         if(ds == "MUV"):
             # It takes around 3 minutes to process
             continue
+        data = MoleculeDatasetWrapper(ds)
         data = MoleculeDatasetWrapper(ds)
         train, valid, test = data.get_data_loaders()
         shutil.rmtree("./data_download")
@@ -187,10 +189,10 @@ def test_composition():
     assert True
 
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
     #test_atom_mask()
     #test_bond_delete()
     #test_atom_mask_mol()
     #test_bond_delete_mol()
-    #test_molecule_data()
+    test_molecule_data()
     #test_composition()
