@@ -213,7 +213,7 @@ class MoleculeDataset(Dataset):
         if self.test_mode:
             true_index = index
         else:
-            true_index = index // self.aug_time
+            true_index = index // (self.aug_time + 1)
 
         # Create initial data set
         mol = Chem.MolFromSmiles(self.smiles_data[true_index])
@@ -234,37 +234,16 @@ class MoleculeDataset(Dataset):
 
         # Set up PyG data object
         molecule = PyG_Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr)
-        if(not self.test_mode):
+        #if(not self.test_mode):
+        if((not self.test_mode) and (index % (aug_time+1) != 0)): # Now doesn't augment original
             aug_molecule = self.transform(molecule, seed=self.reproduce_seeds[index])
             return aug_molecule
         else:
             return molecule
 
-        # Set up atom masking object
-        #if(isinstance(self.atom_mask_ratio, list)):
-        #    amr = random.uniform(self.atom_mask_ratio[0], self.atom_mask_ratio[1])
-        #else:
-        #    amr = self.atom_mask_ratio
-
-        #atom_mask = RandomAtomMask(amr)
-
-        ## Set up bond deletion object
-        #if(isinstance(self.bond_delete_ratio, list)):
-        #    bdr = random.uniform(self.bond_delete_ratio[0], self.bond_delete_ratio[1])
-        #else:
-        #    bdr = self.bond_delete_ratio
-
-        #edge_mask = RandomBondDelete(bdr)
-
-        ## Do masking
-        #molecule = atom_mask(molecule, self.reproduce_seeds[index])
-        #molecule = edge_mask(molecule, self.reproduce_seeds[index])
-
-        #return molecule
-
 
     def __len__(self):
-        return len(self.smiles_data) * self.aug_time
+        return len(self.smiles_data) * (self.aug_time + 1) # Original + augmented
 
 
 class MoleculeDatasetWrapper(MoleculeDataset):
@@ -293,7 +272,6 @@ class MoleculeDatasetWrapper(MoleculeDataset):
             ---
             None
         '''
-        print("TRANSFORM IN MOLECULE DATASET: {}".format(transform))
         super().__init__(dataset, data_path, transform)
         self.split = split
         self.data_path = data_path
@@ -324,13 +302,16 @@ class MoleculeDatasetWrapper(MoleculeDataset):
 
         # Split
         #TODO: Fix this redundency of passing in dataset name?
-        train_set = MoleculeDataset(self.dataset, transform=self.transform, smiles_data=self.smiles_data[train_idx],
+        train_set = MoleculeDataset(self.dataset, transform=self.transform,
+                            smiles_data=self.smiles_data[train_idx],
                             class_labels=self.labels[self.target][train_idx], test_mode=False,
                             aug_time=self.aug_time, task=self.task, target=self.target)
-        valid_set = MoleculeDataset(self.dataset, transform=self.transform, smiles_data=self.smiles_data[valid_idx],
+        valid_set = MoleculeDataset(self.dataset, transform=self.transform,
+                            smiles_data=self.smiles_data[valid_idx],
                             class_labels=self.labels[self.target][valid_idx],
                             test_mode=True, task=self.task, target=self.target)
-        test_set = MoleculeDataset(self.dataset, transform=self.transform, smiles_data=self.smiles_data[test_idx],
+        test_set = MoleculeDataset(self.dataset, transform=self.transform,
+                           smiles_data=self.smiles_data[test_idx],
                            class_labels=self.labels[self.target][test_idx],
                            test_mode=True, task=self.task, target=self.target)
 

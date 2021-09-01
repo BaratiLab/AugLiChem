@@ -17,8 +17,8 @@ from auglichem.crystal._transforms import (
         PrimitiveCellTransformation
 )
 from auglichem.crystal._compositions import Compose, OneOf
-from auglichem.crystal.data import CrystalDataset
-from auglichem.crystal.data._crystal_dataset import CrystalDataset
+from auglichem.crystal.data import CrystalDataset, CrystalDatasetWrapper
+#from auglichem.crystal.data._crystal_dataset import CrystalDataset
 
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 
@@ -27,13 +27,44 @@ def test_crystal_data():
         Since automated downloading isn't supported yet, this can't be tested without
         uploading the data set
     '''
+    #data = CrystalDataset("Lanthanides", on_the_fly_augment=True)
     assert True
-    #data = CrystalDataset("Lanthanides")
+    #data = CrystalDatasetWrapper("Lanthanides")
+    
+    #transform = [RandomRotationTransformation(axis=[1,0,0], angle=15),
+    #             SupercellTransformation()]
+    #data.data_augmentation(transform)
+    #data.data_augmentation(transform)
     #train, valid, test = data.get_data_loaders()
     #shutil.rmtree("./data_download")
 
     #for b, t in enumerate(train):
-    #    print(b)
+    #    print(t)
+
+def test_random_rotation():
+    #rotate = RandomRotationTransformation([1,0,0], 90,)
+    pass
+
+def test_random_perturb_structure_transformation():
+    pass
+
+def test_random_remove_sites_transformation():
+    pass
+
+def test_supercell_transformation():
+    pass
+
+def test_random_translates_sites_transformation():
+    pass
+
+def cubic_supercell_transformation():
+    pass
+
+def test_cubic_supercell_transformation():
+    pass
+
+def primitive_cell_transformation():
+    pass
 
 def test_composition():
     #TODO Actually test the various functionality rather than simply check it runs

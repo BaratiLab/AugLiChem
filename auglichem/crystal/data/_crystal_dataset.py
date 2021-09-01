@@ -9,10 +9,23 @@ import warnings
 import random
 import numpy as np
 import torch
+from tqdm import tqdm
 from pymatgen.core.structure import Structure
+from pymatgen.io import cif
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 import pandas as pd
+import warnings
+
+from auglichem.crystal._transforms import (
+        RandomRotationTransformation,
+        RandomPerturbStructureTransformation,
+        RandomRemoveSitesTransformation,
+        SupercellTransformation,
+        RandomTranslateSitesTransformation,
+        CubicSupercellTransformation,
+        PrimitiveCellTransformation
+)
 
 from auglichem.utils import (
         ATOM_LIST,
@@ -134,13 +147,14 @@ class CrystalDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, id_prop_augment=None,
                  atom_init_file=None, id_prop_file=None, ari=None,fold = 0,
                  max_num_nbr=12, radius=8, dmin=0, step=0.2,
-                 random_seed=123, aug_time=4, test_mode=True):
+                 random_seed=123, aug_time=4, test_mode=True, on_the_fly_augment=False):
 
         super(Dataset, self).__init__()
         
         self.dataset = dataset
         self.data_path = data_path
         self.transform = transform
+        self._augmented = False # To control runaway augmentation
 
         # No augmentation if no transform is specified
         if(self.transform is None):
@@ -151,6 +165,8 @@ class CrystalDataset(Dataset):
 
         if self.test_mode:
             self.aug_time = 1
+
+        # Need to do and save augmented data here
 
         assert type(self.aug_time) == int
         assert self.aug_time >= 1
@@ -180,6 +196,72 @@ class CrystalDataset(Dataset):
         self.gdf = lambda dist: self._gaussian_distance(dist, dmin=dmin, dmax=self.radius,
                                                         step=step)
 
+        self.on_the_fly_augment = on_the_fly_augment
+        if(self.on_the_fly_augment):
+            warnings.warn("On-the-fly augmentations for crystals is untested and can lead to memory issues. Use with caution.", category=RuntimeWarning, stacklevel=2)
+
+
+    def _aug_name(self, transformation):
+        if(isinstance(transformation, RandomRotationTransformation)):
+            suffix = '_rotated'
+        elif(isinstance(transformation, RandomPerturbStructureTransformation)):
+            suffix = '_perturbed'
+        elif(isinstance(transformation, RandomRemoveSitesTransformation)):
+            suffix = '_remove_sites'
+        elif(isinstance(transformation, SupercellTransformation)):
+            suffix = '_supercell'
+        elif(isinstance(transformation, RandomTranslateSitesTransformation)):
+            suffix = '_translate'
+        elif(isinstance(transformation, CubicSupercellTransformation)):
+            suffix = '_cubic_supercell'
+        elif(isinstance(transformation, PrimitiveCellTransformation)):
+            suffix = '_primitive_cell'
+        return suffix
+
+
+    def data_augmentation(self, transform=None):
+        '''
+            Function call to deliberately augment the data
+
+        '''
+        if(self._augmented):
+            print("Augmentation has already been done.")
+            return
+
+        if(self.on_the_fly_augment):
+            print("Augmentation will be done on-the-fly.")
+            return
+
+        # Check transforms
+        if(transform is None and self.transform is None):
+            raise ValueError("No transform specified.")
+        elif(not isinstance(transform, list)):
+            transform = [transform]
+
+        # Do augmentations
+        new_id_prop_augment = []
+        for id_prop in tqdm(self.id_prop_augment):
+            new_id_prop_augment.append((id_prop[0], id_prop[1]))
+            for t in transform:
+
+                # Get augmented file name
+                id_name = id_prop[0] + self._aug_name(t)
+                new_id_prop_augment.append((id_name,id_prop[1]))
+                
+                # Don't create file if it already exists
+                if(os.path.exists(self.data_path + '/' + id_name + '.cif')):
+                    continue
+
+                # Transform crystal
+                aug_crystal = t.apply_transformation(
+                                    Structure.from_file(os.path.join(self.data_path,
+                                    id_prop[0]+'.cif')))
+                cif.CifWriter(aug_crystal).write_file(self.data_path + '/' + id_name + '.cif')
+
+        self.id_prop_augment = np.array(new_id_prop_augment)
+        self._augmented = True
+
+
     def __len__(self):
         return len(self.id_prop_augment)
 
@@ -196,9 +278,12 @@ class CrystalDataset(Dataset):
         crystal = Structure.from_file(os.path.join(self.data_path,
                                                    cif_id+'.cif'))
 
-        # Do augmentation
-        if(not self.test_mode):
-            crystal = self.transform(crystal)
+        if(self.on_the_fly_augment):
+            if(self.transform is None):
+                raise ValueError("Transformations need to be specified.")
+            for t in self.transform:
+                crystal = t.apply_transfromation(crystal)
+
         atom_fea = np.vstack([self.ari.get_atom_fea(crystal[i].specie.number)
                               for i in range(len(crystal))])
         atom_fea = torch.Tensor(atom_fea)
