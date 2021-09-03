@@ -31,7 +31,7 @@ from ._load_sets import read_smiles
 
 class MoleculeDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, smiles_data=None, labels=None,
-                 task=None, test_mode=False, aug_time=1, atom_mask_ratio=[0, 0.25],
+                 task=None, test_mode=False, aug_time=0, atom_mask_ratio=[0, 0.25],
                  bond_delete_ratio=[0, 0.25], target=None, class_labels=None, **kwargs):
         '''
             Initialize Molecular Data set object. This object tracks data, labels,
@@ -78,10 +78,10 @@ class MoleculeDataset(Dataset):
             self.aug_time = aug_time
 
         if self.test_mode:
-            self.aug_time = 1
+            self.aug_time = 0
 
-        assert type(aug_time) == int
-        assert aug_time >= 1
+        assert type(self.aug_time) == int
+        #assert self.aug_time >= 1
 
         # For reproducibility
         self.reproduce_seeds = list(range(self.__len__()))
@@ -230,12 +230,10 @@ class MoleculeDataset(Dataset):
         num_atoms = mol.GetNumAtoms()
         num_bonds = mol.GetNumBonds()
 
-        # Mask according to initialized rules
-
         # Set up PyG data object
         molecule = PyG_Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr)
         #if(not self.test_mode):
-        if((not self.test_mode) and (index % (aug_time+1) != 0)): # Now doesn't augment original
+        if((not self.test_mode) and (index % (self.aug_time+1) != 0)): # Now retains original
             aug_molecule = self.transform(molecule, seed=self.reproduce_seeds[index])
             return aug_molecule
         else:
@@ -249,7 +247,7 @@ class MoleculeDataset(Dataset):
 class MoleculeDatasetWrapper(MoleculeDataset):
     #TODO: Take in transformation/composition object as argument to match crystal?
     def __init__(self, dataset, transform=None, split="scaffold", batch_size=64, num_workers=0,
-                 valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None):
+                 valid_size=0.1, test_size=0.1, aug_time=0, data_path=None, target=None):
         '''
             Input:
             ---

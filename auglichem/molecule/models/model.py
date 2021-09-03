@@ -6,5 +6,5 @@ def get_model(task_name, config):
         from auglichem.models.gcn import GCN
         return GCN(task_name, **config)
     elif config['type'] == 'afp':
-        from auglichem.models.afp import AttentiveFP
+        from auglichem.models.attentive_fp import AttentiveFP
         return AttentiveFP(task_name, **config)
