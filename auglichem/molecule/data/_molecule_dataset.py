@@ -289,28 +289,28 @@ class MoleculeDatasetWrapper(MoleculeDataset):
             self.target = list(self.labels.keys())[0]
 
         # Get indices of data splits
-        #TODO: Include different splits
         if(self.split == 'scaffold'):
-            train_idx, valid_idx, test_idx = scaffold_split(self.smiles_data, self.valid_size,
-                                                            self.test_size)
+            self.train_idx, self.valid_idx, self.test_idx = \
+                       scaffold_split(self.smiles_data, self.valid_size, self.test_size)
         elif(self.split == 'random'):
-            raise NotImplementedError("Random splitting not supported yet")
+            self.train_idx, self.valid_idx, self.test_idx = \
+                       random_split(self.smiles_data, self.valid_size, self.test_size)
         else:
             raise ValueError("Please select scaffold or random split")
 
         # Split
-        #TODO: Fix this redundency of passing in dataset name?
         train_set = MoleculeDataset(self.dataset, transform=self.transform,
-                            smiles_data=self.smiles_data[train_idx],
-                            class_labels=self.labels[self.target][train_idx], test_mode=False,
+                            smiles_data=self.smiles_data[self.train_idx],
+                            class_labels=self.labels[self.target][self.train_idx],
+                            test_mode=False,
                             aug_time=self.aug_time, task=self.task, target=self.target)
         valid_set = MoleculeDataset(self.dataset, transform=self.transform,
-                            smiles_data=self.smiles_data[valid_idx],
-                            class_labels=self.labels[self.target][valid_idx],
+                            smiles_data=self.smiles_data[self.valid_idx],
+                            class_labels=self.labels[self.target][self.valid_idx],
                             test_mode=True, task=self.task, target=self.target)
         test_set = MoleculeDataset(self.dataset, transform=self.transform,
-                           smiles_data=self.smiles_data[test_idx],
-                           class_labels=self.labels[self.target][test_idx],
+                           smiles_data=self.smiles_data[self.test_idx],
+                           class_labels=self.labels[self.target][self.test_idx],
                            test_mode=True, task=self.task, target=self.target)
 
         train_loader = DataLoader(
