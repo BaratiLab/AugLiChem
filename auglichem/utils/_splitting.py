@@ -55,7 +55,7 @@ def generate_scaffolds(smiles_data, log_every_n=1000):
     return scaffold_sets
 
 
-def scaffold_split(smiles_data, valid_size, test_size, seed=None, log_every_n=1000):
+def scaffold_split(smiles_data, valid_size, test_size, log_every_n=1000):
     train_size = 1.0 - valid_size - test_size
     scaffold_sets = generate_scaffolds(smiles_data)
 
