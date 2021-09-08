@@ -79,6 +79,6 @@ def test_constants():
     assert len(BONDDIR_LIST) == 4
     assert NUM_BOND_DIRECTION == 4
 
-if __name__ == '__main__':
-    #test_scaffold_split()
-    test_random_split()
+#if __name__ == '__main__':
+#    test_scaffold_split()
+#    test_random_split()

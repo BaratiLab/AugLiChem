@@ -5,6 +5,7 @@ import random
 import numpy as np
 from copy import deepcopy
 from operator import itemgetter
+import warnings
 
 import torch
 import torch.nn.functional as F
@@ -34,7 +35,7 @@ class MoleculeDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, smiles_data=None, labels=None,
                  task=None, test_mode=False, aug_time=0, atom_mask_ratio=[0, 0.25],
                  bond_delete_ratio=[0, 0.25], target=None, class_labels=None, seed=None,
-                 **kwargs):
+                 augment_original=False, **kwargs):
         '''
             Initialize Molecular Data set object. This object tracks data, labels,
             task, test, and augmentation
@@ -87,7 +88,7 @@ class MoleculeDataset(Dataset):
 
         # For reproducibility
         self.seed = seed
-        if(self.seed):
+        if(seed is not None):
             random.seed(self.seed)
         self.reproduce_seeds = list(range(self.__len__()))
         np.random.shuffle(self.reproduce_seeds)
@@ -105,6 +106,12 @@ class MoleculeDataset(Dataset):
             self.class_labels = class_labels
         else:
             self.class_labels = self.labels[self.target]
+
+        # Augment original data
+        self.augment_original = augment_original
+        if(self.augment_original):
+            warnings.warn("Augmenting original dataset may lead to unexpected results.",
+                          RuntimeWarning, stacklevel=2)
 
 
     def _get_data_x(self, mol):
@@ -237,8 +244,11 @@ class MoleculeDataset(Dataset):
 
         # Set up PyG data object
         molecule = PyG_Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr)
-        #if(not self.test_mode):
+
         if((not self.test_mode) and (index % (self.aug_time+1) != 0)): # Now retains original
+            aug_molecule = self.transform(molecule, seed=self.reproduce_seeds[index])
+            return aug_molecule
+        elif((not self.test_mode) and self.augment_original):
             aug_molecule = self.transform(molecule, seed=self.reproduce_seeds[index])
             return aug_molecule
         else:
@@ -293,6 +303,8 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         # If no target is passed and target not originally set, set to first label
         if(not target and not self.target):
             self.target = list(self.labels.keys())[0]
+        elif(target == 'all'):
+            self.target = list(self.labels.keys())
         elif(target is not None):
             self.target = target
 

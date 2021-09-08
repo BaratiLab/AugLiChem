@@ -26,5 +26,5 @@ def test_initialization():
     assert not _check_eq(model, model2)
 
 
-if __name__ == '__main__':
-    test_initialization()
+#if __name__ == '__main__':
+#    test_initialization()

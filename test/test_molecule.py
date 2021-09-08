@@ -3,6 +3,7 @@ sys.path.append(sys.path[0][:-4])
 
 import shutil
 import numpy as np
+import warnings
 
 import torch
 from torch_geometric.data import Data as PyG_Data
@@ -174,7 +175,7 @@ def test_molecule_data():
 
 
 def test_composition():
-    #TODO Actually test the various functionality rather than simply check it runs
+    # Atom mask and Bond Delete tests ensure this runs properly also
     transform = Compose([
         RandomAtomMask(p=[0.1, 0.5]),
         RandomBondDelete(p=[0.6, 0.7])
@@ -182,15 +183,84 @@ def test_composition():
     data = MoleculeDatasetWrapper("BACE", transform=transform, batch_size=1024, aug_time=3)
     train, valid, test = data.get_data_loaders()
     shutil.rmtree("./data_download")
-    #for b, t in enumerate(train):
-    #    print(t)
     assert True
 
 
-if __name__ == '__main__':
-    #test_atom_mask()
-    #test_bond_delete()
-    #test_atom_mask_mol()
-    #test_bond_delete_mol()
-    test_molecule_data()
-    #test_composition()
+def test_loading_multitask():
+    transform = Compose([
+        RandomAtomMask(p=[0.1, 0.5]),
+        RandomBondDelete(p=[0.6, 0.7])
+    ])
+    data = MoleculeDatasetWrapper("ClinTox", transform=transform, batch_size=1024, aug_time=3)
+    train, valid, test = data.get_data_loaders(['FDA_APPROVED', 'CT_TOX'])
+    for data in train:
+        assert list(data.y.shape) == [1024, 2]
+
+    train, valid, test = data.get_data_loaders(['CT_TOX'])
+    for data in train:
+        assert list(data.y.shape) == [1024, 1]
+
+
+    data = MoleculeDatasetWrapper("SIDER", transform=transform, batch_size=1, aug_time=3)
+    train, valid, test = data.get_data_loaders('all')
+    for data in train:
+        assert list(data.y.shape) == [1, 27]
+
+    # Remove downloaded data
+    shutil.rmtree("./data_download")
+
+
+def test_consistent_augment():
+    aug_time = 2
+    transform = Compose([
+        RandomAtomMask(p=0.5),
+    ])
+    data = MoleculeDataset("BACE", transform=transform, batch_size=1024, aug_time=aug_time,
+                           test_mode=False)
+
+    # Dataset retains a copy of the original data
+    original = data.__getitem__(0)
+    first_aug = data.__getitem__(1)
+    second_aug = data.__getitem__(2)
+    second_aug_again = data.__getitem__(2)
+    assert not torch.equal(original.x, first_aug.x)
+    assert not torch.equal(original.x, second_aug.x)
+    assert not torch.equal(first_aug.x, second_aug.x)
+    assert torch.equal(second_aug.x, second_aug_again.x)
+
+    # Check that original is retained. No masking is done.
+    for i in range(0, len(data),  aug_time+1):
+        assert all(data.__getitem__(i).x.numpy()[:,0] != 118)
+
+    # Turn off retaining original
+    transform = Compose([
+        RandomAtomMask(p=1.),
+    ])
+    with warnings.catch_warnings(record=True) as w:
+        # Cause all warnings to always be triggered.
+        warnings.simplefilter("always")
+        # Trigger a warning.
+        data = MoleculeDataset("BACE", transform=transform, batch_size=1024, aug_time=aug_time,
+                               test_mode=False, augment_original=True)
+        # Verify some things
+        assert len(w) == 1
+        assert issubclass(w[-1].category, RuntimeWarning)
+        warn_string = "Augmenting original dataset may lead to unexpected results."
+        assert warn_string in str(w[-1].message)
+
+    # Check that every atom is masked
+    for i in range(0, len(data)):
+        assert all(data.__getitem__(i).x.numpy()[:,0] == 118)
+
+    shutil.rmtree("./data_download")
+
+
+#if __name__ == '__main__':
+#    test_atom_mask()
+#    test_bond_delete()
+#    test_atom_mask_mol()
+#    test_bond_delete_mol()
+#    test_molecule_data()
+#    test_composition()
+#    test_loading_multitask()
+#    test_consistent_augment()
