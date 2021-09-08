@@ -191,18 +191,18 @@ def test_loading_multitask():
         RandomAtomMask(p=[0.1, 0.5]),
         RandomBondDelete(p=[0.6, 0.7])
     ])
-    data = MoleculeDatasetWrapper("ClinTox", transform=transform, batch_size=1024, aug_time=3)
-    train, valid, test = data.get_data_loaders(['FDA_APPROVED', 'CT_TOX'])
+    dataset = MoleculeDatasetWrapper("ClinTox", transform=transform, batch_size=1024, aug_time=3)
+    train, valid, test = dataset.get_data_loaders(['FDA_APPROVED', 'CT_TOX'])
     for data in train:
         assert list(data.y.shape) == [1024, 2]
 
-    train, valid, test = data.get_data_loaders(['CT_TOX'])
+    train, valid, test = dataset.get_data_loaders(['CT_TOX'])
     for data in train:
         assert list(data.y.shape) == [1024, 1]
 
 
-    data = MoleculeDatasetWrapper("SIDER", transform=transform, batch_size=1, aug_time=3)
-    train, valid, test = data.get_data_loaders('all')
+    dataset = MoleculeDatasetWrapper("SIDER", transform=transform, batch_size=1, aug_time=3)
+    train, valid, test = dataset.get_data_loaders('all')
     for data in train:
         assert list(data.y.shape) == [1, 27]
 
