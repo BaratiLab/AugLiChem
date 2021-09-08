@@ -12,6 +12,8 @@ from torch_geometric.nn import GATConv, MessagePassing, global_add_pool
 #from ..inits import glorot, zeros
 
 import math
+import random
+
 def glorot(tensor):
     if tensor is not None:
         stdv = math.sqrt(6.0 / (tensor.size(-2) + tensor.size(-1)))
@@ -85,8 +87,11 @@ class AttentiveFP(torch.nn.Module):
     """
     def __init__(self, in_channels: int, hidden_channels: int,
                  out_channels: int, edge_dim: int, num_layers: int,
-                 num_timesteps: int, dropout: float = 0.0):
+                 num_timesteps: int, dropout: float = 0.0, seed: int = None):
         super(AttentiveFP, self).__init__()
+        if(seed is not None):
+            torch.manual_seed(seed)
+            random.seed(seed)
 
         self.num_layers = num_layers
         self.num_timesteps = num_timesteps
