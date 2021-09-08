@@ -4,6 +4,7 @@ import math
 import random
 import numpy as np
 from copy import deepcopy
+from operator import itemgetter
 
 import torch
 import torch.nn.functional as F
@@ -32,7 +33,8 @@ from ._load_sets import read_smiles
 class MoleculeDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, smiles_data=None, labels=None,
                  task=None, test_mode=False, aug_time=0, atom_mask_ratio=[0, 0.25],
-                 bond_delete_ratio=[0, 0.25], target=None, class_labels=None, **kwargs):
+                 bond_delete_ratio=[0, 0.25], target=None, class_labels=None, seed=None,
+                 **kwargs):
         '''
             Initialize Molecular Data set object. This object tracks data, labels,
             task, test, and augmentation
@@ -84,6 +86,9 @@ class MoleculeDataset(Dataset):
         #assert self.aug_time >= 1
 
         # For reproducibility
+        self.seed = seed
+        if(self.seed):
+            random.seed(self.seed)
         self.reproduce_seeds = list(range(self.__len__()))
         np.random.shuffle(self.reproduce_seeds)
 
@@ -245,9 +250,9 @@ class MoleculeDataset(Dataset):
 
 
 class MoleculeDatasetWrapper(MoleculeDataset):
-    #TODO: Take in transformation/composition object as argument to match crystal?
     def __init__(self, dataset, transform=None, split="scaffold", batch_size=64, num_workers=0,
-                 valid_size=0.1, test_size=0.1, aug_time=0, data_path=None, target=None):
+                 valid_size=0.1, test_size=0.1, aug_time=0, data_path=None, target=None,
+                 seed=None):
         '''
             Input:
             ---
@@ -270,7 +275,7 @@ class MoleculeDatasetWrapper(MoleculeDataset):
             ---
             None
         '''
-        super().__init__(dataset, data_path, transform)
+        super().__init__(dataset, data_path, transform, seed=seed)
         self.split = split
         self.data_path = data_path
         self.batch_size = batch_size
@@ -285,8 +290,11 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         '''
 
         '''
-        if(not target):
+        # If no target is passed and target not originally set, set to first label
+        if(not target and not self.target):
             self.target = list(self.labels.keys())[0]
+        elif(target is not None):
+            self.target = target
 
         # Get indices of data splits
         if(self.split == 'scaffold'):
@@ -294,29 +302,35 @@ class MoleculeDatasetWrapper(MoleculeDataset):
                        scaffold_split(self.smiles_data, self.valid_size, self.test_size)
         elif(self.split == 'random'):
             self.train_idx, self.valid_idx, self.test_idx = \
-                       random_split(self.smiles_data, self.valid_size, self.test_size)
+                       random_split(self.smiles_data, self.valid_size, self.test_size, self.seed)
         else:
             raise ValueError("Please select scaffold or random split")
 
         # Split
+        if(isinstance(self.target, str)):
+            labels = np.array(itemgetter(self.target)(self.labels)).T
+        else: # Support for multiclass learning
+            labels = np.array(itemgetter(*self.target)(self.labels)).T
+
         train_set = MoleculeDataset(self.dataset, transform=self.transform,
                             smiles_data=self.smiles_data[self.train_idx],
-                            class_labels=self.labels[self.target][self.train_idx],
+                            class_labels=labels[self.train_idx],
                             test_mode=False,
                             aug_time=self.aug_time, task=self.task, target=self.target)
         valid_set = MoleculeDataset(self.dataset, transform=self.transform,
                             smiles_data=self.smiles_data[self.valid_idx],
-                            class_labels=self.labels[self.target][self.valid_idx],
+                            class_labels=labels[self.valid_idx],
                             test_mode=True, task=self.task, target=self.target)
         test_set = MoleculeDataset(self.dataset, transform=self.transform,
                            smiles_data=self.smiles_data[self.test_idx],
-                           class_labels=self.labels[self.target][self.test_idx],
+                           class_labels=labels[self.test_idx],
                            test_mode=True, task=self.task, target=self.target)
 
         train_loader = DataLoader(
             train_set, batch_size=self.batch_size,
             num_workers=self.num_workers, drop_last=True, shuffle=True
         )
+
         valid_loader = DataLoader(
             valid_set, batch_size=len(valid_set),
             num_workers=self.num_workers, drop_last=False
