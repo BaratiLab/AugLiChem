@@ -258,38 +258,42 @@ class RandomSubgraphRemoval(BaseAugmentTransform):
         return aug_mol_graph
 
 
-class RandomMotifRemoval(BaseAugmentTransform):
-    def __init__(self, p: float = 1.0):
-        """
-        @param p: the probability of the transform being applied; default value is 1.0
-        """
-        super().__init__(p)
+class MotifRemoval(object):
+    def __init__(self):
+        super().__init__()
     
-    def _remove_frag(self, mol):
-        break_bonds = list(FindBRICSBonds(mol))
-        num_breaks = len(break_bonds)
-        num_frags = max([1, num_breaks])
+    # def _remove_frag(self, mol):
+    #     break_bonds = list(FindBRICSBonds(mol))
+    #     num_breaks = len(break_bonds)
+    #     num_frags = max([1, num_breaks])
 
-        mol2 = BreakBRICSBonds(mol, break_bonds)
-        res = Chem.MolToSmiles(mol2, True)
-        frag_list = res.split('.')
-        frag_smiles = '.'.join(random.sample(frag_list, num_frags))
+    #     mol2 = BreakBRICSBonds(mol, break_bonds)
+    #     res = Chem.MolToSmiles(mol2, True)
+    #     frag_list = res.split('.')
+    #     frag_smiles = '.'.join(random.sample(frag_list, num_frags))
 
-        frag_mol = Chem.MolFromSmiles(frag_smiles)
-        frag_mol = Chem.AddHs(frag_mol)
+    #     frag_mol = Chem.MolFromSmiles(frag_smiles)
+    #     frag_mol = Chem.AddHs(frag_mol)
         
-        return frag_mol
+    #     return frag_mol
 
-    def apply_transform(self, mol: rdkit.Chem.rdchem.Mol, seed: Optional[None]) -> PyG_Data:
+    def apply_transform(self, mol: rdkit.Chem.rdchem.Mol) -> List[rdkit.Chem.rdchem.Mol]:
         """
         Transform that randomly remove a motif decomposed via BRICS
         @param mol: rdkit.Chem.rdchem.Mol to be augmented
-        @returns: Augmented PyG Data
+        @returns: list of augmented rdkit.Chem.rdchem.Mol
         """
-        if(seed):
-            random.seed(seed)
 
-        aug_mol = self._remove_frag(mol)
-        aug_mol_graph = _mol2graph(aug_mol)
-        
-        return aug_mol_graph
+        aug_mols = []
+
+        mol = Chem.AddHs(mol)
+        aug_mols.append(mol)
+        fp = Chem.RDKFingerprint(mol)
+        res = list(BRICSDecompose(mol, returnMols=False, singlePass=True))
+        for r in res:
+            mol_aug = Chem.MolFromSmiles(r)
+            fp_aug = Chem.RDKFingerprint(mol_aug)
+            if DataStructs.FingerprintSimilarity(fp, fp_aug) > 0.6:
+                aug_mols.append(r)
+
+        return aug_mols

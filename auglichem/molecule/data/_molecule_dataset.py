@@ -25,7 +25,8 @@ from auglichem.utils import (
         random_split,
         scaffold_split
 )
-from auglichem.molecule import RandomAtomMask, RandomBondDelete
+from auglichem.molecule import RandomAtomMask, RandomBondDelete, \
+    RandomSubgraphRemoval, BaseTransform, MotifRemoval
 from ._load_sets import read_smiles
 
 
@@ -79,7 +80,7 @@ class MoleculeDataset(Dataset):
         else:
             self.test_mode = test_mode
             self.aug_time = aug_time
-
+        
         if self.test_mode:
             self.aug_time = 0
 
