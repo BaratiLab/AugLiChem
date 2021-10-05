@@ -740,14 +740,14 @@ def _process_csv(csv_file, target, task):
         if i == 0:
             continue
 
-        # smiles = row[3]
+        # Hold on to all rows that contain any targets
         try:
             smiles = row['smiles']
         except KeyError:
             smiles = row['mol']
         for idx, t in enumerate(target):
             label = row[t]
-            mol = Chem.MolFromSmiles(smiles)
+            mol = Chem.MolFromSmiles(smiles) 
             if mol != None and label != '':
                 if(idx == 0):
                     smiles_data.append(smiles)
@@ -760,11 +760,14 @@ def _process_csv(csv_file, target, task):
                     labels[t].append(float(label))
                 else:
                     raise ValueError('task must be either regression or classification')
+            elif mol != None and label == '':
+                labels[t].append(-999999999)
 
     # Recast lables to numpy arrays
     for t in target:
         labels[t] = np.array(labels[t])
 
+    print("LENGTH OF SMILES DATA: {}".format(len(smiles_data)))
     return smiles_data, labels, task
 
 
