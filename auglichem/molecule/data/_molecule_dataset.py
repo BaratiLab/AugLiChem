@@ -255,6 +255,15 @@ class MoleculeDataset(Dataset):
             return molecule
 
 
+    def _clean_label(self, target):
+        # I don't think this takes augmentation into account?
+        good_idxs = []
+        for i, val in enumerate(self.labels[target]):
+            if(val != -999999999):
+                good_idxs.append(i)
+        return good_idxs
+
+
     def __len__(self):
         return len(self.smiles_data) * (self.aug_time + 1) # Original + augmented
 
@@ -300,13 +309,20 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         '''
 
         '''
-        # If no target is passed and target not originally set, set to first label
-        if(not target and not self.target):
-            self.target = list(self.labels.keys())[0]
-        elif(target == 'all'):
+        if(not target): # No target passed in, use default and warn
+            warnings.warn("No target was set, using {} by default.".format(self.target),
+                          RuntimeWarning, stacklevel=2)
+            print(self.target)
+            good_idxs = self._clean_label(self.target)
+        elif(target == 'all'): # Set to all labels for multitask learning
             self.target = list(self.labels.keys())
-        elif(target is not None):
+            good_idxs = list(range(len(self.smiles_data)))
+        elif(isinstance(target, str)): # Set to passed-in single label
             self.target = target
+            good_idxs = self._clean_label(self.target)
+        elif(isinstance(target, list)): # Multitask on a subset of labels, no cleaning
+            self.target = target
+            good_idxs = list(range(len(self.smiles_data)))
 
         # Get indices of data splits
         if(self.split == 'scaffold'):
@@ -318,24 +334,24 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         else:
             raise ValueError("Please select scaffold or random split")
 
-        # Split
+        # Get data target wither by list or single target
         if(isinstance(self.target, str)):
             labels = np.array(itemgetter(self.target)(self.labels)).T
         else: # Support for multiclass learning
             labels = np.array(itemgetter(*self.target)(self.labels)).T
 
         train_set = MoleculeDataset(self.dataset, transform=self.transform,
-                            smiles_data=self.smiles_data[self.train_idx],
-                            class_labels=labels[self.train_idx],
+                            smiles_data=self.smiles_data[good_idxs][self.train_idx],
+                            class_labels=labels[good_idxs][self.train_idx],
                             test_mode=False,
                             aug_time=self.aug_time, task=self.task, target=self.target)
         valid_set = MoleculeDataset(self.dataset, transform=self.transform,
-                            smiles_data=self.smiles_data[self.valid_idx],
-                            class_labels=labels[self.valid_idx],
+                            smiles_data=self.smiles_data[good_idxs][self.valid_idx],
+                            class_labels=labels[good_idxs][self.valid_idx],
                             test_mode=True, task=self.task, target=self.target)
         test_set = MoleculeDataset(self.dataset, transform=self.transform,
-                           smiles_data=self.smiles_data[self.test_idx],
-                           class_labels=labels[self.test_idx],
+                           smiles_data=self.smiles_data[good_idxs][self.test_idx],
+                           class_labels=labels[good_idxs][self.test_idx],
                            test_mode=True, task=self.task, target=self.target)
 
         train_loader = DataLoader(
