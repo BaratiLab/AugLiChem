@@ -256,12 +256,46 @@ class MoleculeDataset(Dataset):
 
 
     def _clean_label(self, target):
-        # I don't think this takes augmentation into account?
+        # If value is not -999999999 we have a valid mol - label pair
         good_idxs = []
         for i, val in enumerate(self.labels[target]):
             if(val != -999999999):
                 good_idxs.append(i)
         return good_idxs
+
+
+    def _match_indices(self, good_idx):
+
+        # For each of train, valid, test, we match where we have a valid molecular
+        # representation with where we have a valid label
+        updated_train_idx = []
+        for v in self.train_idx:
+            try:
+                updated_train_idx.append(good_idx.index(v))
+            except ValueError:
+                # No label for training data
+                pass
+
+        updated_valid_idx = []
+        for v in self.train_idx:
+            try:
+                updated_valid_idx.append(good_idx.index(v))
+            except ValueError:
+                # No label for training data
+                pass
+
+        updated_test_idx = []
+        for v in self.train_idx:
+            try:
+                updated_test_idx.append(good_idx.index(v))
+            except ValueError:
+                # No label for training data
+                pass
+
+        # Update indices
+        self.train_idx = updated_train_idx
+        self.valid_idx = updated_valid_idx
+        self.test_idx = updated_test_idx
 
 
     def __len__(self):
@@ -309,16 +343,17 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         '''
 
         '''
+        print(len(self.smiles_data))
         if(not target): # No target passed in, use default and warn
             warnings.warn("No target was set, using {} by default.".format(self.target),
                           RuntimeWarning, stacklevel=2)
-            print(self.target)
             good_idxs = self._clean_label(self.target)
         elif(target == 'all'): # Set to all labels for multitask learning
             self.target = list(self.labels.keys())
             good_idxs = list(range(len(self.smiles_data)))
         elif(isinstance(target, str)): # Set to passed-in single label
             self.target = target
+            print("TARGET: {}".format(self.target))
             good_idxs = self._clean_label(self.target)
         elif(isinstance(target, list)): # Multitask on a subset of labels, no cleaning
             self.target = target
@@ -327,12 +362,19 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         # Get indices of data splits
         if(self.split == 'scaffold'):
             self.train_idx, self.valid_idx, self.test_idx = \
-                       scaffold_split(self.smiles_data, self.valid_size, self.test_size)
+                       scaffold_split(self.smiles_data[good_idxs],
+                                      self.valid_size, self.test_size)
         elif(self.split == 'random'):
             self.train_idx, self.valid_idx, self.test_idx = \
-                       random_split(self.smiles_data, self.valid_size, self.test_size, self.seed)
+                       random_split(self.smiles_data[good_idxs],
+                                    self.valid_size, self.test_size, self.seed)
         else:
             raise ValueError("Please select scaffold or random split")
+
+        # Need to argwhere for all good_idxs in train, val, test.
+        if(isinstance(target, str) and not(target == 'all')):
+            self._match_indices(good_idxs)#, self.train_idx, self.valid_idx, self.test_idx)
+            
 
         # Get data target wither by list or single target
         if(isinstance(self.target, str)):
@@ -340,6 +382,7 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         else: # Support for multiclass learning
             labels = np.array(itemgetter(*self.target)(self.labels)).T
 
+        # Split into train, validation, and test
         train_set = MoleculeDataset(self.dataset, transform=self.transform,
                             smiles_data=self.smiles_data[good_idxs][self.train_idx],
                             class_labels=labels[good_idxs][self.train_idx],

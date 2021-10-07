@@ -745,12 +745,18 @@ def _process_csv(csv_file, target, task):
             smiles = row['smiles']
         except KeyError:
             smiles = row['mol']
+
+        # Hold on to good smiles representations
+        mol = Chem.MolFromSmiles(smiles) 
+        if(mol != None):
+            smiles_data.append(smiles)
+        else:
+            continue
+
+        # Check values for every target
         for idx, t in enumerate(target):
             label = row[t]
-            mol = Chem.MolFromSmiles(smiles) 
-            if mol != None and label != '':
-                if(idx == 0):
-                    smiles_data.append(smiles)
+            if label != '':
                 if task == 'classification':
                     try:
                         labels[t].append(int(label))
@@ -768,6 +774,9 @@ def _process_csv(csv_file, target, task):
         labels[t] = np.array(labels[t])
 
     print("LENGTH OF SMILES DATA: {}".format(len(smiles_data)))
+    for key, val in labels.items():
+        print(key, len(val))
+
     return smiles_data, labels, task
 
 
