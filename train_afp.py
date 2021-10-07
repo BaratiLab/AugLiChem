@@ -1,4 +1,5 @@
 import sys
+import os
 from tqdm import tqdm
 #sys.path.append(sys.path[0][:-8])
 
@@ -328,9 +329,9 @@ def train(model, train_loader, val_loader, optimizer, criterion, device, save_st
 
 if __name__ == '__main__':
 
-    task_name = 'BBBP'
-    splitting = 'random'
-    aug_time = 2
+    task_name = 'SIDER'
+    splitting = 'scaffold'
+    aug_time = 1
 
     # Select GPU
     if(len(sys.argv) > 1):
@@ -339,8 +340,8 @@ if __name__ == '__main__':
         device = torch.device('cpu')
 
     # Set run parameters
-    batch_size = 100
-    epochs = 100
+    batch_size = 200
+    epochs = 2
     radius = 3
     T = 2
     fingerprint_dim = 150
@@ -354,7 +355,8 @@ if __name__ == '__main__':
         RandomBondDelete([0.0, 0.2])
     ])
 
-    for seed in [10, 20, 30]:
+    #for seed in [10, 20, 30]:
+    for seed in [10]:
     
         print("Getting Dataset...")
         dataset = MoleculeDatasetWrapper(task_name, transform=transform, aug_time=aug_time,
@@ -403,7 +405,11 @@ if __name__ == '__main__':
                   'splitting': splitting,
                   'epochs': epochs
         }
-        np.save(save_string("parameters"), params)
+        try:
+            np.save(save_string("parameters"), params)
+        except FileNotFoundError:
+            os.mkdir(save_string("")[:-7])
+            np.save(save_string("parameters"), params)
 
         # Train our model
         model = train(model, train_loader, val_loader, optimizer, criterion, device, save_string,
