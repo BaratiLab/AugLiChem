@@ -83,7 +83,8 @@ class AttentiveFP(nn.Module):
             readout.
         dropout (float, optional): Dropout probability. (default: :obj:`0.0`)
     """
-    def __init__(self, task, emb_dim, num_layers, num_timesteps, drop_ratio, out_dim, **kwargs):
+    def __init__(self, task, emb_dim, num_layers, num_timesteps, drop_ratio, out_dim,
+                 **kwargs):
         super(AttentiveFP, self).__init__()
 
         self.x_embedding1 = nn.Embedding(NUM_ATOM_TYPE, emb_dim)

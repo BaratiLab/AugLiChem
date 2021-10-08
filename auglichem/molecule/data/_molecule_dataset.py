@@ -89,7 +89,7 @@ class MoleculeDataset(Dataset):
         # For reproducibility
         self.seed = seed
         if(seed is not None):
-            random.seed(self.seed)
+            np.random.seed(self.seed)
         self.reproduce_seeds = list(range(self.__len__()))
         np.random.shuffle(self.reproduce_seeds)
 
@@ -277,7 +277,7 @@ class MoleculeDataset(Dataset):
                 pass
 
         updated_valid_idx = []
-        for v in self.train_idx:
+        for v in self.valid_idx:
             try:
                 updated_valid_idx.append(good_idx.index(v))
             except ValueError:
@@ -285,7 +285,7 @@ class MoleculeDataset(Dataset):
                 pass
 
         updated_test_idx = []
-        for v in self.train_idx:
+        for v in self.test_idx:
             try:
                 updated_test_idx.append(good_idx.index(v))
             except ValueError:
@@ -353,7 +353,6 @@ class MoleculeDatasetWrapper(MoleculeDataset):
             good_idxs = list(range(len(self.smiles_data)))
         elif(isinstance(target, str)): # Set to passed-in single label
             self.target = target
-            print("TARGET: {}".format(self.target))
             good_idxs = self._clean_label(self.target)
         elif(isinstance(target, list)): # Multitask on a subset of labels, no cleaning
             self.target = target
@@ -373,8 +372,7 @@ class MoleculeDatasetWrapper(MoleculeDataset):
 
         # Need to argwhere for all good_idxs in train, val, test.
         if(isinstance(target, str) and not(target == 'all')):
-            self._match_indices(good_idxs)#, self.train_idx, self.valid_idx, self.test_idx)
-            
+            self._match_indices(good_idxs)
 
         # Get data target wither by list or single target
         if(isinstance(self.target, str)):
@@ -399,7 +397,7 @@ class MoleculeDatasetWrapper(MoleculeDataset):
 
         train_loader = DataLoader(
             train_set, batch_size=self.batch_size,
-            num_workers=self.num_workers, drop_last=True, shuffle=True
+            num_workers=self.num_workers, drop_last=True, shuffle=False
         )
 
         valid_loader = DataLoader(

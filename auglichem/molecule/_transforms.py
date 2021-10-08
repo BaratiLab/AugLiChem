@@ -70,7 +70,7 @@ class RandomAtomMask(BaseTransform):
         @param seed: 
         @returns: Augmented PyG Data
         """
-        if(seed):
+        if(seed is not None):
             random.seed(seed)
         N = mol_graph.x.size(0)
         num_mask_nodes = max([1, math.floor(self.p*N)])
@@ -96,7 +96,7 @@ class RandomBondDelete(BaseTransform):
         @param mol_graph: PyG Data to be augmented
         @returns: Augmented PyG Data
         """
-        if(seed):
+        if(seed is not None):
             random.seed(seed)
         M = mol_graph.edge_index.size(1) // 2
         num_mask_edges = max([0, math.floor(self.p*M)])
