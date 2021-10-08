@@ -43,7 +43,7 @@ def get_model(task, radius, T, p_dropout, fingerprint_dim, output_units_num, see
             num_layers=radius,
             num_timesteps=T,
             drop_ratio=p_dropout,
-            out_dim=output_units_num
+            out_dim=output_units_num,
     )
 
     return model
@@ -67,11 +67,11 @@ def evaluate(model, test_loader, device, target_list, train=False):
 
         # Calculate score
         if(test_loader.dataset.task == 'classification'):
-            score = roc_auc_score(data.y[:,0], np.argmax(pred, axis=1))
-            print("VALIDATION ROC: {0:.5f}".format(score))
+            score = roc_auc_score(data.y[:,0].cpu().numpy(), pred.cpu().numpy()[:,1])
+            print("TEST ROC: {0:.5f}".format(score))
         elif(test_loader.dataset.task == 'regression'):
-            score = mean_squared_error(data.y[:,0].to(device=device), pred, squared=False)
-            print("VALIDATION RMSE: {0:.5f}".format(score))
+            score = mean_squared_error(data.y[:,0].cpu(), pred.cpu(), squared=False)
+            print("TEST RMSE: {0:.5f}".format(score))
 
 
     model.load_state_dict(torch.load(save_string(t)))
@@ -92,18 +92,13 @@ def evaluate(model, test_loader, device, target_list, train=False):
 
         # Calculate score
         if(test_loader.dataset.task == 'classification'):
-            score = roc_auc_score(data.y[:,0], np.argmax(pred, axis=1))
-            print("VALIDATION ROC: {0:.5f}".format(score))
+            score = roc_auc_score(data.y[:,0].cpu().numpy(), pred.cpu().numpy()[:,1])
+            print("TEST ROC: {0:.5f}".format(score))
         elif(test_loader.dataset.task == 'regression'):
-            score = mean_squared_error(data.y[:,0].to(device=device), pred, squared=False)
-            print("VALIDATION RMSE: {0:.5f}".format(score))
-
-
-    model.load_state_dict(torch.load(save_string(t)))
+            score = mean_squared_error(data.y[:,0].cpu(), pred.cpu(), squared=False)
+            print("TEST RMSE: {0:.5f}".format(score))
 
     model.train()
-    model.train()
-    return score
 
 
 def validate(model, val_loader, device, target_list, train=False):
@@ -123,10 +118,10 @@ def validate(model, val_loader, device, target_list, train=False):
 
         # Calculate score
         if(val_loader.dataset.task == 'classification'):
-            score = roc_auc_score(data.y[:,0], np.argmax(pred, axis=1))
+            score = roc_auc_score(data.y[:,0].cpu().numpy(), pred.cpu().numpy()[:,1])
             print("VALIDATION ROC: {0:.5f}".format(score))
         elif(val_loader.dataset.task == 'regression'):
-            score = mean_squared_error(data.y[:,0].to(device=device), pred, squared=False)
+            score = mean_squared_error(data.y[:,0].cpu(), pred.cpu(), squared=False)
             print("VALIDATION RMSE: {0:.5f}".format(score))
 
 
@@ -182,6 +177,7 @@ def train(model, train_loader, val_loader, optimizer, criterion, device, save_st
 
         # Need to do per task also, and keep track per task...
         val_score = validate(model, val_loader, device, target)
+        #evaluate(model, test_loader, device, target_list, save_string)
 
         condition = val_score > best_score \
                     if(train_loader.dataset.task == 'classification') else \
@@ -203,7 +199,7 @@ def train(model, train_loader, val_loader, optimizer, criterion, device, save_st
 
 if __name__ == '__main__':
 
-    task_name = 'SIDER'
+    task_name = 'BBBP'
     splitting = 'scaffold'
     aug_time = 1
 
@@ -214,19 +210,19 @@ if __name__ == '__main__':
         device = torch.device('cpu')
 
     # Set run parameters
-    batch_size = 200
-    epochs = 2
+    batch_size = 100
+    epochs = 100
     radius = 3
-    T = 3
-    fingerprint_dim = 200
-    p_dropout = 0.5
-    weight_decay = 3. # also known as l2_regularization_lambda
+    T = 2
+    fingerprint_dim = 150
+    p_dropout = 0.1
+    weight_decay = 2.9 # also known as l2_regularization_lambda
     learning_rate = 3.5
     
     # Set up transformation
     transform = Compose([
-        RandomAtomMask([0.0, 0.2]),#[0.1, 0.2]),
-        RandomBondDelete([0.0, 0.2])
+        RandomAtomMask(0.2)#[0.1, 0.2]),
+        #RandomBondDelete([0.0, 0.2])
     ])
 
     #for seed in [10, 20, 30]:
@@ -259,8 +255,8 @@ if __name__ == '__main__':
 
             # Get model
             print("Instantiating model...")
-            model = get_model(dataset.task, radius, T, p_dropout, fingerprint_dim, output_units_num, seed).to(
-                              device=device)
+            model = get_model(dataset.task, radius, T, p_dropout, fingerprint_dim, output_units_num,
+                              seed).to(device=device)
                       
             # Get optimizer and loss function
             optimizer = optim.Adam(model.parameters(), 10**-learning_rate,
@@ -274,7 +270,7 @@ if __name__ == '__main__':
             params = {'weight_decay': weight_decay,
                       'learning_rate': learning_rate, 
                       'atom_mask': transform.transforms[0].prob,
-                      'bond_delete': transform.transforms[1].prob,
+                      #'bond_delete': transform.transforms[1].prob,
                       'T': T, 'radius': radius, 'dropout': p_dropout,
                       'fingerprint_dim': fingerprint_dim,
                       'splitting': splitting,
