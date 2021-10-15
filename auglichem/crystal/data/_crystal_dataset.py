@@ -1,3 +1,5 @@
+#TODO: make device (cpu/gpu) an input option, default CPU
+
 from __future__ import print_function, division
 
 import csv
@@ -167,7 +169,6 @@ class CrystalDataset(Dataset):
             self.aug_time = 1
 
         # Need to do and save augmented data here
-
         assert type(self.aug_time) == int
         assert self.aug_time >= 1
 
@@ -307,10 +308,10 @@ class CrystalDataset(Dataset):
                                         nbr[:self.max_num_nbr])))
         nbr_fea_idx, nbr_fea = np.array(nbr_fea_idx), np.array(nbr_fea)
         nbr_fea = self.gdf(nbr_fea)
-        atom_fea = torch.Tensor(atom_fea)
-        nbr_fea = torch.Tensor(nbr_fea)
-        nbr_fea_idx = torch.LongTensor(nbr_fea_idx)
-        target = torch.Tensor([float(target)])
+        atom_fea = torch.Tensor(atom_fea).cuda()
+        nbr_fea = torch.Tensor(nbr_fea).cuda()
+        nbr_fea_idx = torch.LongTensor(nbr_fea_idx).cuda()
+        target = torch.Tensor([float(target)]).cuda()
         return (atom_fea, nbr_fea, nbr_fea_idx), target, cif_id
 
 
