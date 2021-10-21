@@ -773,9 +773,8 @@ def _process_csv(csv_file, target, task):
     for t in target:
         labels[t] = np.array(labels[t])
 
-    print("LENGTH OF SMILES DATA: {}".format(len(smiles_data)))
-    for key, val in labels.items():
-        print(key, len(val))
+    #for key, val in labels.items():
+    #    print(key, len(val))
 
     return smiles_data, labels, task
 

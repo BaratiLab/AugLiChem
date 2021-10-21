@@ -322,6 +322,8 @@ class MoleculeDatasetWrapper(MoleculeDataset):
             aug_time (int, optional default=1):
             data_path (str, optional default=None): specify path to save/lookup data. Default
                         creates `data_download` directory and stores data there
+            target (str, optional, default=None): Target variable
+            seed (int, optional, default=None): Random seed to use for reproducibility
 
 
             Output:
