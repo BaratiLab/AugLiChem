@@ -4,6 +4,7 @@ import csv
 import functools
 import json
 import os
+import shutil
 import random
 import warnings
 import random
@@ -105,8 +106,8 @@ class CrystalDataset(Dataset):
     root_dir
     ├── id_prop.csv
     ├── atom_init.json
-    ├── id0.cif
-    ├── id1.cif
+    ├── 0.cif
+    ├── 1.cif
     ├── ...
 
     id_prop.csv: a CSV file with two columns. The first column recodes a
@@ -147,7 +148,7 @@ class CrystalDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, id_prop_augment=None,
                  atom_init_file=None, id_prop_file=None, ari=None,fold = 0,
                  max_num_nbr=12, radius=8, dmin=0, step=0.2,
-                 random_seed=123, aug_time=4, test_mode=True, on_the_fly_augment=False):
+                 random_seed=123, test_mode=True, on_the_fly_augment=False):
 
         super(Dataset, self).__init__()
         
@@ -161,15 +162,6 @@ class CrystalDataset(Dataset):
             self.test_mode = True
         else:
             self.test_mode = test_mode
-            self.aug_time = aug_time
-
-        if self.test_mode:
-            self.aug_time = 1
-
-        # Need to do and save augmented data here
-
-        assert type(self.aug_time) == int
-        assert self.aug_time >= 1
 
         # After specifying data set
         if(id_prop_augment is None):
@@ -223,6 +215,10 @@ class CrystalDataset(Dataset):
         '''
             Function call to deliberately augment the data
 
+            input:
+            -----------------------
+            transformation (AbstractTransformation): 
+
         '''
         if(self._augmented):
             print("Augmentation has already been done.")
@@ -231,6 +227,10 @@ class CrystalDataset(Dataset):
         if(self.on_the_fly_augment):
             print("Augmentation will be done on-the-fly.")
             return
+        
+        # Copy directory and rename it to augmented
+        shutil.copytree(self.data_path, self.data_path + "_augmented", dirs_exist_ok=True)
+        self.data_path += "_augmented"
 
         # Check transforms
         if(transform is None and self.transform is None):
@@ -316,15 +316,37 @@ class CrystalDataset(Dataset):
 
 class CrystalDatasetWrapper(CrystalDataset):
     def __init__(self, dataset, transform=None, split="random", batch_size=64, num_workers=0,
-                 valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
+                 valid_size=0.1, test_size=0.1, data_path=None, target=None,
                  **kwargs):
+        '''
+            Wrapper Class to handle splitting dataset into train, validation, and test sets
+
+            inputs:
+            -------------------------
+            dataset (str): One of our dataset: lanthanides, perovskites, band_gap, fermi_energy,
+                                               or formation_energy
+            transform (AbstractTransformation, optional): A crystal transformation
+            split (str, default=random): Method of splitting data into train, validation, and
+                                         test
+            batch_size (int, default=64): Data batch size for train_loader
+            num_workers (int, default=0): Number of worker processes for parallel data loading
+            valid_size (float, optional, between [0, 1]): Fraction of data used for validation
+            test_size (float, optional, between [0, 1]): Fraction of data used for test
+            data_path (str, optional default=None): specify path to save/lookup data. Default
+                        creates `data_download` directory and stores data there
+            target (str, optional, default=None): Target variable
+            seed (int, optional, default=None): Random seed to use for reproducibility
+
+            inputs:
+            -------------------------
+            None
+        '''
         super().__init__(dataset, data_path, transform)
         self.split = split
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.valid_size = valid_size
         self.test_size = test_size
-        self.aug_time = aug_time
         self.id_prop_augment = np.asarray(self.id_prop_augment)
 
         # What is this?
@@ -332,7 +354,7 @@ class CrystalDatasetWrapper(CrystalDataset):
         #self.cif_data = np.asarray(self.cif_data) # Might need to be different
         
 
-    def get_data_loaders(self, target=None):
+    def get_data_loaders(self, target=None, transform=None):
         #TODO: Break down into Dataloaders for train/val/test
         if(not target and self.target is None):
              self.target = list(self.labels.keys())[0]
@@ -351,6 +373,9 @@ class CrystalDatasetWrapper(CrystalDataset):
         train_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[train_idx],
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
+        # Augment only training data
+        train_set.data_augmentation(transform)
+
         valid_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[valid_idx],
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
