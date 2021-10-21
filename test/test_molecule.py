@@ -62,12 +62,12 @@ def test_atom_mask():
     # Always mask at least one atom
     data = smiles2graph("C")
     atom_masked = RandomAtomMask(p=0)(data, 0)
-    assert atom_masked.x[:,0].numpy() == [118]
+    assert atom_masked.x[:,0].numpy() == [119]
 
     # Mask every atom
     data = smiles2graph("CCCCCC")
     atom_masked = RandomAtomMask(p=1)(data, 0)
-    assert all(atom_masked.x[:,0].numpy() == [118]*len(data.x))
+    assert all(atom_masked.x[:,0].numpy() == [119]*len(data.x))
 
     # Check seed setting (same)
     data = smiles2graph("C"*50)
@@ -87,7 +87,7 @@ def test_atom_mask_mol():
 
     # Mask every atom
     atom_masked = RandomAtomMask(p=1)(data.__getitem__(0), seed=0)
-    assert all(atom_masked.x[:,0].numpy() == [118]*5)
+    assert all(atom_masked.x[:,0].numpy() == [119]*5)
 
 
 
@@ -133,7 +133,10 @@ def test_bond_delete_mol():
 
 
 def test_smiles2graph():
-    pass
+    data = smiles2graph("CC")
+    assert torch.all(torch.eq(data.x, torch.Tensor([[5,0],[5,0]])))
+    assert torch.all(torch.eq(data.edge_index, torch.Tensor([[0,1],[1,0]])))
+    assert torch.all(torch.eq(data.edge_attr, torch.Tensor([[0,0],[0,0]])))
 
 
 def test_molecule_data():
@@ -230,7 +233,7 @@ def test_consistent_augment():
 
     # Check that original is retained. No masking is done.
     for i in range(0, len(data),  aug_time+1):
-        assert all(data.__getitem__(i).x.numpy()[:,0] != 118)
+        assert all(data.__getitem__(i).x.numpy()[:,0] != 119)
 
     # Turn off retaining original
     transform = Compose([
@@ -250,12 +253,13 @@ def test_consistent_augment():
 
     # Check that every atom is masked
     for i in range(0, len(data)):
-        assert all(data.__getitem__(i).x.numpy()[:,0] == 118)
+        assert all(data.__getitem__(i).x.numpy()[:,0] == 119)
 
     shutil.rmtree("./data_download")
 
 
 #if __name__ == '__main__':
+#    test_smiles2graph()
 #    test_atom_mask()
 #    test_bond_delete()
 #    test_atom_mask_mol()
