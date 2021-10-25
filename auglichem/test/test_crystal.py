@@ -1,4 +1,5 @@
 import sys
+import os
 sys.path.append(sys.path[0][:-14])
 
 import shutil
@@ -84,6 +85,132 @@ def test_composition():
     #    print(b)
     assert True
 
+
+def _check_id_prop_augment(path, transform):
+    # Checking if all cifs have been perturbed
+
+    # Get transformation names
+    transformation_names = []
+    for t in transform:
+        if(isinstance(t, SupercellTransformation)):
+            transformation_names.append("supercell")
+        if(isinstance(t, RandomPerturbStructureTransformation)):
+            transformation_names.append("perturbed")
+
+    # Get original ids
+    ids = np.loadtxt(path + "/id_prop.csv", delimiter=',').astype(int)[:,0]
+
+    # Make sure originals and all transformed cifs exist
+    for i in ids:
+        assert os.path.exists(path + "/{}.cif".format(i))
+        for t in transformation_names:
+            assert os.path.exists(path + "/{}_{}.cif".format(i,t))
+
+
+def _check_train_transform(path, transform, fold):
+    # Get transformation names
+    transformation_names = []
+    for t in transform:
+        if(isinstance(t, SupercellTransformation)):
+            transformation_names.append("supercell")
+        if(isinstance(t, RandomPerturbStructureTransformation)):
+            transformation_names.append("perturbed")
+
+    # Get train ids
+    ids = np.loadtxt(path + "/id_prop_train_{}.csv".format(fold), delimiter=',').astype(int)[:,0]
+
+    for i in ids:
+        assert os.path.exists(path + "/{}.cif".format(i))
+        for t in transformation_names:
+            assert os.path.exists(path + "/{}_{}.cif".format(i,t))
+
+
+def _check_repeats(idx1, idx2):
+    for v in idx1:
+        assert not(v[0] in idx2[:,0]) # Only checking if cif file id is repeated
+
+
+def _check_completeness(path, fold):
+
+    # Get train and validation files
+    train_prop = np.loadtxt(path + "/id_prop_train_{}.csv".format(fold),
+                            delimiter=',')
+    valid_prop = np.loadtxt(path + "/id_prop_valid_{}.csv".format(fold),
+                            delimiter=',')
+
+    # Concatenate and sort by cif id
+    together = np.concatenate((train_prop, valid_prop))
+    reconstructed = together[np.argsort(together[:,0])]
+
+    # Get original ids
+    id_prop = np.loadtxt(path + "/id_prop.csv", delimiter=',')
+    
+    # Check they are equal
+    assert np.array_equal(reconstructed, id_prop)
+
+
+def test_k_fold():
+    assert True
+    #TODO: Automatic data downloading - this works localls
+    #dataset = CrystalDatasetWrapper("lanthanides", kfolds=5,
+    #                                data_path="../../examples/data_download")
+    #transform = [SupercellTransformation()]
+
+    ## Check no repeated indices in train and valid
+    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=0)
+    #_check_id_prop_augment(dataset.data_path, transform)
+    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    #_check_completeness(train_loader.dataset.data_path, 0)
+    #_check_train_transform(train_loader.dataset.data_path, transform, 0)
+
+    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=1)
+    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    #_check_completeness(train_loader.dataset.data_path, 1)
+    #_check_train_transform(train_loader.dataset.data_path, transform, 1)
+
+    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=2)
+    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    #_check_completeness(train_loader.dataset.data_path, 2)
+    #_check_train_transform(train_loader.dataset.data_path, transform, 2)
+
+    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=3)
+    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    #_check_completeness(train_loader.dataset.data_path, 3)
+    #_check_train_transform(train_loader.dataset.data_path, transform, 3)
+
+    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=4)
+    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    #_check_completeness(train_loader.dataset.data_path, 4)
+    #_check_train_transform(train_loader.dataset.data_path, transform, 4)
+
+    #try:
+    #    train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=5)
+    #except ValueError as error:
+    #    assert error.args[0] == "Please select a fold < 5"
+
+    ## Remove directory
+    #shutil.rmtree(dataset.data_path)
+
+    #dataset = CrystalDatasetWrapper("lanthanides", kfolds=2,
+    #                                data_path="../../examples/data_download")
+    #transform = [SupercellTransformation(), RandomPerturbStructureTransformation()]
+
+    ## Check no repeated indices in train and valid
+    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=0)
+    #_check_id_prop_augment(dataset.data_path, transform)
+    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    #_check_completeness(train_loader.dataset.data_path, 0)
+    #_check_train_transform(train_loader.dataset.data_path, transform, 0)
+
+    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=1)
+    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    #_check_completeness(train_loader.dataset.data_path, 1)
+    #_check_train_transform(train_loader.dataset.data_path, transform, 1)
+
+    #shutil.rmtree(dataset.data_path)
+    
+
 #if __name__ == '__main__':
     #test_crystal_data()
     #test_composition()
+    #test_k_fold()

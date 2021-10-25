@@ -124,16 +124,6 @@ def get_train_val_test_loader(dataset, dataset_train, idx_map, collate_fn=defaul
         return train_loader, val_loader
 
 
-def idx_mapping(data = "Data",fold = 0):
-    train_file = "/id_prop_train_{}.csv".format(fold)
-    path  = "./data/" + data + train_file
-    df = pd.read_csv(path, header  = None)
-    cif_ids = df[0].values
-    idx = np.arange(len(cif_ids))
-    diction = dict(zip(cif_ids, idx))
-
-    return diction
-
 class AtomInitializer(object):
     """
     Base class for intializing the vector representation for atoms.
@@ -260,7 +250,7 @@ def _load_data(dataset, data_path='./data_download'):
     ###
     if(dataset == 'lanthanides'):
         task = 'regression'
-        target = ["formation_energy"]
+        target = ["formation_energy"] #TODO: Need to verify
         #csv_file_path = download_url("Nothing yet...", data_path)
         csv_file_path = data_path + "/lanths/id_prop.csv"
         embedding_path = data_path + "/lanths/atom_init.json"
@@ -275,7 +265,7 @@ def _load_data(dataset, data_path='./data_download'):
         data_path += "./band/"
     elif(dataset == 'perovskites'):
         task = 'regression'
-        target = [""]
+        target = ["energy"] #TODO: Need to verify
         #csv_file_path = download_url("Nothing yet...", data_path)
         csv_file_path = data_path + "/"
         embedding_path = data_path + "/"
