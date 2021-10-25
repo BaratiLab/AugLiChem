@@ -19,13 +19,14 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 import pandas as pd
 import warnings
+#from ._knn import knn_graph
 
 from auglichem.crystal._transforms import (
-        RandomRotationTransformation,
-        RandomPerturbStructureTransformation,
-        RandomRemoveSitesTransformation,
+        RotationTransformation,
+        PerturbStructureTransformation,
+        RemoveSitesTransformation,
         SupercellTransformation,
-        RandomTranslateSitesTransformation,
+        TranslateSitesTransformation,
         CubicSupercellTransformation,
         PrimitiveCellTransformation
 )
@@ -39,7 +40,6 @@ from auglichem.utils import (
         scaffold_split,
         random_split
 )
-#from auglichem.crystal.data import AtomCustomJSONInitializer as AJI
 from ._load_sets import AtomCustomJSONInitializer, read_crystal
 
 
@@ -150,7 +150,8 @@ class CrystalDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, id_prop_augment=None,
                  atom_init_file=None, id_prop_file=None, ari=None,fold = 0,
                  max_num_nbr=12, radius=8, dmin=0, step=0.2,
-                 random_seed=123, test_mode=True, on_the_fly_augment=False, kfolds=0):
+                 random_seed=123, test_mode=True, on_the_fly_augment=False, kfolds=0,
+                 seed=None):
 
         super(Dataset, self).__init__()
         
@@ -158,12 +159,7 @@ class CrystalDataset(Dataset):
         self.data_path = data_path
         self.transform = transform
         self._augmented = False # To control runaway augmentation
-
-        # No augmentation if no transform is specified
-        #if(self.transform is None):
-        #    self.test_mode = True
-        #else:
-        #    self.test_mode = test_mode
+        self.seed = seed
 
         # After specifying data set
         if(id_prop_augment is None):
@@ -207,15 +203,15 @@ class CrystalDataset(Dataset):
 
 
     def _aug_name(self, transformation):
-        if(isinstance(transformation, RandomRotationTransformation)):
+        if(isinstance(transformation, RotationTransformation)):
             suffix = '_rotated'
-        elif(isinstance(transformation, RandomPerturbStructureTransformation)):
+        elif(isinstance(transformation, PerturbStructureTransformation)):
             suffix = '_perturbed'
-        elif(isinstance(transformation, RandomRemoveSitesTransformation)):
+        elif(isinstance(transformation, RemoveSitesTransformation)):
             suffix = '_remove_sites'
         elif(isinstance(transformation, SupercellTransformation)):
             suffix = '_supercell'
-        elif(isinstance(transformation, RandomTranslateSitesTransformation)):
+        elif(isinstance(transformation, TranslateSitesTransformation)):
             suffix = '_translate'
         elif(isinstance(transformation, CubicSupercellTransformation)):
             suffix = '_cubic_supercell'
@@ -251,7 +247,7 @@ class CrystalDataset(Dataset):
             # Remove k-fold files from original directory
             for i in range(self.kfolds):
                 os.remove(self.data_path + "/id_prop_train_{}.csv".format(i))
-                os.remove(self.data_path + "/id_prop_valid_{}.csv".format(i))
+                os.remove(self.data_path + "/id_prop_test_{}.csv".format(i))
             
             # Update data path
             self.data_path += "_augmented_{}folds".format(self.kfolds)
@@ -300,8 +296,9 @@ class CrystalDataset(Dataset):
         '''
         updated_train_idx = []
         for idx in train_idx:
+            num_idx = int(np.argwhere(self.id_prop_augment[:,0] == idx[0])[0][0])
             for jdx in range(num_transform+1):
-                updated_train_idx.append(self.id_prop_augment_all[(num_transform+1)*idx+jdx])
+                updated_train_idx.append(self.id_prop_augment_all[(num_transform+1)*num_idx+jdx])
         
         return np.array(updated_train_idx)
 
@@ -320,7 +317,8 @@ class CrystalDataset(Dataset):
             None
 
         '''
-        #TODO: SET SEED
+        # Set seed and shuffle data
+        np.random.seed(self.seed)
         np.random.shuffle(self.id_prop_augment)
 
         frac = 1./self.kfolds
@@ -331,14 +329,15 @@ class CrystalDataset(Dataset):
             idxs = list(range(N))
 
             # Get train and validation idxs
-            valid_idxs = idxs[int(i*frac*N):int((i+1)*frac*N)]
+            test_idxs = idxs[int(i*frac*N):int((i+1)*frac*N)]
             del idxs[int(i*frac*N):int((i+1)*frac*N)]
 
             # Get train and validation sets
-            valid_set = np.array(self.id_prop_augment)[valid_idxs]
+            test_set = np.array(self.id_prop_augment)[test_idxs]
             train_set = np.array(self.id_prop_augment)[idxs]
 
-            np.savetxt(self.data_path + "/id_prop_valid_{}.csv".format(i), valid_set.astype(str),
+            # Save files
+            np.savetxt(self.data_path + "/id_prop_test_{}.csv".format(i), test_set.astype(str),
                        delimiter=',', fmt="%s")
             np.savetxt(self.data_path + "/id_prop_train_{}.csv".format(i), train_set.astype(str),
                        delimiter=',', fmt="%s")
@@ -400,7 +399,7 @@ class CrystalDataset(Dataset):
 class CrystalDatasetWrapper(CrystalDataset):
     def __init__(self, dataset, transform=None, split="random", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, data_path=None, target=None, kfolds=0,
-                 **kwargs):
+                 seed=None, **kwargs):
         '''
             Wrapper Class to handle splitting dataset into train, validation, and test sets
 
@@ -420,13 +419,14 @@ class CrystalDatasetWrapper(CrystalDataset):
             target (str, optional, default=None): Target variable
             kfolds (int, default=0, folds > 1): Number of folds to use in k-fold cross
                         validation. kfolds > 1 for data to be split
+            seed (int, optional, default=None): Random seed set for data shuffling
              
 
             outputs:
             -------------------------
             None
         '''
-        super().__init__(dataset, data_path, transform, kfolds=kfolds)
+        super().__init__(dataset, data_path, transform, kfolds=kfolds, seed=seed)
         self.split = split
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -443,8 +443,9 @@ class CrystalDatasetWrapper(CrystalDataset):
         '''
         idxs = []
         for i in cif_idxs:
-            idxs.append(np.argwhere(self.id_prop_augment[:,0] == str(i))[0][0])
-        return idxs
+            idxs.append(self.id_prop_augment[np.argwhere(self.id_prop_augment == \
+                                                         str(int(i[0])))[0][0]])
+        return np.array(idxs)
 
     
     def _get_split_idxs(self, target=None, transform=None, fold=None):
@@ -456,7 +457,8 @@ class CrystalDatasetWrapper(CrystalDataset):
             raise NotImplementedError("Scaffold only supports molecules currently.")
         elif(self.split == 'random' and not self._k_fold_cv):
             train_idx, valid_idx, test_idx = random_split(self.id_prop_augment[:,0],
-                                                          self.valid_size, self.test_size)
+                                                          self.valid_size, self.test_size,
+                                                          self.seed)
             return train_idx, valid_idx, test_idx
 
         # If using k-fold CV
@@ -470,16 +472,31 @@ class CrystalDatasetWrapper(CrystalDataset):
             print("Ignoring splitting. Using pre-split k folds.")
 
             #TODO: setting type here as int may not be helpful, could be optimized
+            # Get train set
             train_cif_idx = np.loadtxt(self.data_path + "/id_prop_train_{}.csv".format(fold),
-                                   delimiter=',')[:,0].astype(int)
+                                   delimiter=',')
+            #print(train_cif_idx)
             train_idx = self._match_idx(train_cif_idx)
-            valid_cif_idx = np.loadtxt(self.data_path + "/id_prop_valid_{}.csv".format(fold),
-                                   delimiter=',')[:,0].astype(int)
-            valid_idx = self._match_idx(valid_cif_idx)
+
+            # Get validation set
+            valid_size = int(len(train_idx)*self.valid_size)
+            valid_idx = train_idx[:valid_size]
+            train_idx = train_idx[valid_size:]
+
+            # Update idx csv files
+            np.savetxt(self.data_path + "/id_prop_train_{}.csv".format(fold),
+                       train_idx.astype(str), delimiter=',', fmt="%s")
+            np.savetxt(self.data_path + "/id_prop_valid_{}.csv".format(fold),
+                       valid_idx.astype(str), delimiter=',', fmt="%s")
+
+            # Get test set
+            test_cif_idx = np.loadtxt(self.data_path + "/id_prop_test_{}.csv".format(fold),
+                                   delimiter=',')
+            test_idx = self._match_idx(test_cif_idx)
 
             # Do data transformation. With k_fold_cv, self.id_prop_augment is updated later
             self.data_augmentation(transform)
-            return train_idx, valid_idx
+            return train_idx, valid_idx, test_idx
 
         else:
             raise ValueError("Please select scaffold or random split")
@@ -506,12 +523,8 @@ class CrystalDatasetWrapper(CrystalDataset):
             -------------------------
             Loaders
         '''
-        if(self._k_fold_cv): # Need to add in augmented cif files to id_prop_augment
-            train_idx, valid_idx = self._get_split_idxs(target, transform, fold)
-        else: # Augmented cif files will be put in id_prop_augment
-            train_idx, valid_idx, test_idx = self._get_split_idxs(target, transform, fold)
+        train_idx, valid_idx, test_idx = self._get_split_idxs(target, transform, fold)
             
-
         # Get train loader
         if(self._k_fold_cv): # Need to add in augmented cif files to id_prop_augment
             transform = [transform] if(not isinstance(transform, list)) else transform
@@ -535,7 +548,7 @@ class CrystalDatasetWrapper(CrystalDataset):
 
         # Get val loader
         valid_set = CrystalDataset(self.dataset, self.data_path, self.transform,
-                             self.id_prop_augment[valid_idx],
+                             valid_idx,
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
         valid_loader = DataLoader(valid_set, batch_size=len(valid_set),
@@ -543,13 +556,10 @@ class CrystalDatasetWrapper(CrystalDataset):
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
         valid_set._k_fold_cv = self._k_fold_cv
 
-        # In k-fold we only return train and validation loaders
-        if(self._k_fold_cv):
-            return train_loader, valid_loader
 
         # Get test loader
         test_set = CrystalDataset(self.dataset, self.data_path, self.transform,
-                             self.id_prop_augment[test_idx],
+                             test_idx,
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
         test_loader = DataLoader(test_set, batch_size=len(test_set),

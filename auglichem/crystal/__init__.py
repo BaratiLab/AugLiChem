@@ -1,9 +1,9 @@
 from auglichem.crystal._transforms import (
-        RandomRotationTransformation,
-        RandomPerturbStructureTransformation,
-        RandomRemoveSitesTransformation,
+        RotationTransformation,
+        PerturbStructureTransformation,
+        RemoveSitesTransformation,
         SupercellTransformation,
-        RandomTranslateSitesTransformation,
+        TranslateSitesTransformation,
         CubicSupercellTransformation,
         PrimitiveCellTransformation
 )
