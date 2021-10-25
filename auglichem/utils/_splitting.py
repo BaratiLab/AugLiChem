@@ -33,9 +33,8 @@ def _generate_scaffold(smiles, include_chirality=False):
 def generate_scaffolds(smiles_data, log_every_n=1000):
     scaffolds = {}
     data_len = len(smiles_data)
-    print(data_len)
 
-    print("About to generate scaffolds")
+    print("Generating scaffolds...")
     for ind, smiles in enumerate(smiles_data):
         if ind % log_every_n == 0:
             print("Generating scaffold %d/%d" % (ind, data_len))
@@ -51,7 +50,6 @@ def generate_scaffolds(smiles_data, log_every_n=1000):
         scaffold_set for (scaffold, scaffold_set) in sorted(
             scaffolds.items(), key=lambda x: (len(x[1]), x[1][0]), reverse=True)
     ]
-    # print(scaffold_sets)
     return scaffold_sets
 
 

@@ -89,7 +89,7 @@ class MoleculeDataset(Dataset):
         # For reproducibility
         self.seed = seed
         if(seed is not None):
-            random.seed(self.seed)
+            np.random.seed(self.seed)
         self.reproduce_seeds = list(range(self.__len__()))
         np.random.shuffle(self.reproduce_seeds)
 
@@ -255,6 +255,49 @@ class MoleculeDataset(Dataset):
             return molecule
 
 
+    def _clean_label(self, target):
+        # If value is not -999999999 we have a valid mol - label pair
+        good_idxs = []
+        for i, val in enumerate(self.labels[target]):
+            if(val != -999999999):
+                good_idxs.append(i)
+        return good_idxs
+
+
+    def _match_indices(self, good_idx):
+
+        # For each of train, valid, test, we match where we have a valid molecular
+        # representation with where we have a valid label
+        updated_train_idx = []
+        for v in self.train_idx:
+            try:
+                updated_train_idx.append(good_idx.index(v))
+            except ValueError:
+                # No label for training data
+                pass
+
+        updated_valid_idx = []
+        for v in self.valid_idx:
+            try:
+                updated_valid_idx.append(good_idx.index(v))
+            except ValueError:
+                # No label for training data
+                pass
+
+        updated_test_idx = []
+        for v in self.test_idx:
+            try:
+                updated_test_idx.append(good_idx.index(v))
+            except ValueError:
+                # No label for training data
+                pass
+
+        # Update indices
+        self.train_idx = updated_train_idx
+        self.valid_idx = updated_valid_idx
+        self.test_idx = updated_test_idx
+
+
     def __len__(self):
         return len(self.smiles_data) * (self.aug_time + 1) # Original + augmented
 
@@ -279,6 +322,8 @@ class MoleculeDatasetWrapper(MoleculeDataset):
             aug_time (int, optional default=1):
             data_path (str, optional default=None): specify path to save/lookup data. Default
                         creates `data_download` directory and stores data there
+            target (str, optional, default=None): Target variable
+            seed (int, optional, default=None): Random seed to use for reproducibility
 
 
             Output:
@@ -300,47 +345,61 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         '''
 
         '''
-        # If no target is passed and target not originally set, set to first label
-        if(not target and not self.target):
-            self.target = list(self.labels.keys())[0]
-        elif(target == 'all'):
+        print(len(self.smiles_data))
+        if(not target): # No target passed in, use default and warn
+            warnings.warn("No target was set, using {} by default.".format(self.target),
+                          RuntimeWarning, stacklevel=2)
+            good_idxs = self._clean_label(self.target)
+        elif(target == 'all'): # Set to all labels for multitask learning
             self.target = list(self.labels.keys())
-        elif(target is not None):
+            good_idxs = list(range(len(self.smiles_data)))
+        elif(isinstance(target, str)): # Set to passed-in single label
             self.target = target
+            good_idxs = self._clean_label(self.target)
+        elif(isinstance(target, list)): # Multitask on a subset of labels, no cleaning
+            self.target = target
+            good_idxs = list(range(len(self.smiles_data)))
 
         # Get indices of data splits
         if(self.split == 'scaffold'):
             self.train_idx, self.valid_idx, self.test_idx = \
-                       scaffold_split(self.smiles_data, self.valid_size, self.test_size)
+                       scaffold_split(self.smiles_data[good_idxs],
+                                      self.valid_size, self.test_size)
         elif(self.split == 'random'):
             self.train_idx, self.valid_idx, self.test_idx = \
-                       random_split(self.smiles_data, self.valid_size, self.test_size, self.seed)
+                       random_split(self.smiles_data[good_idxs],
+                                    self.valid_size, self.test_size, self.seed)
         else:
             raise ValueError("Please select scaffold or random split")
 
-        # Split
+        # Need to argwhere for all good_idxs in train, val, test.
+        if(isinstance(target, str) and not(target == 'all')):
+            self._match_indices(good_idxs)
+
+        # Get data target wither by list or single target
         if(isinstance(self.target, str)):
             labels = np.array(itemgetter(self.target)(self.labels)).T
         else: # Support for multiclass learning
             labels = np.array(itemgetter(*self.target)(self.labels)).T
 
+        # Split into train, validation, and test
         train_set = MoleculeDataset(self.dataset, transform=self.transform,
-                            smiles_data=self.smiles_data[self.train_idx],
-                            class_labels=labels[self.train_idx],
+                            smiles_data=self.smiles_data[good_idxs][self.train_idx],
+                            class_labels=labels[good_idxs][self.train_idx],
                             test_mode=False,
                             aug_time=self.aug_time, task=self.task, target=self.target)
         valid_set = MoleculeDataset(self.dataset, transform=self.transform,
-                            smiles_data=self.smiles_data[self.valid_idx],
-                            class_labels=labels[self.valid_idx],
+                            smiles_data=self.smiles_data[good_idxs][self.valid_idx],
+                            class_labels=labels[good_idxs][self.valid_idx],
                             test_mode=True, task=self.task, target=self.target)
         test_set = MoleculeDataset(self.dataset, transform=self.transform,
-                           smiles_data=self.smiles_data[self.test_idx],
-                           class_labels=labels[self.test_idx],
+                           smiles_data=self.smiles_data[good_idxs][self.test_idx],
+                           class_labels=labels[good_idxs][self.test_idx],
                            test_mode=True, task=self.task, target=self.target)
 
         train_loader = DataLoader(
             train_set, batch_size=self.batch_size,
-            num_workers=self.num_workers, drop_last=True, shuffle=True
+            num_workers=self.num_workers, drop_last=True, shuffle=False
         )
 
         valid_loader = DataLoader(

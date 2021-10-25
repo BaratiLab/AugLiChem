@@ -72,7 +72,6 @@ def get_train_val_test_loader(dataset, dataset_train, idx_map, collate_fn=defaul
 
     random.shuffle(indices)
     train_idx = indices[:train_size]
-    print(len(indices))
     train_idx_augment = []
 
 
@@ -94,19 +93,12 @@ def get_train_val_test_loader(dataset, dataset_train, idx_map, collate_fn=defaul
             	# add_4 = train_idx[i] + idx_correction + 4
     	# add_5 = train_idx[i] + idx_correction + 5
     #print((train_idx_augment))
-    print(max(train_idx_augment))
-    print(max(train_idx))
-    # for i in range(len(train_idx_augment)):
-    #     if train_idx_augment[i] > 60568:
-    #         print(i,train_idx_augment[i])
 
 
     train_sampler = SubsetRandomSampler(train_idx_augment)
 
-    #print(list(train_sampler))
     val_sampler = SubsetRandomSampler(
         indices[train_size:])
-    #print(list(train_sampler))
     val_sampler = SubsetRandomSampler(
         indices[train_size:])
     if return_test:
@@ -131,16 +123,6 @@ def get_train_val_test_loader(dataset, dataset_train, idx_map, collate_fn=defaul
     else:
         return train_loader, val_loader
 
-
-def idx_mapping(data = "Data",fold = 0):
-    train_file = "/id_prop_train_{}.csv".format(fold)
-    path  = "./data/" + data + train_file
-    df = pd.read_csv(path, header  = None)
-    cif_ids = df[0].values
-    idx = np.arange(len(cif_ids))
-    diction = dict(zip(cif_ids, idx))
-
-    return diction
 
 class AtomInitializer(object):
     """
@@ -186,6 +168,7 @@ class AtomCustomJSONInitializer(AtomInitializer):
     def __init__(self, elem_embedding_file):
         with open(elem_embedding_file) as f:
             elem_embedding = json.load(f)
+        f.close()
         elem_embedding = {int(key): value for key, value
                           in elem_embedding.items()}
         atom_types = set(elem_embedding.keys())
@@ -260,18 +243,50 @@ def download_url(url, root, filename=None):
     return fpath
 
 def _load_data(dataset, data_path='./data_download'):
-    if(dataset == 'Lanthanides'):
+    ###
+    #
+    #   Need to host data sets and download them
+    #
+    ###
+    if(dataset == 'lanthanides'):
+        task = 'regression'
+        target = ["formation_energy"] #TODO: Need to verify
+        #csv_file_path = download_url("Nothing yet...", data_path)
+        csv_file_path = data_path + "/lanths/id_prop.csv"
+        embedding_path = data_path + "/lanths/atom_init.json"
+        data_path += "/lanths"
+    elif(dataset == 'band_gap'):
+        print(data_path)
+        task = 'regression'
+        target = ["band_gap"]
+        #csv_file_path = download_url("Nothing yet...", data_path)
+        csv_file_path = data_path + "/band/id_prop.csv"
+        embedding_path = data_path + "/band/atom_init.json"
+        data_path += "./band/"
+    elif(dataset == 'perovskites'):
+        task = 'regression'
+        target = ["energy"] #TODO: Need to verify
+        #csv_file_path = download_url("Nothing yet...", data_path)
+        csv_file_path = data_path + "/"
+        embedding_path = data_path + "/"
+        data_path = "./"
+    elif(dataset == 'fermi_energy'):
+        task = 'regression'
+        target = ["fermi_energy"]
+        #csv_file_path = download_url("Nothing yet...", data_path)
+        csv_file_path = data_path + "/"
+        embedding_path = data_path + "/"
+        data_path = "./"
+    elif(dataset == 'formation_energy'):
         task = 'regression'
         target = ["formation_energy"]
-        ###
-        #
-        #  This needs to be implemented
-        #
-        ###
         #csv_file_path = download_url("Nothing yet...", data_path)
-        csv_file_path = data_path + "/lanthanides_data_formation/id_prop.csv"
-        embedding_path = data_path + "/lanthanides_data_formation/atom_init.json"
-        data_path = "./data_download/lanthanides_data_formation"
+        csv_file_path = data_path + "/"
+        embedding_path = data_path + "/"
+        data_path = "./"
+    else:
+        raise ValueError("Please select one of the following datasets: lanthanides, band_gap, perovskites, fermi_energy, formation_energy")
+        
 
     return data_path, embedding_path, csv_file_path, target, task
 

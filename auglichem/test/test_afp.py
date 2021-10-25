@@ -1,5 +1,5 @@
 import sys
-sys.path.append(sys.path[0][:-4])
+sys.path.append(sys.path[0][:-14])
 
 import shutil
 import numpy as np

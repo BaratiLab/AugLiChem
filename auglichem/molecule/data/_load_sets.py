@@ -740,17 +740,23 @@ def _process_csv(csv_file, target, task):
         if i == 0:
             continue
 
-        # smiles = row[3]
+        # Hold on to all rows that contain any targets
         try:
             smiles = row['smiles']
         except KeyError:
             smiles = row['mol']
+
+        # Hold on to good smiles representations
+        mol = Chem.MolFromSmiles(smiles) 
+        if(mol != None):
+            smiles_data.append(smiles)
+        else:
+            continue
+
+        # Check values for every target
         for idx, t in enumerate(target):
             label = row[t]
-            mol = Chem.MolFromSmiles(smiles)
-            if mol != None and label != '':
-                if(idx == 0):
-                    smiles_data.append(smiles)
+            if label != '':
                 if task == 'classification':
                     try:
                         labels[t].append(int(label))
@@ -760,10 +766,15 @@ def _process_csv(csv_file, target, task):
                     labels[t].append(float(label))
                 else:
                     raise ValueError('task must be either regression or classification')
+            elif mol != None and label == '':
+                labels[t].append(-999999999)
 
     # Recast lables to numpy arrays
     for t in target:
         labels[t] = np.array(labels[t])
+
+    #for key, val in labels.items():
+    #    print(key, len(val))
 
     return smiles_data, labels, task
 

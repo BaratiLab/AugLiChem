@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+#TODO: Add new transformations and test them
 """
 Created on Fri Aug 20 00:40:11 2021
 

@@ -20,7 +20,9 @@ from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 class BaseTransform(object):
     def __init__(self, prob: float = 1.0):
         """
-        @param p: the probability of the transform being applied; default value is 1.0
+        @param p: the probability of the transform being applied; default value is 1.0. If
+                  a list is passed in, the value will be randomly and sampled between the two
+                  end points.
         """
         if(isinstance(prob, list)):
             assert 0 <= prob[0] <= 1.0
@@ -31,7 +33,6 @@ class BaseTransform(object):
         self.prob = prob
 
     def __call__(self, mol_graph: PyG_Data, seed=None) -> PyG_Data:
-        #TODO Fix this to use Optional[None]?
         """
         @param mol_graph: PyG Data to be augmented
         @param metadata: if set to be a list, metadata about the function execution
@@ -70,7 +71,7 @@ class RandomAtomMask(BaseTransform):
         @param seed: 
         @returns: Augmented PyG Data
         """
-        if(seed):
+        if(seed is not None):
             random.seed(seed)
         N = mol_graph.x.size(0)
         num_mask_nodes = max([1, math.floor(self.p*N)])
@@ -78,7 +79,7 @@ class RandomAtomMask(BaseTransform):
 
         aug_mol_graph = deepcopy(mol_graph)
         for atom_idx in mask_nodes:
-            aug_mol_graph.x[atom_idx,:] = torch.tensor([len(ATOM_LIST)-1, 0])
+            aug_mol_graph.x[atom_idx,:] = torch.tensor([len(ATOM_LIST), 0])
         
         return aug_mol_graph
 
@@ -96,7 +97,7 @@ class RandomBondDelete(BaseTransform):
         @param mol_graph: PyG Data to be augmented
         @returns: Augmented PyG Data
         """
-        if(seed):
+        if(seed is not None):
             random.seed(seed)
         M = mol_graph.edge_index.size(1) // 2
         num_mask_edges = max([0, math.floor(self.p*M)])

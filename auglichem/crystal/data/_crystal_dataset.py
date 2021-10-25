@@ -1,9 +1,12 @@
+#TODO: make device (cpu/gpu) an input option, default CPU
+
 from __future__ import print_function, division
 
 import csv
 import functools
 import json
 import os
+import shutil
 import random
 import warnings
 import random
@@ -105,8 +108,8 @@ class CrystalDataset(Dataset):
     root_dir
     ├── id_prop.csv
     ├── atom_init.json
-    ├── id0.cif
-    ├── id1.cif
+    ├── 0.cif
+    ├── 1.cif
     ├── ...
 
     id_prop.csv: a CSV file with two columns. The first column recodes a
@@ -147,7 +150,7 @@ class CrystalDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, id_prop_augment=None,
                  atom_init_file=None, id_prop_file=None, ari=None,fold = 0,
                  max_num_nbr=12, radius=8, dmin=0, step=0.2,
-                 random_seed=123, aug_time=4, test_mode=True, on_the_fly_augment=False):
+                 random_seed=123, test_mode=True, on_the_fly_augment=False, kfolds=0):
 
         super(Dataset, self).__init__()
         
@@ -157,19 +160,10 @@ class CrystalDataset(Dataset):
         self._augmented = False # To control runaway augmentation
 
         # No augmentation if no transform is specified
-        if(self.transform is None):
-            self.test_mode = True
-        else:
-            self.test_mode = test_mode
-            self.aug_time = aug_time
-
-        if self.test_mode:
-            self.aug_time = 1
-
-        # Need to do and save augmented data here
-
-        assert type(self.aug_time) == int
-        assert self.aug_time >= 1
+        #if(self.transform is None):
+        #    self.test_mode = True
+        #else:
+        #    self.test_mode = test_mode
 
         # After specifying data set
         if(id_prop_augment is None):
@@ -200,6 +194,17 @@ class CrystalDataset(Dataset):
         if(self.on_the_fly_augment):
             warnings.warn("On-the-fly augmentations for crystals is untested and can lead to memory issues. Use with caution.", category=RuntimeWarning, stacklevel=2)
 
+        # Set up for k-fold CV
+        if(kfolds > 1):
+            self._k_fold_cv = True
+            self.kfolds = kfolds
+            self._k_fold_cross_validation()
+        elif(kfolds == 1):
+            raise ValueError("kfolds > 1 to run.")
+        else:
+            self._k_fold_cv = False
+
+
 
     def _aug_name(self, transformation):
         if(isinstance(transformation, RandomRotationTransformation)):
@@ -223,6 +228,10 @@ class CrystalDataset(Dataset):
         '''
             Function call to deliberately augment the data
 
+            input:
+            -----------------------
+            transformation (AbstractTransformation): 
+
         '''
         if(self._augmented):
             print("Augmentation has already been done.")
@@ -231,17 +240,38 @@ class CrystalDataset(Dataset):
         if(self.on_the_fly_augment):
             print("Augmentation will be done on-the-fly.")
             return
+        
+        # Copy directory and rename it to augmented
+        if(self._k_fold_cv):
+            # Copy directory
+            shutil.copytree(self.data_path,
+                            self.data_path + "_augmented_{}folds".format(self.kfolds),
+                            dirs_exist_ok=True)
+
+            # Remove k-fold files from original directory
+            for i in range(self.kfolds):
+                os.remove(self.data_path + "/id_prop_train_{}.csv".format(i))
+                os.remove(self.data_path + "/id_prop_valid_{}.csv".format(i))
+            
+            # Update data path
+            self.data_path += "_augmented_{}folds".format(self.kfolds)
+        else:
+            shutil.copytree(self.data_path, self.data_path + "_augmented", dirs_exist_ok=True)
+            self.data_path += "_augmented"
 
         # Check transforms
-        if(transform is None and self.transform is None):
-            raise ValueError("No transform specified.")
-        elif(not isinstance(transform, list)):
+        if(not isinstance(transform, list)):
             transform = [transform]
 
         # Do augmentations
         new_id_prop_augment = []
         for id_prop in tqdm(self.id_prop_augment):
             new_id_prop_augment.append((id_prop[0], id_prop[1]))
+
+            # Transform crystal
+            if(transform == [None] and self.transform is None):
+                break
+
             for t in transform:
 
                 # Get augmented file name
@@ -252,18 +282,71 @@ class CrystalDataset(Dataset):
                 if(os.path.exists(self.data_path + '/' + id_name + '.cif')):
                     continue
 
-                # Transform crystal
                 aug_crystal = t.apply_transformation(
                                     Structure.from_file(os.path.join(self.data_path,
                                     id_prop[0]+'.cif')))
                 cif.CifWriter(aug_crystal).write_file(self.data_path + '/' + id_name + '.cif')
 
-        self.id_prop_augment = np.array(new_id_prop_augment)
+        if(not self._k_fold_cv):
+            self.id_prop_augment = np.array(new_id_prop_augment)
+        else:
+            self.id_prop_augment_all = np.array(new_id_prop_augment)
         self._augmented = True
+
+
+    def _updated_train_cifs(self, train_idx, num_transform):
+        '''
+            When doing k-fold CV. This function adds the augmented cif names to the train_idx
+        '''
+        updated_train_idx = []
+        for idx in train_idx:
+            for jdx in range(num_transform+1):
+                updated_train_idx.append(self.id_prop_augment_all[(num_transform+1)*idx+jdx])
+        
+        return np.array(updated_train_idx)
+
+
+    def _k_fold_cross_validation(self):
+        '''
+            k-fold CV data splitting function. Uses class attributes to split into k folds.
+            Works by shuffling original data then selecting folds one at a time.
+
+            Inputs:
+            ------------
+            None
+
+            Outputs:
+            ------------
+            None
+
+        '''
+        #TODO: SET SEED
+        np.random.shuffle(self.id_prop_augment)
+
+        frac = 1./self.kfolds
+        N = len(self.id_prop_augment)
+        for i in range(self.kfolds):
+
+            # Get all idxs
+            idxs = list(range(N))
+
+            # Get train and validation idxs
+            valid_idxs = idxs[int(i*frac*N):int((i+1)*frac*N)]
+            del idxs[int(i*frac*N):int((i+1)*frac*N)]
+
+            # Get train and validation sets
+            valid_set = np.array(self.id_prop_augment)[valid_idxs]
+            train_set = np.array(self.id_prop_augment)[idxs]
+
+            np.savetxt(self.data_path + "/id_prop_valid_{}.csv".format(i), valid_set.astype(str),
+                       delimiter=',', fmt="%s")
+            np.savetxt(self.data_path + "/id_prop_train_{}.csv".format(i), train_set.astype(str),
+                       delimiter=',', fmt="%s")
 
 
     def __len__(self):
         return len(self.id_prop_augment)
+
 
     def _gaussian_distance(self, distances, dmin, dmax, step, var=None):
         if var is None:
@@ -271,9 +354,9 @@ class CrystalDataset(Dataset):
         self.filter = np.arange(dmin, dmax+step, step)
         return np.exp(-(distances[..., np.newaxis] - self.filter)**2 / var**2)
 
+
     @functools.lru_cache(maxsize=None)  # Cache loaded structures
     def __getitem__(self, idx):
-        #print(idx)
         cif_id, target = self.id_prop_augment[idx]
         crystal = Structure.from_file(os.path.join(self.data_path,
                                                    cif_id+'.cif'))
@@ -316,54 +399,159 @@ class CrystalDataset(Dataset):
 
 class CrystalDatasetWrapper(CrystalDataset):
     def __init__(self, dataset, transform=None, split="random", batch_size=64, num_workers=0,
-                 valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, target=None,
+                 valid_size=0.1, test_size=0.1, data_path=None, target=None, kfolds=0,
                  **kwargs):
-        super().__init__(dataset, data_path, transform)
+        '''
+            Wrapper Class to handle splitting dataset into train, validation, and test sets
+
+            inputs:
+            -------------------------
+            dataset (str): One of our dataset: lanthanides, perovskites, band_gap, fermi_energy,
+                                               or formation_energy
+            transform (AbstractTransformation, optional): A crystal transformation
+            split (str, default=random): Method of splitting data into train, validation, and
+                                         test
+            batch_size (int, default=64): Data batch size for train_loader
+            num_workers (int, default=0): Number of worker processes for parallel data loading
+            valid_size (float, optional, between [0, 1]): Fraction of data used for validation
+            test_size (float, optional, between [0, 1]): Fraction of data used for test
+            data_path (str, optional default=None): specify path to save/lookup data. Default
+                        creates `data_download` directory and stores data there
+            target (str, optional, default=None): Target variable
+            kfolds (int, default=0, folds > 1): Number of folds to use in k-fold cross
+                        validation. kfolds > 1 for data to be split
+             
+
+            outputs:
+            -------------------------
+            None
+        '''
+        super().__init__(dataset, data_path, transform, kfolds=kfolds)
         self.split = split
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.valid_size = valid_size
         self.test_size = test_size
-        self.aug_time = aug_time
         self.id_prop_augment = np.asarray(self.id_prop_augment)
 
-        # What is this?
         self.collate_fn = collate_pool
-        #self.cif_data = np.asarray(self.cif_data) # Might need to be different
-        
 
-    def get_data_loaders(self, target=None):
-        #TODO: Break down into Dataloaders for train/val/test
+
+    def _match_idx(self, cif_idxs):
+        '''
+            Match function that converts cif idxs to the index it appears at in id_prop_augment
+        '''
+        idxs = []
+        for i in cif_idxs:
+            idxs.append(np.argwhere(self.id_prop_augment[:,0] == str(i))[0][0])
+        return idxs
+
+    
+    def _get_split_idxs(self, target=None, transform=None, fold=None):
         if(not target and self.target is None):
              self.target = list(self.labels.keys())[0]
 
         # Get indices of data splits
-        #TODO: Include different splits
-        if(self.split == 'scaffold'):
+        if(self.split == 'scaffold' and not self._k_fold_cv):
             raise NotImplementedError("Scaffold only supports molecules currently.")
-        elif(self.split == 'random'):
+        elif(self.split == 'random' and not self._k_fold_cv):
             train_idx, valid_idx, test_idx = random_split(self.id_prop_augment[:,0],
                                                           self.valid_size, self.test_size)
+            return train_idx, valid_idx, test_idx
+
+        # If using k-fold CV
+        elif(fold is not None and not self._k_fold_cv):
+            raise ValueError("Fold number specified but k-fold CV not called.")
+        elif(fold is None and self._k_fold_cv):
+            raise ValueError("Please select a fold < {}".format(self.kfolds))
+        elif(fold >= self.kfolds):
+            raise ValueError("Please select a fold < {}".format(self.kfolds))
+        elif(fold is not None):
+            print("Ignoring splitting. Using pre-split k folds.")
+
+            #TODO: setting type here as int may not be helpful, could be optimized
+            train_cif_idx = np.loadtxt(self.data_path + "/id_prop_train_{}.csv".format(fold),
+                                   delimiter=',')[:,0].astype(int)
+            train_idx = self._match_idx(train_cif_idx)
+            valid_cif_idx = np.loadtxt(self.data_path + "/id_prop_valid_{}.csv".format(fold),
+                                   delimiter=',')[:,0].astype(int)
+            valid_idx = self._match_idx(valid_cif_idx)
+
+            # Do data transformation. With k_fold_cv, self.id_prop_augment is updated later
+            self.data_augmentation(transform)
+            return train_idx, valid_idx
+
         else:
             raise ValueError("Please select scaffold or random split")
 
-        # Need to pass in id_prop_augment with indices
-        train_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[train_idx],
+
+    def get_data_loaders(self, target=None, transform=None, fold=None):
+        '''
+            This function splits the data into train, validation, and test data loaders for
+            ease of use in model training
+
+            inputs:
+            -------------------------
+            target (str, optional, default=None): The target label for training. Currently all
+                                        crystal datasets are single-target, and so this parameter
+                                        is truly optional.
+            transform (AbstractTransformation, optional, default=None): The data transformation
+                                        we will use for data augmentation.
+            fold (int, optiona, default=None): Which of k folds to use for training. Will
+                                        throw an error if specified and k-fold CV is not
+                                        done in the class instantiaion. This overrides
+                                        valid_size and test_size
+
+            outputs:
+            -------------------------
+            Loaders
+        '''
+        if(self._k_fold_cv): # Need to add in augmented cif files to id_prop_augment
+            train_idx, valid_idx = self._get_split_idxs(target, transform, fold)
+        else: # Augmented cif files will be put in id_prop_augment
+            train_idx, valid_idx, test_idx = self._get_split_idxs(target, transform, fold)
+            
+
+        # Get train loader
+        if(self._k_fold_cv): # Need to add in augmented cif files to id_prop_augment
+            transform = [transform] if(not isinstance(transform, list)) else transform
+            train_id_prop_augment = self._updated_train_cifs(train_idx, len(transform))
+        else: # Augmented cif files will be put in id_prop_augment
+            train_id_prop_augment = self.id_prop_augment[train_idx]
+        train_set = CrystalDataset(self.dataset, self.data_path, self.transform,
+                             train_id_prop_augment,
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
-        valid_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[valid_idx],
-                             atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
-                             ari=self.ari)
-        test_set = CrystalDataset(self.dataset, self.data_path, self.transform, self.id_prop_augment[test_idx],
-                             atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
-                             ari=self.ari)
+        train_set._k_fold_cv = self._k_fold_cv
+
+
+        # Augment only training data
+        if(transform and not self._k_fold_cv):
+            train_set.data_augmentation(transform)
 
         train_loader = DataLoader(train_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
+
+        # Get val loader
+        valid_set = CrystalDataset(self.dataset, self.data_path, self.transform,
+                             self.id_prop_augment[valid_idx],
+                             atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
+                             ari=self.ari)
         valid_loader = DataLoader(valid_set, batch_size=len(valid_set),
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
+        valid_set._k_fold_cv = self._k_fold_cv
+
+        # In k-fold we only return train and validation loaders
+        if(self._k_fold_cv):
+            return train_loader, valid_loader
+
+        # Get test loader
+        test_set = CrystalDataset(self.dataset, self.data_path, self.transform,
+                             self.id_prop_augment[test_idx],
+                             atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
+                             ari=self.ari)
         test_loader = DataLoader(test_set, batch_size=len(test_set),
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
