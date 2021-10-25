@@ -1,12 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-#TODO: Add new transformations and test them
-"""
-Created on Fri Aug 20 00:40:11 2021
-
-@author: rishikesh
-"""
+from __future__ import print_function, division
 
 import csv
 import functools
@@ -17,7 +9,6 @@ import ase
 from ase.io import read, write
 import warnings
 import numpy as np
-import pymatgen
 from pymatgen.core.structure import Structure
 import glob
 from ase.io import  read, write
@@ -29,12 +20,61 @@ from typing import Optional, Union
 from pymatgen.core.structure import Molecule, Structure
 
 
-class RandomRotationTransformation(AbstractTransformation):
+class AseAtomsAdaptor:
+    """
+    Adaptor serves as a bridge between ASE Atoms and pymatgen objects.
+    """
+
+    @staticmethod
+    def get_atoms(structure, **kwargs):
+        """
+        Returns ASE Atoms object from pymatgen structure or molecule.
+        Args:
+            structure: pymatgen.core.structure.Structure or pymatgen.core.structure.Molecule
+            **kwargs: other keyword args to pass into the ASE Atoms constructor
+        Returns:
+            ASE Atoms object
+        """
+        if not structure.is_ordered:
+            raise ValueError("ASE Atoms only supports ordered structures")
+        if not ase_loaded:
+            raise ImportError(
+                "AseAtomsAdaptor requires ase package.\n" "Use `pip install ase` or `conda install ase -c conda-forge`"
+            )
+        symbols = [str(site.specie.symbol) for site in structure]
+        positions = [site.coords for site in structure]
+        if hasattr(structure, "lattice"):
+            cell = structure.lattice.matrix
+            pbc = True
+        else:
+            cell = None
+            pbc = None
+        return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell, **kwargs)
+
+    @staticmethod
+    def get_structure(atoms, cls=None):
+        """
+        Returns pymatgen structure from ASE Atoms.
+        Args:
+            atoms: ASE Atoms object
+            cls: The Structure class to instantiate (defaults to pymatgen structure)
+        Returns:
+            Equivalent pymatgen.core.structure.Structure
+        """
+        symbols = atoms.get_chemical_symbols()
+        positions = atoms.get_positions()
+        lattice = atoms.get_cell()
+
+        cls = Structure if cls is None else cls
+        return cls(lattice, symbols, positions, coords_are_cartesian=True)
+
+
+class RotationTransformation(AbstractTransformation):
     """
     The RotationTransformation applies a rotation to a structure.
     """
 
-    def __init__(self, axis, angle, angle_in_radians=False):
+    def __init__(self):
         """
         Args:
             axis (3x1 array): Axis of rotation, e.g., [1, 0, 0]
@@ -42,12 +82,12 @@ class RandomRotationTransformation(AbstractTransformation):
             angle_in_radians (bool): Set to True if angle is supplied in radians.
                 Else degrees are assumed.
         """
-        self.axis = axis
-        self.angle = angle
-        self.angle_in_radians = angle_in_radians
-        self._symmop = SymmOp.from_axis_angle_and_translation(self.axis, self.angle, self.angle_in_radians)
+        self.axis = None
+        self.angle = None
+        # self.angle_in_radians = angle_in_radians
+        # self._symmop = SymmOp.from_axis_angle_and_translation(self.axis, self.angle, self.angle_in_radians)
 
-    def apply_transformation(self, structure):
+    def apply_transformation(self, structure, axis, angle, angle_in_radians=False):
         """
         Apply the transformation.
         Args:
@@ -55,8 +95,14 @@ class RandomRotationTransformation(AbstractTransformation):
         Returns:
             Rotated Structure.
         """
+        self.axis = axis
+        self.angle = angle
+        self.angle_in_radians = angle_in_radians
+        self._symmop = SymmOp.from_axis_angle_and_translation(self.axis, self.angle, self.angle_in_radians)
+
         s = structure.copy()
-        s.apply_operation(self._symmop)
+        s.apply_operation(self._symmop, fractional=True)
+        # s = self._symmop(s)
         return s
 
     def __str__(self):
@@ -80,7 +126,8 @@ class RandomRotationTransformation(AbstractTransformation):
         """Returns: False"""
         return False
 
-class RandomPerturbStructureTransformation(AbstractTransformation):
+
+class PerturbStructureTransformation(AbstractTransformation):
     """
     This transformation perturbs a structure by a specified distance in random
     directions. Used for breaking symmetries.
@@ -136,7 +183,37 @@ class RandomPerturbStructureTransformation(AbstractTransformation):
         return False
 
 
-class RandomRemoveSitesTransformation(AbstractTransformation):
+class SwapAxesTransformation(object):
+    def __init__(self, p=0.5):
+        self.p = p
+
+    def apply_transformation(self, crys):
+        if random.random() > self.p:
+            return AseAtomsAdaptor.get_structure(crys)
+        else:
+            atoms = crys.copy()
+            cell = atoms.cell
+
+            choice = np.random.choice(3, 2, replace=False)
+            cell[:,[choice[0], choice[1]]] = cell[:,[choice[1], choice[0]]] ## axes you want to swap
+            cell[[choice[0], choice[1]]] = cell[[choice[1], choice[0]]]
+            atoms.cell = cell
+            angles = (cell.angles())
+            angles[[choice[0], choice[1]]] = angles[[choice[1], choice[0]]]
+            cell.angles  = angles
+            pos = (atoms.positions)
+            pos[:,[choice[0], choice[1]]] = pos[:,[choice[1], choice[0]]]
+            atoms.arrays["positions"] = pos
+
+            return AseAtomsAdaptor.get_structure(atoms)
+
+    def __str__(self):
+        return "SwapAxesTransformation"
+
+    def __repr__(self):
+        return self.__str__()
+
+class RemoveSitesTransformation(AbstractTransformation):
     """
     Remove certain sites in a structure.
     """
@@ -177,7 +254,85 @@ class RandomRemoveSitesTransformation(AbstractTransformation):
     def is_one_to_many(self):
         """Return: False"""
         return False
-    
+
+
+def _proj(b, a):
+    """
+    Returns vector projection (np.ndarray) of vector b (np.ndarray)
+    onto vector a (np.ndarray)
+    """
+    return (b.T @ (a / np.linalg.norm(a))) * (a / np.linalg.norm(a))
+
+def _round_and_make_arr_singular(arr: np.ndarray) -> np.ndarray:
+    """
+    This function rounds all elements of a matrix to the nearest integer,
+    unless the rounding scheme causes the matrix to be singular, in which
+    case elements of zero rows or columns in the rounded matrix with the
+    largest absolute valued magnitude in the unrounded matrix will be
+    rounded to the next integer away from zero rather than to the
+    nearest integer.
+    The transformation is as follows. First, all entries in 'arr' will be
+    rounded to the nearest integer to yield 'arr_rounded'. If 'arr_rounded'
+    has any zero rows, then one element in each zero row of 'arr_rounded'
+    corresponding to the element in 'arr' of that row with the largest
+    absolute valued magnitude will be rounded to the next integer away from
+    zero (see the '_round_away_from_zero(x)' function) rather than the
+    nearest integer. This process is then repeated for zero columns. Also
+    note that if 'arr' already has zero rows or columns, then this function
+    will not change those rows/columns.
+    Args:
+        arr: Input matrix
+    Returns:
+        Transformed matrix.
+    """
+
+    def round_away_from_zero(x):
+        """
+        Returns 'x' rounded to the next integer away from 0.
+        If 'x' is zero, then returns zero.
+        E.g. -1.2 rounds to -2.0. 1.2 rounds to 2.0.
+        """
+        abs_x = abs(x)
+        return math.ceil(abs_x) * (abs_x / x) if x != 0 else 0
+
+    arr_rounded = np.around(arr)
+
+    # Zero rows in 'arr_rounded' make the array singular, so force zero rows to
+    # be nonzero
+    if (~arr_rounded.any(axis=1)).any():
+        # Check for zero rows in T_rounded
+
+        # indices of zero rows
+        zero_row_idxs = np.where(~arr_rounded.any(axis=1))[0]
+
+        for zero_row_idx in zero_row_idxs:  # loop over zero rows
+            zero_row = arr[zero_row_idx, :]
+
+            # Find the element of the zero row with the largest absolute
+            # magnitude in the original (non-rounded) array (i.e. 'arr')
+            matches = np.absolute(zero_row) == np.amax(np.absolute(zero_row))
+            col_idx_to_fix = np.where(matches)[0]
+
+            # Break ties for the largest absolute magnitude
+            r_idx = np.random.randint(len(col_idx_to_fix))
+            col_idx_to_fix = col_idx_to_fix[r_idx]
+
+            # Round the chosen element away from zero
+            arr_rounded[zero_row_idx, col_idx_to_fix] = round_away_from_zero(arr[zero_row_idx, col_idx_to_fix])
+
+    # Repeat process for zero columns
+    if (~arr_rounded.any(axis=0)).any():
+
+        # Check for zero columns in T_rounded
+        zero_col_idxs = np.where(~arr_rounded.any(axis=0))[0]
+        for zero_col_idx in zero_col_idxs:
+            zero_col = arr[:, zero_col_idx]
+            matches = np.absolute(zero_col) == np.amax(np.absolute(zero_col))
+            row_idx_to_fix = np.where(matches)[0]
+
+            for i in row_idx_to_fix:
+                arr_rounded[i, zero_col_idx] = round_away_from_zero(arr[i, zero_col_idx])
+    return arr_rounded.astype(int)
 
 class SupercellTransformation(AbstractTransformation):
     """
@@ -241,12 +396,12 @@ class SupercellTransformation(AbstractTransformation):
         """
         return False
 
-class RandomTranslateSitesTransformation(AbstractTransformation):
+class TranslateSitesTransformation(AbstractTransformation):
     """
     This class translates a set of sites by a certain vector.
     """
 
-    def __init__(self, indices_to_move, translation_vector, vector_in_frac_coords=True):
+    def __init__(self):
         """
         Args:
             indices_to_move: The indices of the sites to move
@@ -258,11 +413,18 @@ class RandomTranslateSitesTransformation(AbstractTransformation):
                 fractional coordinates, and False if it is in cartesian
                 coordinations. Defaults to True.
         """
-        self.indices_to_move = indices_to_move
-        self.translation_vector = np.array(translation_vector)
-        self.vector_in_frac_coords = vector_in_frac_coords
+        # self.indices_to_move = indices_to_move
+        # self.translation_vector = np.array(translation_vector)
+        # self.vector_in_frac_coords = vector_in_frac_coords
 
-    def apply_transformation(self, structure):
+        self.indices_to_move = None
+        self.translation_vector = None
+        self.vector_in_frac_coords = None
+
+    def apply_transformation(self, 
+        structure, indices_to_move, translation_vector, 
+        vector_in_frac_coords=True
+    ):
         """
         Apply the transformation.
         Arg:
@@ -271,6 +433,10 @@ class RandomTranslateSitesTransformation(AbstractTransformation):
         Return:
             Returns a copy of structure with sites translated.
         """
+        self.indices_to_move = indices_to_move
+        self.translation_vector = np.array(translation_vector)
+        self.vector_in_frac_coords = vector_in_frac_coords
+
         s = structure.copy()
         if self.translation_vector.shape == (len(self.indices_to_move), 3):
             for i, idx in enumerate(self.indices_to_move):
@@ -393,14 +559,12 @@ class CubicSupercellTransformation(AbstractTransformation):
             b = proposed_sc_lat_vecs[1]
             c = proposed_sc_lat_vecs[2]
 
-
-            length1_vec = c - self._proj(c, a)  # a-c plane
-            length2_vec = a - self._proj(a, c)
-            length3_vec = b - self._proj(b, a)  # b-a plane
-            length4_vec = a - self._proj(a, b)
-            length5_vec = b - self._proj(b, c)  # b-c plane
-            length6_vec = c - self._proj(c, b)
-
+            length1_vec = c - _proj(c, a)  # a-c plane
+            length2_vec = a - _proj(a, c)
+            length3_vec = b - _proj(b, a)  # b-a plane
+            length4_vec = a - _proj(a, b)
+            length5_vec = b - _proj(b, c)  # b-c plane
+            length6_vec = c - _proj(c, b)
             length_vecs = np.array(
                 [
                     length1_vec,
@@ -448,88 +612,6 @@ class CubicSupercellTransformation(AbstractTransformation):
             False
         """
         return False
-      
-
-    def _proj(b, a):
-        """
-        Returns vector projection (np.ndarray) of vector b (np.ndarray)
-        onto vector a (np.ndarray)
-        """
-        return (b.T @ (a / np.linalg.norm(a))) * (a / np.linalg.norm(a))
-
-
-    def _round_and_make_arr_singular(arr: np.ndarray) -> np.ndarray:
-        """
-        This function rounds all elements of a matrix to the nearest integer,
-        unless the rounding scheme causes the matrix to be singular, in which
-        case elements of zero rows or columns in the rounded matrix with the
-        largest absolute valued magnitude in the unrounded matrix will be
-        rounded to the next integer away from zero rather than to the
-        nearest integer.
-        The transformation is as follows. First, all entries in 'arr' will be
-        rounded to the nearest integer to yield 'arr_rounded'. If 'arr_rounded'
-        has any zero rows, then one element in each zero row of 'arr_rounded'
-        corresponding to the element in 'arr' of that row with the largest
-        absolute valued magnitude will be rounded to the next integer away from
-        zero (see the '_round_away_from_zero(x)' function) rather than the
-        nearest integer. This process is then repeated for zero columns. Also
-        note that if 'arr' already has zero rows or columns, then this function
-        will not change those rows/columns.
-        Args:
-            arr: Input matrix
-        Returns:
-            Transformed matrix.
-        """
-    
-        def round_away_from_zero(x):
-            """
-            Returns 'x' rounded to the next integer away from 0.
-            If 'x' is zero, then returns zero.
-            E.g. -1.2 rounds to -2.0. 1.2 rounds to 2.0.
-            """
-            abs_x = abs(x)
-            return math.ceil(abs_x) * (abs_x / x) if x != 0 else 0
-    
-        arr_rounded = np.around(arr)
-    
-        # Zero rows in 'arr_rounded' make the array singular, so force zero rows to
-        # be nonzero
-        if (~arr_rounded.any(axis=1)).any():
-            # Check for zero rows in T_rounded
-    
-            # indices of zero rows
-            zero_row_idxs = np.where(~arr_rounded.any(axis=1))[0]
-    
-            for zero_row_idx in zero_row_idxs:  # loop over zero rows
-                zero_row = arr[zero_row_idx, :]
-    
-                # Find the element of the zero row with the largest absolute
-                # magnitude in the original (non-rounded) array (i.e. 'arr')
-                matches = np.absolute(zero_row) == np.amax(np.absolute(zero_row))
-                col_idx_to_fix = np.where(matches)[0]
-    
-                # Break ties for the largest absolute magnitude
-                r_idx = np.random.randint(len(col_idx_to_fix))
-                col_idx_to_fix = col_idx_to_fix[r_idx]
-    
-                # Round the chosen element away from zero
-                arr_rounded[zero_row_idx, col_idx_to_fix] = round_away_from_zero(arr[zero_row_idx, col_idx_to_fix])
-    
-        # Repeat process for zero columns
-        if (~arr_rounded.any(axis=0)).any():
-    
-            # Check for zero columns in T_rounded
-            zero_col_idxs = np.where(~arr_rounded.any(axis=0))[0]
-            for zero_col_idx in zero_col_idxs:
-                zero_col = arr[:, zero_col_idx]
-                matches = np.absolute(zero_col) == np.amax(np.absolute(zero_col))
-                row_idx_to_fix = np.where(matches)[0]
-    
-                for i in row_idx_to_fix:
-                    arr_rounded[i, zero_col_idx] = round_away_from_zero(arr[i, zero_col_idx])
-        return arr_rounded.astype(int)
-
-
 
 class PrimitiveCellTransformation(AbstractTransformation):
     """
@@ -578,24 +660,46 @@ class PrimitiveCellTransformation(AbstractTransformation):
         Returns: False
         """
         return False
-
-
+# for test purpose
 if __name__ == '__main__':
-    cif_id = '1000041'
-    crystal = Structure.from_file(os.path.join(cif_id+'.cif'))
+    cif_file = read("original.cif")  # Path for the cif file
 
-    ## perturb and perturb+rotate
+    atoms = cif_file.copy()
+    cell = atoms.cell
+
+    choice = np.random.choice(3, 2, replace = False)
+    cell[:,[choice[0], choice[1]]] = cell[:,[choice[1], choice[0]]] ## axes you want to swap
+    cell[[choice[0], choice[1]]] = cell[[choice[1], choice[0]]]
+    atoms.cell = cell
+    angles = (cell.angles())
+    angles[[choice[0], choice[1]]] = angles[[choice[1], choice[0]]]
+    cell.angles  = angles
+    pos = (atoms.positions)
+    pos[:,[choice[0], choice[1]]] = pos[:,[choice[1], choice[0]]]
+    atoms.arrays["positions"] = pos
+    #write("rotated_1.cif",atoms, format = "cif") # dont need to save 
+    rotated_struct = AseAtomsAdaptor.get_structure(atoms) # rotational swapped object
+    #print(rotated_struct)
+
+    crystal = Structure.from_file("original.cif")
+    print(crystal)
+    num_sites = crystal.num_sites
+    
+    mask_num = max((1, int(np.floor(0.25*num_sites))))
+    indices_trans = np.random.choice(num_sites, mask_num, replace=False)
+    
+    print(indices_trans)
+    translation = np.random.rand(len(indices_trans),3)
+    translate = TranslateSitesTransformation(indices_trans,translation)
     angle_to_rotate  = np.random.choice(360, 1, replace = False)
-    rotate = RandomRotationTransformation([1,1,1], angle_to_rotate)
-    perturb = RandomPerturbStructureTransformation(distance = 0.05)
-    perturb_rot = RandomPerturbStructureTransformation(distance = 0.05)
-    perturbed_crys = (perturb.apply_transformation(crystal)) ### perturbed structure object
-    rotated_crys = rotate.apply_transformation(perturb_rot.apply_transformation(crystal)) ### rotated structure object
+    #rotate = RotationTransformation([1,1,1], angle_to_rotate)
+    #rotated = (rotate.apply_transformation(crystal))
+    primitive = PrimitiveCellTransformation(tolerance = 0.5)
+    print("primitive",primitive.apply_transformation(crystal))
+    cube = CubicSupercellTransformation()
 
-    # file save perturb rotate and original
-    filename_rot = cif_id + "_" + "rotated.cif"
-    filename_per = cif_id + "_" + "perturbed.cif"
-    filename_ori = cif_id + ".cif"
-    pymatgen.io.cif.CifWriter(  rotated_crys).write_file(filename_rot)
-    pymatgen.io.cif.CifWriter(perturbed_crys).write_file(filename_per)
-    pymatgen.io.cif.CifWriter(crystal).write_file(filename_ori)
+    perturb = PerturbStructureTransformation(distance = 0.5)
+    perturb_ = (perturb.apply_transformation(crystal)) ### perturbed structure object
+    print(perturb_)
+    print(cube.apply_transformation(perturb_)) ### rotated structure object
+    print(translate.apply_transformation(perturb_))

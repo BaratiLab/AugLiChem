@@ -8,11 +8,11 @@ from pymatgen.transformations.transformation_abc import AbstractTransformation
 
 from auglichem.crystal.data._crystal_dataset import CrystalDataset
 from auglichem.crystal._transforms import (
-        RandomRotationTransformation,
-        RandomPerturbStructureTransformation,
-        RandomRemoveSitesTransformation,
+        RotationTransformation,
+        PerturbStructureTransformation,
+        RemoveSitesTransformation,
         SupercellTransformation,
-        RandomTranslateSitesTransformation,
+        TranslateSitesTransformation,
         CubicSupercellTransformation,
         PrimitiveCellTransformation
 )

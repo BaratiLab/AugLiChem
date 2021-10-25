@@ -9,11 +9,11 @@ import torch
 from torch_geometric.data import Data as PyG_Data
 
 from auglichem.crystal._transforms import (
-        RandomRotationTransformation,
-        RandomPerturbStructureTransformation,
-        RandomRemoveSitesTransformation,
+        RotationTransformation,
+        PerturbStructureTransformation,
+        RemoveSitesTransformation,
         SupercellTransformation,
-        RandomTranslateSitesTransformation,
+        TranslateSitesTransformation,
         CubicSupercellTransformation,
         PrimitiveCellTransformation
 )
@@ -32,7 +32,7 @@ def test_crystal_data():
     assert True
     #data = CrystalDatasetWrapper("Lanthanides")
     
-    #transform = [RandomRotationTransformation(axis=[1,0,0], angle=15),
+    #transform = [RotationTransformation(axis=[1,0,0], angle=15),
     #             SupercellTransformation()]
     #data.data_augmentation(transform)
     #data.data_augmentation(transform)
@@ -43,7 +43,7 @@ def test_crystal_data():
     #    print(t)
 
 def test_random_rotation():
-    #rotate = RandomRotationTransformation([1,0,0], 90,)
+    #rotate = RotationTransformation([1,0,0], 90,)
     pass
 
 def test_random_perturb_structure_transformation():
@@ -70,11 +70,11 @@ def primitive_cell_transformation():
 def test_composition():
     #TODO Actually test the various functionality rather than simply check it runs
     #transform = Compose([
-    #    RandomRotationTransformation([1,0,0], 90),
-    #    RandomPerturbStructureTransformation(),
-    #    RandomRemoveSitesTransformation([0]),
+    #    RotationTransformation([1,0,0], 90),
+    #    PerturbStructureTransformation(),
+    #    RemoveSitesTransformation([0]),
     #    SupercellTransformation(),
-    #    RandomTranslateSitesTransformation([0,2], [1,1]),
+    #    TranslateSitesTransformation([0,2], [1,1]),
     #    CubicSupercellTransformation(10, 100, 10),
     #    PrimitiveCellTransformation(0.1)
     #])
@@ -94,7 +94,7 @@ def _check_id_prop_augment(path, transform):
     for t in transform:
         if(isinstance(t, SupercellTransformation)):
             transformation_names.append("supercell")
-        if(isinstance(t, RandomPerturbStructureTransformation)):
+        if(isinstance(t, PerturbStructureTransformation)):
             transformation_names.append("perturbed")
 
     # Get original ids
@@ -113,7 +113,7 @@ def _check_train_transform(path, transform, fold):
     for t in transform:
         if(isinstance(t, SupercellTransformation)):
             transformation_names.append("supercell")
-        if(isinstance(t, RandomPerturbStructureTransformation)):
+        if(isinstance(t, PerturbStructureTransformation)):
             transformation_names.append("perturbed")
 
     # Get train ids
@@ -137,9 +137,11 @@ def _check_completeness(path, fold):
                             delimiter=',')
     valid_prop = np.loadtxt(path + "/id_prop_valid_{}.csv".format(fold),
                             delimiter=',')
+    test_prop = np.loadtxt(path + "/id_prop_test_{}.csv".format(fold),
+                            delimiter=',')
 
     # Concatenate and sort by cif id
-    together = np.concatenate((train_prop, valid_prop))
+    together = np.concatenate((train_prop, valid_prop, test_prop))
     reconstructed = together[np.argsort(together[:,0])]
 
     # Get original ids
@@ -150,67 +152,76 @@ def _check_completeness(path, fold):
 
 
 def test_k_fold():
-    assert True
+    #assert True
     #TODO: Automatic data downloading - this works localls
-    #dataset = CrystalDatasetWrapper("lanthanides", kfolds=5,
-    #                                data_path="../../examples/data_download")
-    #transform = [SupercellTransformation()]
+    dataset = CrystalDatasetWrapper("lanthanides", kfolds=5,
+                                    data_path="../../examples/data_download")
+    transform = [SupercellTransformation()]
 
-    ## Check no repeated indices in train and valid
-    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=0)
-    #_check_id_prop_augment(dataset.data_path, transform)
-    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
-    #_check_completeness(train_loader.dataset.data_path, 0)
-    #_check_train_transform(train_loader.dataset.data_path, transform, 0)
+    # Check no repeated indices in train and valid
+    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+                                                                        fold=0)
+    _check_id_prop_augment(dataset.data_path, transform)
+    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    _check_completeness(train_loader.dataset.data_path, 0)
+    _check_train_transform(train_loader.dataset.data_path, transform, 0)
 
-    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=1)
-    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
-    #_check_completeness(train_loader.dataset.data_path, 1)
-    #_check_train_transform(train_loader.dataset.data_path, transform, 1)
+    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+                                                                        fold=1)
+    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    _check_completeness(train_loader.dataset.data_path, 1)
+    _check_train_transform(train_loader.dataset.data_path, transform, 1)
 
-    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=2)
-    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
-    #_check_completeness(train_loader.dataset.data_path, 2)
-    #_check_train_transform(train_loader.dataset.data_path, transform, 2)
+    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+                                                                        fold=2)
+    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    _check_completeness(train_loader.dataset.data_path, 2)
+    _check_train_transform(train_loader.dataset.data_path, transform, 2)
 
-    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=3)
-    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
-    #_check_completeness(train_loader.dataset.data_path, 3)
-    #_check_train_transform(train_loader.dataset.data_path, transform, 3)
+    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+                                                                        fold=3)
+    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    _check_completeness(train_loader.dataset.data_path, 3)
+    _check_train_transform(train_loader.dataset.data_path, transform, 3)
 
-    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=4)
-    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
-    #_check_completeness(train_loader.dataset.data_path, 4)
-    #_check_train_transform(train_loader.dataset.data_path, transform, 4)
+    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+                                                                        fold=4)
+    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    _check_completeness(train_loader.dataset.data_path, 4)
+    _check_train_transform(train_loader.dataset.data_path, transform, 4)
 
-    #try:
-    #    train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=5)
-    #except ValueError as error:
-    #    assert error.args[0] == "Please select a fold < 5"
+    try:
+        train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=5)
+    except ValueError as error:
+        assert error.args[0] == "Please select a fold < 5"
 
-    ## Remove directory
+    # Remove directory
     #shutil.rmtree(dataset.data_path)
 
-    #dataset = CrystalDatasetWrapper("lanthanides", kfolds=2,
-    #                                data_path="../../examples/data_download")
-    #transform = [SupercellTransformation(), RandomPerturbStructureTransformation()]
+    dataset = CrystalDatasetWrapper("lanthanides", kfolds=2,
+                                    data_path="../../examples/data_download")
+    transform = [SupercellTransformation(), PerturbStructureTransformation()]
 
-    ## Check no repeated indices in train and valid
-    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=0)
-    #_check_id_prop_augment(dataset.data_path, transform)
-    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
-    #_check_completeness(train_loader.dataset.data_path, 0)
-    #_check_train_transform(train_loader.dataset.data_path, transform, 0)
+    # Check no repeated indices in train and valid
+    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+                                                                        fold=0)
+    _check_id_prop_augment(dataset.data_path, transform)
+    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    _check_completeness(train_loader.dataset.data_path, 0)
+    _check_train_transform(train_loader.dataset.data_path, transform, 0)
 
-    #train_loader, valid_loader = dataset.get_data_loaders(transform=transform, fold=1)
-    #_check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
-    #_check_completeness(train_loader.dataset.data_path, 1)
-    #_check_train_transform(train_loader.dataset.data_path, transform, 1)
+    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+                                                                        fold=1)
+    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    _check_completeness(train_loader.dataset.data_path, 1)
+    _check_train_transform(train_loader.dataset.data_path, transform, 1)
 
     #shutil.rmtree(dataset.data_path)
     
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
     #test_crystal_data()
     #test_composition()
-    #test_k_fold()
+    test_k_fold()
