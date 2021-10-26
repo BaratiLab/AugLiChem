@@ -2,7 +2,6 @@ from __future__ import print_function, division
 
 import torch
 import torch.nn as nn
-import warnings
 
 
 class ConvLayer(nn.Module):
@@ -123,10 +122,6 @@ class CrystalGraphConvNet(nn.Module):
             self.logsoftmax = nn.LogSoftmax(dim=1)
             self.dropout = nn.Dropout()
 
-        # Need to use older data managing
-        warnings.warn("CrystalDataset._cgcnn must be set to True to use GINet properly.",
-                      RuntimeWarning, stacklevel=2)
-
     def forward(self, atom_fea, nbr_fea, nbr_fea_idx, crystal_atom_idx):
         """
         Forward pass
@@ -168,7 +163,7 @@ class CrystalGraphConvNet(nn.Module):
         out = self.fc_out(crys_fea)
         if self.classification:
             out = self.logsoftmax(out)
-        return out
+        return out,crys_fea
 
     def pooling(self, atom_fea, crystal_atom_idx):
         """

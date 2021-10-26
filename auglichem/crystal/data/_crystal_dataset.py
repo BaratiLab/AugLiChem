@@ -15,11 +15,16 @@ import torch
 from tqdm import tqdm
 from pymatgen.core.structure import Structure
 from pymatgen.io import cif
-from torch.utils.data import Dataset, DataLoader
-from torch.utils.data.sampler import SubsetRandomSampler
+from sklearn import preprocessing
+
+from torch_geometric.data import Data, Dataset, DataLoader
+#from torch.utils.data import Dataset, DataLoader
+
 import pandas as pd
 import warnings
-#from ._knn import knn_graph
+
+from ._knn import knn_graph
+from ._load_sets import AtomCustomJSONInitializer
 
 from auglichem.crystal._transforms import (
         RotationTransformation,
@@ -40,7 +45,7 @@ from auglichem.utils import (
         scaffold_split,
         random_split
 )
-from ._load_sets import AtomCustomJSONInitializer, read_crystal
+from ._load_sets import read_crystal
 
 
 def collate_pool(dataset_list):
@@ -151,7 +156,7 @@ class CrystalDataset(Dataset):
                  atom_init_file=None, id_prop_file=None, ari=None,fold = 0,
                  max_num_nbr=12, radius=8, dmin=0, step=0.2,
                  random_seed=123, test_mode=True, on_the_fly_augment=False, kfolds=0,
-                 seed=None):
+                 num_neighbors=8, seed=None):
 
         super(Dataset, self).__init__()
         
@@ -160,6 +165,7 @@ class CrystalDataset(Dataset):
         self.transform = transform
         self._augmented = False # To control runaway augmentation
         self.seed = seed
+        self.num_neighbors = num_neighbors
 
         # After specifying data set
         if(id_prop_augment is None):
@@ -200,6 +206,8 @@ class CrystalDataset(Dataset):
         else:
             self._k_fold_cv = False
 
+        # Set manually if using the built-in GINet model
+        self._cgcnn = False
 
 
     def _aug_name(self, transformation):
@@ -254,6 +262,9 @@ class CrystalDataset(Dataset):
         else:
             shutil.copytree(self.data_path, self.data_path + "_augmented", dirs_exist_ok=True)
             self.data_path += "_augmented"
+
+        self.atom_featurizer = AtomCustomJSONInitializer(os.path.join(self.data_path,
+                               'atom_init.json'))
 
         # Check transforms
         if(not isinstance(transform, list)):
@@ -354,8 +365,45 @@ class CrystalDataset(Dataset):
         return np.exp(-(distances[..., np.newaxis] - self.filter)**2 / var**2)
 
 
-    @functools.lru_cache(maxsize=None)  # Cache loaded structures
-    def __getitem__(self, idx):
+    def _getitem_crystal(self, idx):
+        #cif_id, target = self.id_prop_augment[idx]
+        #crystal = Structure.from_file(os.path.join(self.data_path,
+        #                                           cif_id+'.cif'))
+
+        #if(self.on_the_fly_augment):
+        #    if(self.transform is None):
+        #        raise ValueError("Transformations need to be specified.")
+        #    for t in self.transform:
+        #        crystal = t.apply_transfromation(crystal)
+
+        #atom_fea = np.vstack([self.ari.get_atom_feat(crystal[i].specie.number)
+        #                      for i in range(len(crystal))])
+        #atom_fea = torch.Tensor(atom_fea)
+        #all_nbrs = crystal.get_all_neighbors(self.radius, include_index=True)
+        #all_nbrs = [sorted(nbrs, key=lambda x: x[1]) for nbrs in all_nbrs]
+        #nbr_fea_idx, nbr_fea = [], []
+        #for nbr in all_nbrs:
+        #    if len(nbr) < self.max_num_nbr:
+        #        warnings.warn('{} not find enough neighbors to build graph. '
+        #                      'If it happens frequently, consider increase '
+        #                      'radius.'.format(cif_id))
+        #        nbr_fea_idx.append(list(map(lambda x: x[2], nbr)) +
+        #                           [0] * (self.max_num_nbr - len(nbr)))
+        #        nbr_fea.append(list(map(lambda x: x[1], nbr)) +
+        #                       [self.radius + 1.] * (self.max_num_nbr -
+        #                                             len(nbr)))
+        #    else:
+        #        nbr_fea_idx.append(list(map(lambda x: x[2],
+        #                                    nbr[:self.max_num_nbr])))
+        #        nbr_fea.append(list(map(lambda x: x[1],
+        #                                nbr[:self.max_num_nbr])))
+        #nbr_fea_idx, nbr_fea = np.array(nbr_fea_idx), np.array(nbr_fea)
+        #nbr_fea = self.gdf(nbr_fea)
+        #atom_fea = torch.Tensor(atom_fea)
+        #nbr_fea = torch.Tensor(nbr_fea)
+        #nbr_fea_idx = torch.LongTensor(nbr_fea_idx)
+        #target = torch.Tensor([float(target)])
+        #return (atom_fea, nbr_fea, nbr_fea_idx), target, cif_id
         cif_id, target = self.id_prop_augment[idx]
         crystal = Structure.from_file(os.path.join(self.data_path,
                                                    cif_id+'.cif'))
@@ -366,7 +414,7 @@ class CrystalDataset(Dataset):
             for t in self.transform:
                 crystal = t.apply_transfromation(crystal)
 
-        atom_fea = np.vstack([self.ari.get_atom_fea(crystal[i].specie.number)
+        atom_fea = np.vstack([self.ari.get_atom_feat(crystal[i].specie.number)
                               for i in range(len(crystal))])
         atom_fea = torch.Tensor(atom_fea)
         all_nbrs = crystal.get_all_neighbors(self.radius, include_index=True)
@@ -394,6 +442,91 @@ class CrystalDataset(Dataset):
         nbr_fea_idx = torch.LongTensor(nbr_fea_idx)
         target = torch.Tensor([float(target)])
         return (atom_fea, nbr_fea, nbr_fea_idx), target, cif_id
+
+
+    def _getitem_knn(self, idx):
+        # get the cif id and path
+
+        augment_cif_id, self.aug_labels = self.id_prop_augment[idx]
+        augment_cryst_path = os.path.join(self.data_path, augment_cif_id + '.cif')
+
+        self.aug_labels = np.array(self.aug_labels)
+        #if self.task == 'regression':
+        self.scaler = preprocessing.StandardScaler()
+        self.scaler.fit(self.aug_labels.reshape(-1,1))
+        self.aug_labels = self.scaler.transform(self.aug_labels.reshape(-1,1))
+
+        # read cif using pymatgen
+        aug_crys = Structure.from_file(augment_cryst_path)
+        pos = aug_crys.frac_coords
+        atom_indices = list(aug_crys.atomic_numbers)
+        cell = aug_crys.lattice.get_cartesian_coords(1)
+        feat = self.atom_featurizer.get_atom_features(atom_indices)
+        N = len(pos)
+        y = self.aug_labels
+        y = torch.tensor(y, dtype=torch.float).view(1,1)
+        atomics = []
+        for index in atom_indices:
+            atomics.append(ATOM_LIST.index(index))
+        atomics = torch.tensor(atomics, dtype=torch.long)
+        pos = torch.tensor(pos, dtype=torch.float)
+        feat = torch.tensor(feat, dtype=torch.float)
+        edge_index = knn_graph(pos, k=self.num_neighbors, loop=False)
+        edge_attr = torch.zeros(edge_index.size(1), dtype=torch.long)
+
+        data = Data(
+            atomics=atomics, pos=pos, feat=feat, y=y,
+            edge_index=edge_index, edge_attr=edge_attr
+        )
+
+        # build the PyG graph
+        return data
+
+
+    @functools.lru_cache(maxsize=None)  # Cache loaded structures
+    def __getitem__(self, idx):
+        if(self._cgcnn):
+            return self._getitem_crystal(idx)
+        else:
+            return self._getitem_knn(idx)
+        #cif_id, target = self.id_prop_augment[idx]
+        #crystal = Structure.from_file(os.path.join(self.data_path,
+        #                                           cif_id+'.cif'))
+
+        #if(self.on_the_fly_augment):
+        #    if(self.transform is None):
+        #        raise ValueError("Transformations need to be specified.")
+        #    for t in self.transform:
+        #        crystal = t.apply_transfromation(crystal)
+
+        #atom_fea = np.vstack([self.ari.get_atom_feat(crystal[i].specie.number)
+        #                      for i in range(len(crystal))])
+        #atom_fea = torch.Tensor(atom_fea)
+        #all_nbrs = crystal.get_all_neighbors(self.radius, include_index=True)
+        #all_nbrs = [sorted(nbrs, key=lambda x: x[1]) for nbrs in all_nbrs]
+        #nbr_fea_idx, nbr_fea = [], []
+        #for nbr in all_nbrs:
+        #    if len(nbr) < self.max_num_nbr:
+        #        warnings.warn('{} not find enough neighbors to build graph. '
+        #                      'If it happens frequently, consider increase '
+        #                      'radius.'.format(cif_id))
+        #        nbr_fea_idx.append(list(map(lambda x: x[2], nbr)) +
+        #                           [0] * (self.max_num_nbr - len(nbr)))
+        #        nbr_fea.append(list(map(lambda x: x[1], nbr)) +
+        #                       [self.radius + 1.] * (self.max_num_nbr -
+        #                                             len(nbr)))
+        #    else:
+        #        nbr_fea_idx.append(list(map(lambda x: x[2],
+        #                                    nbr[:self.max_num_nbr])))
+        #        nbr_fea.append(list(map(lambda x: x[1],
+        #                                nbr[:self.max_num_nbr])))
+        #nbr_fea_idx, nbr_fea = np.array(nbr_fea_idx), np.array(nbr_fea)
+        #nbr_fea = self.gdf(nbr_fea)
+        #atom_fea = torch.Tensor(atom_fea)
+        #nbr_fea = torch.Tensor(nbr_fea)
+        #nbr_fea_idx = torch.LongTensor(nbr_fea_idx)
+        #target = torch.Tensor([float(target)])
+        #return (atom_fea, nbr_fea, nbr_fea_idx), target, cif_id
 
 
 class CrystalDatasetWrapper(CrystalDataset):
@@ -496,6 +629,8 @@ class CrystalDatasetWrapper(CrystalDataset):
 
             # Do data transformation. With k_fold_cv, self.id_prop_augment is updated later
             self.data_augmentation(transform)
+            self.atom_featurizer = AtomCustomJSONInitializer(os.path.join(self.data_path,
+                                   'atom_init.json'))
             return train_idx, valid_idx, test_idx
 
         else:
@@ -541,7 +676,11 @@ class CrystalDatasetWrapper(CrystalDataset):
         # Augment only training data
         if(transform and not self._k_fold_cv):
             train_set.data_augmentation(transform)
+            self.atom_featurizer = AtomCustomJSONInitializer(os.path.join(self.data_path,
+                                   'atom_init.json'))
 
+        if(not(self._cgcnn)):
+            self.collate_fn = None
         train_loader = DataLoader(train_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
@@ -551,18 +690,19 @@ class CrystalDatasetWrapper(CrystalDataset):
                              valid_idx,
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
-        valid_loader = DataLoader(valid_set, batch_size=len(valid_set),
+        valid_loader = DataLoader(valid_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
         valid_set._k_fold_cv = self._k_fold_cv
 
 
         # Get test loader
+        print(test_idx)
         test_set = CrystalDataset(self.dataset, self.data_path, self.transform,
                              test_idx,
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari)
-        test_loader = DataLoader(test_set, batch_size=len(test_set),
+        test_loader = DataLoader(test_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, drop_last=True, shuffle=True)
         return train_loader, valid_loader, test_loader
