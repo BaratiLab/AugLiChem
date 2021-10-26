@@ -4,6 +4,11 @@ import urllib
 from tqdm import tqdm
 import csv
 import gzip
+
+import requests
+import io
+import zipfile
+
 import sys
 import numpy as np
 import csv
@@ -15,113 +20,8 @@ USER_AGENT = "auglichem"
 
 #TODO: Automated data loading once we host the datasets
 
-def get_train_val_test_loader(dataset, dataset_train, idx_map, collate_fn=default_collate, 
-                              fold = 0,batch_size=64, train_ratio=None,
-                              val_ratio=0.2, test_ratio=0.1, return_test=False,
-                              num_workers=1, pin_memory=False, num_aug = 4, **kwargs):
-    """
-    Utility function for dividing a dataset to train, val, test datasets.
-
-    !!! The dataset needs to be shuffled before using the function !!!
-
-    Parameters
-    ----------
-    dataset: torch.utils.data.Dataset
-      The full dataset to be divided.
-    collate_fn: torch.utils.data.DataLoader
-    batch_size: int
-    train_ratio: float
-    val_ratio: float
-    test_ratio: float
-    return_test: bool
-      Whether to return the test dataset loader. If False, the last test_size
-      data will be hidden.
-    num_workers: int
-    pin_memory: bool
-
-    Returns
-    -------
-    train_loader: torch.utils.data.DataLoader
-      DataLoader that random samples the training data.
-    val_loader: torch.utils.data.DataLoader
-      DataLoader that random samples the validation data.
-    (test_loader): torch.utils.data.DataLoader
-      DataLoader that random samples the test data, returns if
-        return_test=True.
-    """
-    total_size = len(dataset)
-    if train_ratio is None:
-        assert val_ratio + test_ratio < 1
-        train_ratio = 1 - val_ratio - test_ratio
-        print('[Warning] train_ratio is None, using all training data.')
-    else:
-        assert train_ratio + val_ratio + test_ratio <= 1
-    indices = list(range(total_size))
-    if kwargs['train_size']:
-        train_size = kwargs['train_size']
-    else:
-        train_size = int(train_ratio * total_size)
-    if kwargs['test_size']:
-        test_size = kwargs['test_size']
-    else:
-        test_size = int(test_ratio * total_size)
-    if kwargs['val_size']:
-        valid_size = kwargs['val_size']
-    else:
-        valid_size = int(val_ratio * total_size)
-
-    random.shuffle(indices)
-    train_idx = indices[:train_size]
-    train_idx_augment = []
-
-
-    for i in range (len(train_idx)):
-        #true_index = idx_map[train_idx[i]]
-        idx_correction = num_aug*train_idx[i]
-        # if train_idx[i]>15142:
-        #     print(i)
-        add_1 = idx_correction + 1
-        add_2 = idx_correction + 2
-        add_3 = idx_correction + 3
-        add_  = idx_correction
-        train_idx_augment.append(add_1)
-        train_idx_augment.append(add_2)
-        train_idx_augment.append(add_3)
-        train_idx_augment.append(add_)
-    	# train_idx_augment.append(add_4)
-    	# train_idx_augment.append(add_5)
-            	# add_4 = train_idx[i] + idx_correction + 4
-    	# add_5 = train_idx[i] + idx_correction + 5
-    #print((train_idx_augment))
-
-
-    train_sampler = SubsetRandomSampler(train_idx_augment)
-
-    val_sampler = SubsetRandomSampler(
-        indices[train_size:])
-    val_sampler = SubsetRandomSampler(
-        indices[train_size:])
-    if return_test:
-        test_sampler = SubsetRandomSampler(indices[-test_size:])
-
-
-    train_loader = DataLoader(dataset_train, batch_size=batch_size,
-                              sampler=train_sampler,
-                              num_workers=num_workers,
-                              collate_fn=collate_fn, pin_memory=pin_memory)
-    val_loader = DataLoader(dataset, batch_size=batch_size,
-                            sampler=val_sampler,
-                            num_workers=num_workers,
-                            collate_fn=collate_fn, pin_memory=pin_memory)
-    if return_test:
-        test_loader = DataLoader(dataset, batch_size=batch_size,
-                                 sampler=test_sampler,
-                                 num_workers=num_workers,
-                                 collate_fn=collate_fn, pin_memory=pin_memory)
-    if return_test:
-        return train_loader, val_loader, test_loader
-    else:
-        return train_loader, val_loader
+# Data available at:
+#        https://drive.google.com/drive/folders/1R8kjl1O1cGn-bzKij4IvzCrzLOUt0139?usp=sharing
 
 
 class AtomInitializer(object):
@@ -134,9 +34,12 @@ class AtomInitializer(object):
         self.atom_types = set(atom_types)
         self._embedding = {}
 
-    def get_atom_fea(self, atom_type):
+    def get_atom_feat(self, atom_type):
         assert atom_type in self.atom_types
         return self._embedding[atom_type]
+
+    def get_atom_features(self, atomics):
+        return np.vstack([self.get_atom_feat(i) for i in atomics])
 
     def load_state_dict(self, state_dict):
         self._embedding = state_dict
@@ -207,6 +110,23 @@ def check_integrity(fpath, md5=None):
     return check_md5(fpath, md5)
 
 
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+
+    return None
+
+
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
+
+
 def download_url(url, root, filename=None):
     """Download a file from a url and place it in root.
     Args:
@@ -215,6 +135,20 @@ def download_url(url, root, filename=None):
         filename (str, optional): Name to save the file under. If None, use the basename of
                                   the URL
     """
+    URL = "https://docs.google.com/uc?export=download"
+    session = requests.Session()
+    response = session.get(URL, params = { 'id' : url }, stream = True)
+    token = get_confirm_token(response)
+    print(token)
+
+    if token:
+        params = { 'id' : url, 'confirm' : token }
+        response = session.get(URL, params = params, stream = True)
+
+    save_response_content(response, root+"/lanths")
+
+    raise
+
     root = os.path.expanduser(root)
     if not filename:
         filename = os.path.basename(url)
@@ -252,6 +186,9 @@ def _load_data(dataset, data_path='./data_download'):
         task = 'regression'
         target = ["formation_energy"] #TODO: Need to verify
         #csv_file_path = download_url("Nothing yet...", data_path)
+        u = "https://drive.google.com/file/d/1YzlWF00JPsHUGtlw7AH3pMGBTlz63Oly/view?usp=sharing"
+        u = "https://drive.google.com/file/d/1YzlWF00JPsHUGtlw7AH3pMGBTlz63Oly/view?usp=sharing"
+        #csv_file_path = download_url(u, data_path)
         csv_file_path = data_path + "/lanths/id_prop.csv"
         embedding_path = data_path + "/lanths/atom_init.json"
         data_path += "/lanths"
