@@ -8,6 +8,9 @@ import numpy as np
 import torch
 from torch_geometric.data import Data as PyG_Data
 
+import warnings
+from tqdm import tqdm
+
 from auglichem.crystal._transforms import (
         RotationTransformation,
         PerturbStructureTransformation,
@@ -19,7 +22,8 @@ from auglichem.crystal._transforms import (
 )
 from auglichem.crystal._compositions import Compose, OneOf
 from auglichem.crystal.data import CrystalDataset, CrystalDatasetWrapper
-#from auglichem.crystal.data._crystal_dataset import CrystalDataset
+from auglichem.crystal.models import GINet, SchNet
+from auglichem.crystal.models import CrystalGraphConvNet as CGCNN
 
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 
@@ -28,19 +32,64 @@ def test_crystal_data():
         Since automated downloading isn't supported yet, this can't be tested without
         uploading the data set
     '''
-    #data = CrystalDataset("Lanthanides", on_the_fly_augment=True)
+    # Check general implementation
+    dataset = CrystalDatasetWrapper("lanthanides", batch_size=1)
+    transform = [SupercellTransformation()]
+    train, valid, test = dataset.get_data_loaders(transform=transform)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        num_cifs = 0
+        for v in tqdm(train):
+            pass
+        for v in tqdm(valid):
+            pass
+        for v in tqdm(test):
+            pass
     assert True
-    #data = CrystalDatasetWrapper("Lanthanides")
-    
-    #transform = [RotationTransformation(axis=[1,0,0], angle=15),
-    #             SupercellTransformation()]
-    #data.data_augmentation(transform)
-    #data.data_augmentation(transform)
-    #train, valid, test = data.get_data_loaders()
-    #shutil.rmtree("./data_download")
 
-    #for b, t in enumerate(train):
-    #    print(t)
+    dataset = CrystalDatasetWrapper("lanthanides", batch_size=1, kfolds=2)
+    train, valid, test = dataset.get_data_loaders(fold=0)
+    train, valid, test = dataset.get_data_loaders(transform=transform)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        num_cifs = 0
+        for v in tqdm(train):
+            pass
+        for v in tqdm(valid):
+            pass
+        for v in tqdm(test):
+            pass
+    assert True
+
+    # Check for CGCNN now
+    dataset = CrystalDatasetWrapper("lanthanides", batch_size=1, cgcnn=True)
+    transform = [SupercellTransformation()]
+    train, valid, test = dataset.get_data_loaders(transform=transform)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        num_cifs = 0
+        for v in tqdm(train):
+            pass
+        for v in tqdm(valid):
+            pass
+        for v in tqdm(test):
+            pass
+    assert True
+
+    dataset = CrystalDatasetWrapper("lanthanides", batch_size=1, cgcnn=True, kfolds=2)
+    train, valid, test = dataset.get_data_loaders(fold=0)
+    train, valid, test = dataset.get_data_loaders(transform=transform)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        num_cifs = 0
+        for v in tqdm(train):
+            pass
+        for v in tqdm(valid):
+            pass
+        for v in tqdm(test):
+            pass
+    assert True
+    
 
 def test_random_rotation():
     #rotate = RotationTransformation([1,0,0], 90,)
@@ -153,7 +202,7 @@ def _check_completeness(path, fold):
 
 def test_k_fold():
     #assert True
-    #TODO: Automatic data downloading - this works localls
+    #TODO: Automatic data downloading - this works locally
     dataset = CrystalDatasetWrapper("lanthanides", kfolds=5,
                                     data_path="../../examples/data_download")
     transform = [SupercellTransformation()]
@@ -198,7 +247,7 @@ def test_k_fold():
         assert error.args[0] == "Please select a fold < 5"
 
     # Remove directory
-    #shutil.rmtree(dataset.data_path)
+    shutil.rmtree(dataset.data_path)
 
     dataset = CrystalDatasetWrapper("lanthanides", kfolds=2,
                                     data_path="../../examples/data_download")
@@ -218,10 +267,11 @@ def test_k_fold():
     _check_completeness(train_loader.dataset.data_path, 1)
     _check_train_transform(train_loader.dataset.data_path, transform, 1)
 
-    #shutil.rmtree(dataset.data_path)
+    # Remove directory
+    shutil.rmtree(dataset.data_path)
     
 
 if __name__ == '__main__':
-    #test_crystal_data()
+    test_crystal_data()
     #test_composition()
     test_k_fold()

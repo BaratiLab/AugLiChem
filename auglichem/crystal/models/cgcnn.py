@@ -124,7 +124,7 @@ class CrystalGraphConvNet(nn.Module):
             self.dropout = nn.Dropout()
 
         # Need to use older data managing
-        warnings.warn("CrystalDataset._cgcnn must be set to True to use GINet properly.",
+        warnings.warn("CrystalDataset._cgcnn must be set to True to use CGCNN properly.",
                       RuntimeWarning, stacklevel=2)
 
     def forward(self, atom_fea, nbr_fea, nbr_fea_idx, crystal_atom_idx):

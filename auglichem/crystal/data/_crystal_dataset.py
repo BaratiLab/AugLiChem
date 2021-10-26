@@ -18,7 +18,6 @@ from pymatgen.io import cif
 from sklearn import preprocessing
 
 from torch_geometric.data import Data, Dataset, DataLoader
-#from torch.utils.data import Dataset, DataLoader
 
 import pandas as pd
 import warnings
@@ -156,7 +155,7 @@ class CrystalDataset(Dataset):
                  atom_init_file=None, id_prop_file=None, ari=None,fold = 0,
                  max_num_nbr=12, radius=8, dmin=0, step=0.2,
                  random_seed=123, test_mode=True, on_the_fly_augment=False, kfolds=0,
-                 num_neighbors=8, seed=None):
+                 num_neighbors=8, seed=None, cgcnn=False):
 
         super(Dataset, self).__init__()
         
@@ -206,8 +205,12 @@ class CrystalDataset(Dataset):
         else:
             self._k_fold_cv = False
 
-        # Set manually if using the built-in GINet model
-        self._cgcnn = False
+        # Must be true to use built-in CGCNN model
+        self._cgcnn = cgcnn
+
+        # Set atom featurizer
+        self.atom_featurizer = AtomCustomJSONInitializer(os.path.join(self.data_path,
+                                   'atom_init.json'))
 
 
     def _aug_name(self, transformation):
@@ -366,44 +369,6 @@ class CrystalDataset(Dataset):
 
 
     def _getitem_crystal(self, idx):
-        #cif_id, target = self.id_prop_augment[idx]
-        #crystal = Structure.from_file(os.path.join(self.data_path,
-        #                                           cif_id+'.cif'))
-
-        #if(self.on_the_fly_augment):
-        #    if(self.transform is None):
-        #        raise ValueError("Transformations need to be specified.")
-        #    for t in self.transform:
-        #        crystal = t.apply_transfromation(crystal)
-
-        #atom_fea = np.vstack([self.ari.get_atom_feat(crystal[i].specie.number)
-        #                      for i in range(len(crystal))])
-        #atom_fea = torch.Tensor(atom_fea)
-        #all_nbrs = crystal.get_all_neighbors(self.radius, include_index=True)
-        #all_nbrs = [sorted(nbrs, key=lambda x: x[1]) for nbrs in all_nbrs]
-        #nbr_fea_idx, nbr_fea = [], []
-        #for nbr in all_nbrs:
-        #    if len(nbr) < self.max_num_nbr:
-        #        warnings.warn('{} not find enough neighbors to build graph. '
-        #                      'If it happens frequently, consider increase '
-        #                      'radius.'.format(cif_id))
-        #        nbr_fea_idx.append(list(map(lambda x: x[2], nbr)) +
-        #                           [0] * (self.max_num_nbr - len(nbr)))
-        #        nbr_fea.append(list(map(lambda x: x[1], nbr)) +
-        #                       [self.radius + 1.] * (self.max_num_nbr -
-        #                                             len(nbr)))
-        #    else:
-        #        nbr_fea_idx.append(list(map(lambda x: x[2],
-        #                                    nbr[:self.max_num_nbr])))
-        #        nbr_fea.append(list(map(lambda x: x[1],
-        #                                nbr[:self.max_num_nbr])))
-        #nbr_fea_idx, nbr_fea = np.array(nbr_fea_idx), np.array(nbr_fea)
-        #nbr_fea = self.gdf(nbr_fea)
-        #atom_fea = torch.Tensor(atom_fea)
-        #nbr_fea = torch.Tensor(nbr_fea)
-        #nbr_fea_idx = torch.LongTensor(nbr_fea_idx)
-        #target = torch.Tensor([float(target)])
-        #return (atom_fea, nbr_fea, nbr_fea_idx), target, cif_id
         cif_id, target = self.id_prop_augment[idx]
         crystal = Structure.from_file(os.path.join(self.data_path,
                                                    cif_id+'.cif'))
@@ -446,7 +411,6 @@ class CrystalDataset(Dataset):
 
     def _getitem_knn(self, idx):
         # get the cif id and path
-
         augment_cif_id, self.aug_labels = self.id_prop_augment[idx]
         augment_cryst_path = os.path.join(self.data_path, augment_cif_id + '.cif')
 
@@ -489,50 +453,12 @@ class CrystalDataset(Dataset):
             return self._getitem_crystal(idx)
         else:
             return self._getitem_knn(idx)
-        #cif_id, target = self.id_prop_augment[idx]
-        #crystal = Structure.from_file(os.path.join(self.data_path,
-        #                                           cif_id+'.cif'))
-
-        #if(self.on_the_fly_augment):
-        #    if(self.transform is None):
-        #        raise ValueError("Transformations need to be specified.")
-        #    for t in self.transform:
-        #        crystal = t.apply_transfromation(crystal)
-
-        #atom_fea = np.vstack([self.ari.get_atom_feat(crystal[i].specie.number)
-        #                      for i in range(len(crystal))])
-        #atom_fea = torch.Tensor(atom_fea)
-        #all_nbrs = crystal.get_all_neighbors(self.radius, include_index=True)
-        #all_nbrs = [sorted(nbrs, key=lambda x: x[1]) for nbrs in all_nbrs]
-        #nbr_fea_idx, nbr_fea = [], []
-        #for nbr in all_nbrs:
-        #    if len(nbr) < self.max_num_nbr:
-        #        warnings.warn('{} not find enough neighbors to build graph. '
-        #                      'If it happens frequently, consider increase '
-        #                      'radius.'.format(cif_id))
-        #        nbr_fea_idx.append(list(map(lambda x: x[2], nbr)) +
-        #                           [0] * (self.max_num_nbr - len(nbr)))
-        #        nbr_fea.append(list(map(lambda x: x[1], nbr)) +
-        #                       [self.radius + 1.] * (self.max_num_nbr -
-        #                                             len(nbr)))
-        #    else:
-        #        nbr_fea_idx.append(list(map(lambda x: x[2],
-        #                                    nbr[:self.max_num_nbr])))
-        #        nbr_fea.append(list(map(lambda x: x[1],
-        #                                nbr[:self.max_num_nbr])))
-        #nbr_fea_idx, nbr_fea = np.array(nbr_fea_idx), np.array(nbr_fea)
-        #nbr_fea = self.gdf(nbr_fea)
-        #atom_fea = torch.Tensor(atom_fea)
-        #nbr_fea = torch.Tensor(nbr_fea)
-        #nbr_fea_idx = torch.LongTensor(nbr_fea_idx)
-        #target = torch.Tensor([float(target)])
-        #return (atom_fea, nbr_fea, nbr_fea_idx), target, cif_id
 
 
 class CrystalDatasetWrapper(CrystalDataset):
     def __init__(self, dataset, transform=None, split="random", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, data_path=None, target=None, kfolds=0,
-                 seed=None, **kwargs):
+                 seed=None, cgcnn=False, **kwargs):
         '''
             Wrapper Class to handle splitting dataset into train, validation, and test sets
 
@@ -553,21 +479,22 @@ class CrystalDatasetWrapper(CrystalDataset):
             kfolds (int, default=0, folds > 1): Number of folds to use in k-fold cross
                         validation. kfolds > 1 for data to be split
             seed (int, optional, default=None): Random seed set for data shuffling
+            cgcnn (bool, optional, default=False): Set to True is using built-in CGCNN model.
              
 
             outputs:
             -------------------------
             None
         '''
-        super().__init__(dataset, data_path, transform, kfolds=kfolds, seed=seed)
+        super().__init__(dataset, data_path, transform, kfolds=kfolds, seed=seed, cgcnn=cgcnn)
         self.split = split
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.valid_size = valid_size
         self.test_size = test_size
         self.id_prop_augment = np.asarray(self.id_prop_augment)
-
         self.collate_fn = collate_pool
+        self.cgcnn = cgcnn
 
 
     def _match_idx(self, cif_idxs):
@@ -608,7 +535,6 @@ class CrystalDatasetWrapper(CrystalDataset):
             # Get train set
             train_cif_idx = np.loadtxt(self.data_path + "/id_prop_train_{}.csv".format(fold),
                                    delimiter=',')
-            #print(train_cif_idx)
             train_idx = self._match_idx(train_cif_idx)
 
             # Get validation set
@@ -659,51 +585,64 @@ class CrystalDatasetWrapper(CrystalDataset):
             Loaders
         '''
         train_idx, valid_idx, test_idx = self._get_split_idxs(target, transform, fold)
+
             
         # Get train loader
         if(self._k_fold_cv): # Need to add in augmented cif files to id_prop_augment
             transform = [transform] if(not isinstance(transform, list)) else transform
             train_id_prop_augment = self._updated_train_cifs(train_idx, len(transform))
+            valid_id_prop_augment = valid_idx
+            test_id_prop_augment = test_idx
         else: # Augmented cif files will be put in id_prop_augment
             train_id_prop_augment = self.id_prop_augment[train_idx]
+            valid_id_prop_augment = self.id_prop_augment[valid_idx]
+            test_id_prop_augment = self.id_prop_augment[test_idx]
         train_set = CrystalDataset(self.dataset, self.data_path, self.transform,
                              train_id_prop_augment,
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
-                             ari=self.ari)
+                             ari=self.ari, cgcnn=self.cgcnn)
         train_set._k_fold_cv = self._k_fold_cv
 
 
         # Augment only training data
         if(transform and not self._k_fold_cv):
             train_set.data_augmentation(transform)
-            self.atom_featurizer = AtomCustomJSONInitializer(os.path.join(self.data_path,
-                                   'atom_init.json'))
 
+        # torch_geometric does not require collate_fn, CGCNN requires torch Dataset/Loader
         if(not(self._cgcnn)):
             self.collate_fn = None
+            from torch_geometric.data import Data, DataLoader
+        else:
+            from torch.utils.data import DataLoader
+
         train_loader = DataLoader(train_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
-                                  collate_fn=self.collate_fn, drop_last=True, shuffle=True)
+                                  collate_fn=self.collate_fn, shuffle=True)
 
         # Get val loader
-        valid_set = CrystalDataset(self.dataset, self.data_path, self.transform,
-                             valid_idx,
-                             atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
-                             ari=self.ari)
+        valid_set = CrystalDataset(self.dataset,
+                             data_path=self.data_path,
+                             transform=self.transform,
+                             id_prop_augment=valid_id_prop_augment,
+                             atom_init_file=self.atom_init_file,
+                             id_prop_file=self.id_prop_file,
+                             ari=self.ari, cgcnn=self.cgcnn)
         valid_loader = DataLoader(valid_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
-                                  collate_fn=self.collate_fn, drop_last=True, shuffle=True)
+                                  collate_fn=self.collate_fn, shuffle=True)
         valid_set._k_fold_cv = self._k_fold_cv
 
 
         # Get test loader
-        print(test_idx)
-        test_set = CrystalDataset(self.dataset, self.data_path, self.transform,
-                             test_idx,
-                             atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
-                             ari=self.ari)
+        test_set = CrystalDataset(self.dataset,
+                             data_path=self.data_path,
+                             transform=self.transform,
+                             id_prop_augment=test_id_prop_augment,
+                             atom_init_file=self.atom_init_file,
+                             id_prop_file=self.id_prop_file,
+                             ari=self.ari, cgcnn=self.cgcnn)
         test_loader = DataLoader(test_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
-                                  collate_fn=self.collate_fn, drop_last=True, shuffle=True)
+                                  collate_fn=self.collate_fn, shuffle=True)
         return train_loader, valid_loader, test_loader
     
