@@ -83,9 +83,14 @@ class AttentiveFP(nn.Module):
             readout.
         dropout (float, optional): Dropout probability. (default: :obj:`0.0`)
     """
-    def __init__(self, task, emb_dim, num_layers, num_timesteps, drop_ratio, out_dim,
-                 **kwargs):
+    def __init__(self, task, emb_dim=300, num_layers=5, num_timesteps=3, drop_ratio=0,
+                 output_dim=None, **kwargs):
         super(AttentiveFP, self).__init__()
+        if(output_dim == None):
+            self.output_dim = 1
+        else:
+            self.output_dim = output_dim
+
 
         self.x_embedding1 = nn.Embedding(NUM_ATOM_TYPE, emb_dim)
         self.x_embedding2 = nn.Embedding(NUM_CHIRALITY_TAG, emb_dim)
@@ -116,9 +121,10 @@ class AttentiveFP(nn.Module):
 
         # self.lin2 = Linear(emb_dim, out_channels)
         if self.task == 'classification':
-            self.lin2 = nn.Linear(emb_dim, out_dim)
+            self.output_dim *= 2
+            self.lin2 = nn.Linear(emb_dim, self.output_dim)
         elif self.task == 'regression':
-            self.lin2 = nn.Linear(emb_dim, 1)
+            self.lin2 = nn.Linear(emb_dim, self.output_dim)
 
         self.reset_parameters()
 

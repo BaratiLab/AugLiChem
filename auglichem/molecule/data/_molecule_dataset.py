@@ -256,6 +256,9 @@ class MoleculeDataset(Dataset):
 
 
     def _clean_label(self, target):
+        """
+            Removes labels that don't have values for a given target.
+        """
         # If value is not -999999999 we have a valid mol - label pair
         good_idxs = []
         for i, val in enumerate(self.labels[target]):
@@ -265,6 +268,10 @@ class MoleculeDataset(Dataset):
 
 
     def _match_indices(self, good_idx):
+        """
+            Match indices between our train/valid/test index and the good indices we have
+            for each data subset.
+        """
 
         # For each of train, valid, test, we match where we have a valid molecular
         # representation with where we have a valid label
@@ -343,9 +350,21 @@ class MoleculeDatasetWrapper(MoleculeDataset):
 
     def get_data_loaders(self, target=None):
         '''
+            Returns torch_geometric DataLoaders for train/validation/test splits. These can
+            be iterated over and are ideal for training and evaluating models.
+
+            Inputs:
+            -------
+            target (str, optional): Target name to get data loaders for. If None, returns the
+                                  loaders for the first target. If 'all' returns data for
+                                  all targets at once, ideal for multitarget trainimg.
+
+            Outputs:
+            --------
+            train/valid/test_loader (DataLoader): Data loaders containing the train, validation
+                                  and test splits of our data.
 
         '''
-        print(len(self.smiles_data))
         if(not target): # No target passed in, use default and warn
             warnings.warn("No target was set, using {} by default.".format(self.target),
                           RuntimeWarning, stacklevel=2)
@@ -399,15 +418,15 @@ class MoleculeDatasetWrapper(MoleculeDataset):
 
         train_loader = DataLoader(
             train_set, batch_size=self.batch_size,
-            num_workers=self.num_workers, drop_last=True, shuffle=False
+            num_workers=self.num_workers, drop_last=False, shuffle=True
         )
 
         valid_loader = DataLoader(
-            valid_set, batch_size=len(valid_set),
+            valid_set, batch_size=self.batch_size,
             num_workers=self.num_workers, drop_last=False
         )
         test_loader = DataLoader(
-            test_set, batch_size=len(test_set),
+            test_set, batch_size=self.batch_size,
             num_workers=self.num_workers, drop_last=False
         )
 
