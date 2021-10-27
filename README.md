@@ -4,7 +4,7 @@
 
 Welcome to AugLiChem!
 The augmentation library for chemical systems.
-This package supports augmentation for both crystaline and molecular systems, as well as provides automatic downloading for our benchmark datasets.
+This package supports augmentation for both crystaline and molecular systems, as well as provides automatic downloading for our benchmark datasets, and easy to use model implementations.
 
 
 ## Installation
@@ -24,7 +24,12 @@ Once you have `pytorch` installed, installing AugLiChem can be done simply using
 
 `pip install auglichem`
 
-####Note: Installation may take a while due to large dependencies.
+**Note:** Installation may take a while due to large dependencies.
+
+
+## Use
+
+Usage guides are provided in the `examples/` directory and provide useful guides for using both the molecular and crystal sides of the package.
 
 ## Authors
 
