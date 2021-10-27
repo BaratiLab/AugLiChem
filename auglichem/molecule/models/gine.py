@@ -4,19 +4,12 @@ import torch.nn.functional as F
 from torch.nn import Linear, LayerNorm, ReLU
 
 from torch_scatter import scatter
-# from torch_geometric.nn import GINEConv
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import add_self_loops, degree, softmax
 from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool
 
-#from data_aug.dataset import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 from auglichem.utils import NUM_ATOM_TYPE, NUM_CHIRALITY_TAG, NUM_BOND_TYPE, NUM_BOND_DIRECTION
 
-
-#num_atom_type = len(ATOM_LIST) + 1 # including the extra mask tokens
-#num_chirality_tag = len(CHIRALITY_LIST)
-#num_bond_type = len(BOND_LIST) + 1 # including aromatic and self-loop edge
-#num_bond_direction = len(BONDDIR_LIST)
 
 
 class GINEConv(MessagePassing):
@@ -71,7 +64,7 @@ class GINE(nn.Module):
     """
     def __init__(self, 
         task='classification', num_layer=5, emb_dim=300, 
-        feat_dim=256, pool='mean', drop_ratio=0, **kwargs
+        feat_dim=256, pool='mean', drop_ratio=0, output_dim=None, **kwargs
     ):
         super(GINE, self).__init__()
         self.num_layer = num_layer
@@ -79,6 +72,10 @@ class GINE(nn.Module):
         self.feat_dim = feat_dim
         self.drop_ratio = drop_ratio
         self.task = task
+        if(output_dim == None):
+            self.output_dim = 1
+        else:
+            self.output_dim = output_dim
 
         if self.num_layer < 2:
             raise ValueError("Number of GNN layers must be greater than 1.")
@@ -111,10 +108,11 @@ class GINE(nn.Module):
         self.feat_lin = nn.Linear(self.emb_dim, self.feat_dim)
 
         if self.task == 'classification':
+            self.output_dim *= 2
             self.pred_lin = nn.Sequential(
                 nn.Linear(self.feat_dim, self.feat_dim//2), 
                 nn.ReLU(inplace=True),
-                nn.Linear(self.feat_dim//2, 2)
+                nn.Linear(self.feat_dim//2, self.output_dim)
             )
         elif self.task == 'regression':
             self.pred_lin = nn.Sequential(
@@ -124,7 +122,7 @@ class GINE(nn.Module):
                 nn.ReLU(inplace=True),
                 nn.Linear(self.feat_dim//2, self.feat_dim//4),
                 nn.ReLU(inplace=True),
-                nn.Linear(self.feat_dim//4, 1)
+                nn.Linear(self.feat_dim//4, self.output_dim)
             )
 
     def forward(self, data):

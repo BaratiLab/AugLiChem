@@ -418,15 +418,15 @@ class MoleculeDatasetWrapper(MoleculeDataset):
 
         train_loader = DataLoader(
             train_set, batch_size=self.batch_size,
-            num_workers=self.num_workers, drop_last=True, shuffle=False
+            num_workers=self.num_workers, drop_last=False, shuffle=True
         )
 
         valid_loader = DataLoader(
-            valid_set, batch_size=len(valid_set),
+            valid_set, batch_size=self.batch_size,
             num_workers=self.num_workers, drop_last=False
         )
         test_loader = DataLoader(
-            test_set, batch_size=len(test_set),
+            test_set, batch_size=self.batch_size,
             num_workers=self.num_workers, drop_last=False
         )
 
