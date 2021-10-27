@@ -15,7 +15,7 @@ It is recommended to use an environment manager such as conda to install AugLiCh
 Instructions can be found [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
 If using conda, creating a new environment is ideal and can be done simply by running the following command:
 
-`conda create env -n "auglichem" python=3.8 ipython; conda activate auglichem`
+`conda create -n "auglichem" python=3.8; conda activate auglichem`
 
 AugLiChem is built primarily with `pytorch` and that should be installed independently according to your system specifications.
 After activating your conda environment, `pytorch` can be installed easily and instructions are found [here](https://pytorch.org/).
