@@ -32,6 +32,8 @@ setuptools.setup(
                       'rdkit-pypi',
 
                       'torch-geometric==1.7.2',
+                      'torch-sparse',
+                      'torch-scatter',
 
                       'ase>=3.22.0',
                       'pymatgen>=2022.0.11',

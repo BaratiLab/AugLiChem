@@ -24,7 +24,7 @@ Once you have `pytorch` installed, installing AugLiChem can be done simply using
 
 `pip install auglichem`
 
-**Note:** Installation may take a while due to large dependencies.
+**Note:** Installation may take a while due to pymatgen and torch-sparse dependencies.
 
 
 ## Use
