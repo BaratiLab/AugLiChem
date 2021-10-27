@@ -16,6 +16,8 @@ from torch_geometric.data import Data as PyG_Data
 
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 
+#TODO: Updated documentation to match other files
+
 
 class BaseTransform(object):
     def __init__(self, prob: float = 1.0):

@@ -177,6 +177,10 @@ def download_url(url, root, filename=None):
     return fpath
 
 def _load_data(dataset, data_path='./data_download'):
+    '''
+        Loads dataset, sets task to regression for the downloadable sets, gets the atom
+        embedding file, and updates the data path.
+    '''
     ###
     #
     #   Need to host data sets and download them
@@ -229,6 +233,24 @@ def _load_data(dataset, data_path='./data_download'):
 
 
 def read_crystal(dataset, data_path):
+    """
+        Inputs:
+        -------
+        dataset (str): The dataset to be used, needs to be one of: lanthanides, band_gap,
+                       perovskites, fermi_energy, or formation_energy
+        data_path (str): The path to search for data. If the requested data set is not there,
+                         the data is downloaded automatically and stored at data_path.
+
+        Outputs:
+        --------
+        csv_file_path (str): The path of id_prop.csv in the data set directory.
+        embedding_file_path (str): The path of [] in the data set directory.
+        ari: (AtomCustomJSONInitializer): Object that initializes the vector representation
+                                          of atoms.
+        data_path (str): The relative path of the data.
+        target (str): The name of the target variable.
+        task (str): regression or classification. Currently only classification is supported.
+    """
 
     # Create data download directory if it does not exist
     if(data_path is None):

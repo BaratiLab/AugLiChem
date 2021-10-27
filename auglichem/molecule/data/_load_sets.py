@@ -12,8 +12,7 @@ import numpy as np
 import hashlib
 
 #TODO:
-#  2) Clean up code and add proper comments
-#  3) Check integrity?
+#  1) Clean up code and add proper documentation
 
 USER_AGENT = "auglichem"
 

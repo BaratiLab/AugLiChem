@@ -125,37 +125,46 @@ class CrystalDataset(Dataset):
 
     ID.cif: a CIF file that recodes the crystal structure, where ID is the
     unique ID for the crystal.
-
-    Parameters
-    ----------
-
-    root_dir: str
-        The path to the root directory of the dataset
-    max_num_nbr: int
-        The maximum number of neighbors while constructing the crystal graph
-    radius: float
-        The cutoff radius for searching neighbors
-    dmin: float
-        The minimum distance for constructing GaussianDistance
-    step: float
-        The step size for constructing GaussianDistance
-    random_seed: int
-        Random seed for shuffling the dataset
-
-    Returns
-    -------
-
-    atom_fea: torch.Tensor shape (n_i, atom_fea_len)
-    nbr_fea: torch.Tensor shape (n_i, M, nbr_fea_len)
-    nbr_fea_idx: torch.LongTensor shape (n_i, M)
-    target: torch.Tensor shape (1, )
-    cif_id: str or int
     """
     def __init__(self, dataset, data_path=None, transform=None, id_prop_augment=None,
-                 atom_init_file=None, id_prop_file=None, ari=None,fold = 0,
-                 max_num_nbr=12, radius=8, dmin=0, step=0.2,
-                 random_seed=123, test_mode=True, on_the_fly_augment=False, kfolds=0,
-                 num_neighbors=8, seed=None, cgcnn=False):
+                 atom_init_file=None, id_prop_file=None, ari=None,
+                 radius=8, dmin=0, step=0.2,
+                 on_the_fly_augment=False, kfolds=0,
+                 num_neighbors=8, max_num_nbr=12, seed=None, cgcnn=False):
+        """
+            Inputs:
+            -------
+            dataset (str): One of our 5 datasets: lanthanides, perosvkites, band_gap,
+                           fermi_energy, or formation_energy.
+            data_path (str, optional): Path for our data, automatically checks if it is there
+                           and downloads the data if it isn't.
+            transform (list of AbstractTransformations, optional): The transformations
+                           to do on our CIF files
+            id_prop_augment (np.array of floats, shape=(N,2), optional):
+            atom_init_file (str, optional):
+            id_prop_file (str, optional):
+            ari (CustomAtomJSONInitializer, optional):
+            radius (float, optional, default=0):
+            dmin (float, optional, default=0):
+            step (float, optional, default=0.2):
+            on_the_fly_augment (bool, optional, default=Faalse): Setting to true augments
+                           cif files on-the-fly, like in MoleculeDataset. This feature is
+                           experimental and may significantly slow down run times.
+            kfolds (int, optional, default=0): Number of folds to use in k-fold cross
+                           validation. Must be >= 2 in order to run.
+            num_neighbors (int, optional, default=8): Number of neighbors to include for
+                           torch_geometric based models.
+            max_num_nbr (int, optional, default=12): Maximum number of neighboring atoms used
+                           when building the crystal graph for CGCNN.
+            random_seed (int, optional): Random seed  to use for data splitting.
+            cgcnn (bool, optional, default=False): If using built-in CGCNN model, must be set
+                           to True.
+
+            Outputs:
+            --------
+            None
+
+        """
 
         super(Dataset, self).__init__()
         
@@ -228,16 +237,21 @@ class CrystalDataset(Dataset):
             suffix = '_cubic_supercell'
         elif(isinstance(transformation, PrimitiveCellTransformation)):
             suffix = '_primitive_cell'
+        elif(isinstance(transformation, SwapAxesTransformation)):
+            suffix = '_swapaxes'
         return suffix
 
 
     def data_augmentation(self, transform=None):
         '''
-            Function call to deliberately augment the data
+            Function call to deliberately augment the data. Transformations are done one at
+            a time. For example, if we're using the RotationTransformation and
+            SupercellTransformation, 0.cif will turn into 0.cif, 0_supercell.cif, and
+            0_rotated.cif. Note: 0_supercell_rotated.cif WILL NOT be created.
 
             input:
             -----------------------
-            transformation (AbstractTransformation): 
+            transformation (list of AbstractTransformations): The transformations
 
         '''
         if(self._augmented):
@@ -321,15 +335,6 @@ class CrystalDataset(Dataset):
         '''
             k-fold CV data splitting function. Uses class attributes to split into k folds.
             Works by shuffling original data then selecting folds one at a time.
-
-            Inputs:
-            ------------
-            None
-
-            Outputs:
-            ------------
-            None
-
         '''
         # Set seed and shuffle data
         np.random.seed(self.seed)
@@ -369,6 +374,9 @@ class CrystalDataset(Dataset):
 
 
     def _getitem_crystal(self, idx):
+        """
+            Loads in and processes cif file for CGCNN at call time
+        """
         cif_id, target = self.id_prop_augment[idx]
         crystal = Structure.from_file(os.path.join(self.data_path,
                                                    cif_id+'.cif'))
@@ -410,6 +418,10 @@ class CrystalDataset(Dataset):
 
 
     def _getitem_knn(self, idx):
+        """
+            Loads in and processes cif file at call time. Returns torch_geometric Data
+            object, and uses knn to find atom neighbors.
+        """
         # get the cif id and path
         augment_cif_id, self.aug_labels = self.id_prop_augment[idx]
         augment_cryst_path = os.path.join(self.data_path, augment_cif_id + '.cif')
@@ -438,17 +450,20 @@ class CrystalDataset(Dataset):
         edge_index = knn_graph(pos, k=self.num_neighbors, loop=False)
         edge_attr = torch.zeros(edge_index.size(1), dtype=torch.long)
 
+        # build the PyG graph
         data = Data(
             atomics=atomics, pos=pos, feat=feat, y=y,
             edge_index=edge_index, edge_attr=edge_attr
         )
 
-        # build the PyG graph
         return data
 
 
     @functools.lru_cache(maxsize=None)  # Cache loaded structures
     def __getitem__(self, idx):
+        """
+            Loads and processes cif file. Takes care of cgcnn vs. torch_geometric models.
+        """
         if(self._cgcnn):
             return self._getitem_crystal(idx)
         else:
@@ -509,6 +524,9 @@ class CrystalDatasetWrapper(CrystalDataset):
 
     
     def _get_split_idxs(self, target=None, transform=None, fold=None):
+        """
+            This function returns the train, validation, and test id_prop_augment data..
+        """
         if(not target and self.target is None):
              self.target = list(self.labels.keys())[0]
 
@@ -582,7 +600,9 @@ class CrystalDatasetWrapper(CrystalDataset):
 
             outputs:
             -------------------------
-            Loaders
+            train/valid/test_loader (DataLoader): The torch_geometric data loader initialized.
+                                        The data loader can be iterated over, returning batches
+                                        of the data specified by `batch_size`.
         '''
         train_idx, valid_idx, test_idx = self._get_split_idxs(target, transform, fold)
 

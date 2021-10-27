@@ -184,6 +184,9 @@ class PerturbStructureTransformation(AbstractTransformation):
 
 
 class SwapAxesTransformation(object):
+    """
+    Swap coordinate axes in the crystal strucutre.
+    """
     def __init__(self, p=0.5):
         self.p = p
 
@@ -660,6 +663,7 @@ class PrimitiveCellTransformation(AbstractTransformation):
         Returns: False
         """
         return False
+
 # for test purpose
 if __name__ == '__main__':
     cif_file = read("original.cif")  # Path for the cif file
