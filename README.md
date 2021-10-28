@@ -27,13 +27,16 @@ AugLiChem is built primarily with `pytorch` and that should be installed indepen
 After activating your conda environment, `pytorch` can be installed easily and instructions are found [here](https://pytorch.org/).
 
 
+`torch_geometric` needs to be installed with `conda install pyg -c pyg -c conda-forge`.
+
+
 After pytorch, torch-sparse and torch-scatter need to be installed according to your hardware, with guide here: [torch-sparse](https://github.com/rusty1s/pytorch_sparse).
 
-The last manual install is `rdkit`, which is installed as:
+<Lastly, rdkit needs to installed with:
 
-`conda install -c rdkit rdkit`
+`pip install rdkit-pypi`>
 
-Once you have `pytorch', `rdkit, `torch_sparse`, and `torch_scatter` installed, installing AugLiChem can be done using PyPI:
+Once you have `pytorch` and `torch_geometric` installed, installing AugLiChem can be done using PyPI:
 
 `pip install auglichem`
 
@@ -44,7 +47,7 @@ A slightly different install is required to run on the new M1 chips.
  Miniforge (which contains conda installer) needs to fist be installed by following the guide [here](https://github.com/conda-forge/miniforge)
 
 Once you have miniforge compatible with ARM64 architecture, a new environment with rdkit can be installed.
-If you do not specify `python=3.8` it will default to `python=3.9.6` as of the time of writing this, which does not appear to cause any issues.
+If you do not specify `python=3.8` it will default to `python=3.9.6` as of the time of writing this.
 
 `conda create -n auglichem python=3.8 rdkit'
 
@@ -55,17 +58,11 @@ Now activate the environment:
 From here, individual packages can be installed:
 
 `conda install -c pytorch pytorch`
-
 `conda install -c fastchan torchvision`
-
 `conda install scipy`
-
 `pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html`
-
 `conda install cython`
-
 `conda install scikit-learn`
-
 `pip install auglichem`
 
 
