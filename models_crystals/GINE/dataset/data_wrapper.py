@@ -51,11 +51,11 @@ class CrystalDataset(Dataset):
         cif_id, self.labels = self.id_prop_data[index]
         cryst_path = os.path.join(self.data_dir, cif_id + '.cif')
 
-        self.labels = np.array(self.labels)
-        if self.task == 'regression':
-            self.scaler = preprocessing.StandardScaler()
-            self.scaler.fit(self.labels.reshape(-1,1))
-            self.labels = self.scaler.transform(self.labels.reshape(-1,1))
+        self.labels = np.array(self.labels,dtype = 'float')
+        # if self.task == 'regression':
+        #     self.scaler = preprocessing.StandardScaler()
+        #     self.scaler.fit(self.labels.reshape(-1,1))
+        #     self.labels = self.scaler.transform(self.labels.reshape(-1,1))
 
         # read cif using pymatgen
         crys = Structure.from_file(cryst_path)
@@ -106,11 +106,11 @@ class AugmentCrystalDataset(Dataset):
         augment_cif_id, self.aug_labels = self.id_prop_augment[index]
         augment_cryst_path = os.path.join(self.data_dir, augment_cif_id + '.cif')
 
-        self.aug_labels = np.array(self.aug_labels)
-        if self.task == 'regression':
-            self.scaler = preprocessing.StandardScaler()
-            self.scaler.fit(self.aug_labels.reshape(-1,1))
-            self.aug_labels = self.scaler.transform(self.aug_labels.reshape(-1,1))
+        self.aug_labels = np.array(self.aug_labels, dtype = 'float')
+        # if self.task == 'regression':
+        #     self.scaler = preprocessing.StandardScaler()
+        #     self.scaler.fit(self.aug_labels.reshape(-1,1))
+        #     self.aug_labels = self.scaler.transform(self.aug_labels.reshape(-1,1))
 
         # read cif using pymatgen
         aug_crys = Structure.from_file(augment_cryst_path)

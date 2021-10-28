@@ -89,10 +89,10 @@ class CrystalDataset(Dataset):
         cryst_path = os.path.join(self.data_dir, cif_id + '.cif')
 
         self.labels = np.array(self.labels)
-        if self.task == 'regression':
-            self.scaler = preprocessing.StandardScaler()
-            self.scaler.fit(self.labels.reshape(-1,1))
-            self.labels = self.scaler.transform(self.labels.reshape(-1,1))
+        # if self.task == 'regression':
+        #     self.scaler = preprocessing.StandardScaler()
+        #     self.scaler.fit(self.labels.reshape(-1,1))
+        #     self.labels = self.scaler.transform(self.labels.reshape(-1,1))
         # if self.swap_axes:
         #     # read cif using ASE
         #     crys = ase_read(cryst_path)
