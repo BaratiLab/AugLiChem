@@ -142,38 +142,32 @@ def test_smiles2graph():
 def test_molecule_data():
     # This has been tested locally
     assert True
-    #datasets = [
-    #        "QM7",
-    #        "QM8",
-    #        "QM9",
+    datasets = [
+            "QM7",
+            "QM8",
+            "QM9",
 
-    #        "ESOL",
-    #        "FreeSolv",
-    #        "Lipophilicity",
+            "ESOL",
+            "FreeSolv",
+            "Lipophilicity",
 
-    #        "PCBA",
-    #        "MUV",
-    #        "HIV",
-    #        "BACE",
-    #        ####"PDBbind",
-    #        ####"PDBbind - refined",
-    #        ####"PDBbind - core",
+            #"PCBA",
+            "MUV",
+            "HIV",
+            "BACE",
 
-    #        "BBBP",
-    #        "Tox21",
-    #        "ToxCast",
-    #        "SIDER",
-    #        "ClinTox"
-    #]
+            "BBBP",
+            "Tox21",
+            "ToxCast",
+            "SIDER",
+            "ClinTox"
+    ]
 
-    #for ds in datasets:
-    #    print("\nDATASET: {}".format(ds))
-    #    if(ds == "MUV"):
-    #        # It takes around 3 minutes to process
-    #        continue
-    #    data = MoleculeDatasetWrapper(ds)
-    #    data = MoleculeDatasetWrapper(ds)
-    #    train, valid, test = data.get_data_loaders()
+    for ds in datasets:
+        print("\nDATASET: {}".format(ds))
+        data = MoleculeDatasetWrapper(ds)
+        data = MoleculeDatasetWrapper(ds)
+        train, valid, test = data.get_data_loaders()
     #    shutil.rmtree("./data_download")
 
 
@@ -185,7 +179,7 @@ def test_composition():
     ])
     data = MoleculeDatasetWrapper("BACE", transform=transform, batch_size=1024, aug_time=3)
     train, valid, test = data.get_data_loaders()
-    shutil.rmtree("./data_download")
+    #shutil.rmtree("./data_download")
     assert True
 
 
@@ -196,21 +190,27 @@ def test_loading_multitask():
     ])
     dataset = MoleculeDatasetWrapper("ClinTox", transform=transform, batch_size=1024, aug_time=3)
     train, valid, test = dataset.get_data_loaders(['FDA_APPROVED', 'CT_TOX'])
-    for data in train:
+    for idx, data in enumerate(train):
+        if(idx == len(train)-1):
+            continue
         assert list(data.y.shape) == [1024, 2]
 
     train, valid, test = dataset.get_data_loaders(['CT_TOX'])
-    for data in train:
+    for idx, data in enumerate(train):
+        if(idx == len(train)-1):
+            continue
         assert list(data.y.shape) == [1024, 1]
 
 
     dataset = MoleculeDatasetWrapper("SIDER", transform=transform, batch_size=1, aug_time=3)
     train, valid, test = dataset.get_data_loaders('all')
-    for data in train:
+    for idx, data in enumerate(train):
+        if(idx == len(train)-1):
+            continue
         assert list(data.y.shape) == [1, 27]
 
     # Remove downloaded data
-    shutil.rmtree("./data_download")
+    #shutil.rmtree("./data_download")
 
 
 def test_consistent_augment():
@@ -255,7 +255,7 @@ def test_consistent_augment():
     for i in range(0, len(data)):
         assert all(data.__getitem__(i).x.numpy()[:,0] == 119)
 
-    shutil.rmtree("./data_download")
+    #shutil.rmtree("./data_download")
 
 
 #if __name__ == '__main__':
