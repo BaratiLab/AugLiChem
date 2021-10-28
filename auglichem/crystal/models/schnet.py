@@ -146,6 +146,11 @@ class SchNet(torch.nn.Module):
         """"""
         z = data.atomics
         pos = data.pos
+        if(batch is None): # If we're using the CrystalDatasetWrapper loaders, data has batch
+            try:
+                batch = data.batch
+            except AttributeError:
+                pass
         assert z.dim() == 1 and z.dtype == torch.long
         batch = torch.zeros_like(z) if batch is None else batch
 

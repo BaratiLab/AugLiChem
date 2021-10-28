@@ -1,8 +1,8 @@
 import torch
 import scipy.spatial
 
-if torch.cuda.is_available():
-    import torch_cluster.radius_cuda
+#if torch.cuda.is_available():
+#    import torch_cluster.radius_cuda
 
 
 def radius(x, y, r, batch_x=None, batch_y=None, max_num_neighbors=32):
@@ -56,21 +56,20 @@ def radius(x, y, r, batch_x=None, batch_y=None, max_num_neighbors=32):
     assert x.size(0) == batch_x.size(0)
     assert y.size(0) == batch_y.size(0)
 
-    if x.is_cuda:
-        return torch_cluster.radius_cuda.radius(x, y, r, batch_x, batch_y,
-                                                max_num_neighbors)
+    # Need to put data on CPU for this function, hold on to device to put back
+    _device = x.device
 
     x = torch.cat([x, 2 * r * batch_x.view(-1, 1).to(x.dtype)], dim=-1)
     y = torch.cat([y, 2 * r * batch_y.view(-1, 1).to(y.dtype)], dim=-1)
 
-    tree = scipy.spatial.cKDTree(x.detach().numpy())
+    tree = scipy.spatial.cKDTree(x.cpu().detach().numpy())
     _, col = tree.query(
-        y.detach().numpy(), k=max_num_neighbors, distance_upper_bound=r + 1e-8)
+        y.cpu().detach().numpy(), k=max_num_neighbors, distance_upper_bound=r + 1e-8)
     col = [torch.from_numpy(c).to(torch.long) for c in col]
     row = [torch.full_like(c, i) for i, c in enumerate(col)]
     row, col = torch.cat(row, dim=0), torch.cat(col, dim=0)
     mask = col < int(tree.n)
-    return torch.stack([row[mask], col[mask]], dim=0)
+    return torch.stack([row[mask], col[mask]], dim=0).to(device=_device)
 
 
 

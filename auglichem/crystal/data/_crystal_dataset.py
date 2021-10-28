@@ -427,10 +427,6 @@ class CrystalDataset(Dataset):
         augment_cryst_path = os.path.join(self.data_path, augment_cif_id + '.cif')
 
         self.aug_labels = np.array(self.aug_labels)
-        #if self.task == 'regression':
-        self.scaler = preprocessing.StandardScaler()
-        self.scaler.fit(self.aug_labels.reshape(-1,1))
-        self.aug_labels = self.scaler.transform(self.aug_labels.reshape(-1,1))
 
         # read cif using pymatgen
         aug_crys = Structure.from_file(augment_cryst_path)
@@ -440,7 +436,7 @@ class CrystalDataset(Dataset):
         feat = self.atom_featurizer.get_atom_features(atom_indices)
         N = len(pos)
         y = self.aug_labels
-        y = torch.tensor(y, dtype=torch.float).view(1,1)
+        y = torch.tensor(float(y), dtype=torch.float).view(1,1)
         atomics = []
         for index in atom_indices:
             atomics.append(ATOM_LIST.index(index))
