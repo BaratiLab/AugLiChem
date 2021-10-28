@@ -44,7 +44,7 @@ A slightly different install is required to run on the new M1 chips.
  Miniforge (which contains conda installer) needs to fist be installed by following the guide [here](https://github.com/conda-forge/miniforge)
 
 Once you have miniforge compatible with ARM64 architecture, a new environment with rdkit can be installed.
-If you do not specify `python=3.8` it will default to `python=3.9.6` as of the time of writing this.
+If you do not specify `python=3.8` it will default to `python=3.9.6` as of the time of writing this, which does not appear to cause any issues.
 
 `conda create -n auglichem python=3.8 rdkit'
 
@@ -55,11 +55,17 @@ Now activate the environment:
 From here, individual packages can be installed:
 
 `conda install -c pytorch pytorch`
+
 `conda install -c fastchan torchvision`
+
 `conda install scipy`
+
 `pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html`
+
 `conda install cython`
+
 `conda install scikit-learn`
+
 `pip install auglichem`
 
 
