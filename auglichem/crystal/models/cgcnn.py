@@ -154,6 +154,10 @@ class CrystalGraphConvNet(nn.Module):
           Atom hidden features after convolution
 
         """
+        if(atom_fea.is_cuda): # Convert crystal_atom_idx to cuda if necessary
+            crystal_atom_idx = \
+                        [crys_idx.to(device=atom_fea.device) for crys_idx in crystal_atom_idx]
+                                
         atom_fea = self.embedding(atom_fea)
         for conv_func in self.convs:
             atom_fea = conv_func(atom_fea, nbr_fea, nbr_fea_idx)

@@ -1,5 +1,4 @@
 import setuptools
-from pip.req import parse_requirements
 
 with open("README.md", "r") as f:
     long_description = f.read()
@@ -21,21 +20,20 @@ setuptools.setup(
     'Programming Language :: Python :: 3',
     "Operating System :: OS Independent",
   ],
-  python_requires = '>=3.0, < 3.9',
+  python_requires = '>=3.8',
   install_requires = ['numpy>=1.21.1',
                       'pytest>=6.0.1',
                       'pytest-cov',
-                      'sklearn>=0.24.2',
+                      'sklearn',
                       'pandas>=1.3.1',
                       'matplotlib>=3.4.2',
                       'tensorboard>=2.4.1',
                       'pyyaml>=5.4.1',
-                      'rdkit-pypi>=2021.03.4',
+                      'rdkit-pypi',
 
-                      'torch==1.8.0',
-                      'torchvision==0.2.2',
                       'torch-geometric==1.7.2',
-                      'pytorch_scatter==2.0.',
+                      'torch-sparse',
+                      'torch-scatter',
 
                       'ase>=3.22.0',
                       'pymatgen>=2022.0.11',

@@ -18,7 +18,8 @@ from auglichem.crystal._transforms import (
         SupercellTransformation,
         TranslateSitesTransformation,
         CubicSupercellTransformation,
-        PrimitiveCellTransformation
+        PrimitiveCellTransformation,
+        SwapAxesTransformation
 )
 from auglichem.crystal._compositions import Compose, OneOf
 from auglichem.crystal.data import CrystalDataset, CrystalDatasetWrapper
@@ -48,8 +49,7 @@ def test_crystal_data():
     assert True
 
     dataset = CrystalDatasetWrapper("lanthanides", batch_size=1, kfolds=2)
-    train, valid, test = dataset.get_data_loaders(fold=0)
-    train, valid, test = dataset.get_data_loaders(transform=transform)
+    train, valid, test = dataset.get_data_loaders(transform=transform, fold=0)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         num_cifs = 0
@@ -77,8 +77,7 @@ def test_crystal_data():
     assert True
 
     dataset = CrystalDatasetWrapper("lanthanides", batch_size=1, cgcnn=True, kfolds=2)
-    train, valid, test = dataset.get_data_loaders(fold=0)
-    train, valid, test = dataset.get_data_loaders(transform=transform)
+    train, valid, test = dataset.get_data_loaders(transform=transform, fold=0)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         num_cifs = 0
@@ -90,50 +89,6 @@ def test_crystal_data():
             pass
     assert True
     
-
-def test_random_rotation():
-    #rotate = RotationTransformation([1,0,0], 90,)
-    pass
-
-def test_random_perturb_structure_transformation():
-    pass
-
-def test_random_remove_sites_transformation():
-    pass
-
-def test_supercell_transformation():
-    pass
-
-def test_random_translates_sites_transformation():
-    pass
-
-def cubic_supercell_transformation():
-    pass
-
-def test_cubic_supercell_transformation():
-    pass
-
-def primitive_cell_transformation():
-    pass
-
-def test_composition():
-    #TODO Actually test the various functionality rather than simply check it runs
-    #transform = Compose([
-    #    RotationTransformation([1,0,0], 90),
-    #    PerturbStructureTransformation(),
-    #    RemoveSitesTransformation([0]),
-    #    SupercellTransformation(),
-    #    TranslateSitesTransformation([0,2], [1,1]),
-    #    CubicSupercellTransformation(10, 100, 10),
-    #    PrimitiveCellTransformation(0.1)
-    #])
-    #data = CrystalDataset("Lanthanides", transform=transform, batch_size=1024, aug_time=3)
-    #train, valid, test = data.get_data_loaders()
-    ##shutil.rmtree("./data_download")
-    #for b, t in enumerate(train):
-    #    print(b)
-    assert True
-
 
 def _check_id_prop_augment(path, transform):
     # Checking if all cifs have been perturbed
@@ -247,7 +202,7 @@ def test_k_fold():
         assert error.args[0] == "Please select a fold < 5"
 
     # Remove directory
-    shutil.rmtree(dataset.data_path)
+    #shutil.rmtree(dataset.data_path)
 
     dataset = CrystalDatasetWrapper("lanthanides", kfolds=2,
                                     data_path="../../examples/data_download")
@@ -268,10 +223,58 @@ def test_k_fold():
     _check_train_transform(train_loader.dataset.data_path, transform, 1)
 
     # Remove directory
-    shutil.rmtree(dataset.data_path)
+    #shutil.rmtree(dataset.data_path)
+
+
+def test_rotation():
+    transform = [RotationTransformation()]
+    pass
+
+
+def test_perturb_structure():
+    transform = [PerturbStructureTransformation()]
+    pass
+
+
+def test_remove_sites():
+    tranform = [RemoveSitesTransformation([0])]
+    pass
+
+
+def test_supercell():
+    transform = [SupercellTransformation()]
+    pass
+
+
+def test_translate():
+    transform = [TranslateSitesTransformation()]
+    pass
+
+
+def test_cubic_supercell():
+    transform = [CubicSupercellTransformation()]
+    pass
+
+
+def test_primitive():
+    transfomr = [PrimitiveCellTransformation()]
+    pass
+
+
+def test_swap_axes():
+    transform = [SwapAxesTransformation()]
+    pass
     
 
 if __name__ == '__main__':
-    test_crystal_data()
+    #test_crystal_data()
     #test_composition()
-    test_k_fold()
+    #test_k_fold()
+    test_rotation()
+    test_perturb_structure()
+    test_remove_sites()
+    test_supercell()
+    test_translate()
+    test_cubic_supercell()
+    test_primitive()
+    test_swap_axes()
