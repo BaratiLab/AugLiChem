@@ -57,11 +57,17 @@ Now activate the environment:
 From here, individual packages can be installed:
 
 `conda install -c pytorch pytorch`
+
 `conda install -c fastchan torchvision`
+
 `conda install scipy`
+
 `pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html`
+
 `conda install cython`
+
 `conda install scikit-learn`
+
 `pip install auglichem`
 
 
