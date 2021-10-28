@@ -32,13 +32,12 @@ After activating your conda environment, `pytorch` can be installed easily and i
 
 After pytorch, torch-sparse and torch-scatter need to be installed according to your hardware, with guide here: [torch-sparse](https://github.com/rusty1s/pytorch_sparse).
 
-<Lastly, rdkit needs to installed with:
-
-`pip install rdkit-pypi`>
 
 Once you have `pytorch` and `torch_geometric` installed, installing AugLiChem can be done using PyPI:
 
 `pip install auglichem`
+
+`conda install auglichem`
 
 
 ### MacOS ARM64 Architecture
@@ -70,6 +69,7 @@ From here, individual packages can be installed:
 
 Usage guides are provided in the `examples/` directory and provide useful guides for using both the molecular and crystal sides of the package.
 Make sure to install `jupyter` before working with examples, using `conda install jupyter`.
+After installing the package as described above, the example notebooks can be downloaded separately and run locally.
 
 ## Authors
 
