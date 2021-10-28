@@ -12,7 +12,7 @@ from torch import nn
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import roc_auc_score, mean_squared_error, mean_absolute_error
-
+import time
 from dataset.data_wrapper import CrystalDatasetWrapper
 from model.gin import GINet
 
@@ -157,8 +157,8 @@ class Runner(object):
         if self.config['dataset']['task'] == 'regression':
             predictions = np.array(predictions)
             labels = np.array(labels)
-            predictions = valid_loader.dataset.scaler.inverse_transform(predictions)
-            labels = valid_loader.dataset.scaler.inverse_transform(labels)
+            #predictions = valid_loader.dataset.scaler.inverse_transform(predictions)
+            #labels = valid_loader.dataset.scaler.inverse_transform(labels)
             # rmse = mean_squared_error(labels, predictions, squared=False)
             mae = mean_absolute_error(labels, predictions)
             print('Validation loss:', valid_loss)
@@ -210,8 +210,8 @@ class Runner(object):
         if self.config['dataset']['task'] == 'regression':
             predictions = np.array(predictions)
             labels = np.array(labels)
-            predictions = test_loader.dataset.scaler.inverse_transform(predictions)
-            labels = test_loader.dataset.scaler.inverse_transform(labels)
+            #predictions = test_loader.dataset.scaler.inverse_transform(predictions)
+            #labels = test_loader.dataset.scaler.inverse_transform(labels)
             # self.rmse = mean_squared_error(labels, predictions, squared=False)
             self.mae = mean_absolute_error(labels, predictions)
             print('Test loss:', test_loss)
@@ -262,8 +262,8 @@ if __name__ == "__main__":
         raise ValueError('Undefined dataset')
 
     fold_num = 5
-
-    for i in range(1,fold_num):
+    start_time = time.time()
+    for i in range(1):
         curr_fold = i
         dataset = CrystalDatasetWrapper(config['batch_size'], **config['dataset'],fold = curr_fold)
 
@@ -273,3 +273,8 @@ if __name__ == "__main__":
         df = pd.DataFrame([[loss, metric]])
         os.makedirs('experiments', exist_ok=True)
         df.to_csv('experiments/{}_{}_{}.csv'.format(config['model_type'], task_name,fold_num), index=False, mode='a', header=False)
+    
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    print("The total time:", total_time)

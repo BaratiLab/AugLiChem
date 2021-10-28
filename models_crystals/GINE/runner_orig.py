@@ -157,8 +157,8 @@ class Runner(object):
         if self.config['dataset']['task'] == 'regression':
             predictions = np.array(predictions)
             labels = np.array(labels)
-            predictions = valid_loader.dataset.scaler.inverse_transform(predictions)
-            labels = valid_loader.dataset.scaler.inverse_transform(labels)
+            #predictions = valid_loader.dataset.scaler.inverse_transform(predictions)
+            #labels = valid_loader.dataset.scaler.inverse_transform(labels)
             # rmse = mean_squared_error(labels, predictions, squared=False)
             mae = mean_absolute_error(labels, predictions)
             print('Validation loss:', valid_loss)
@@ -210,8 +210,8 @@ class Runner(object):
         if self.config['dataset']['task'] == 'regression':
             predictions = np.array(predictions)
             labels = np.array(labels)
-            predictions = test_loader.dataset.scaler.inverse_transform(predictions)
-            labels = test_loader.dataset.scaler.inverse_transform(labels)
+            #predictions = test_loader.dataset.scaler.inverse_transform(predictions)
+            #labels = test_loader.dataset.scaler.inverse_transform(labels)
             # self.rmse = mean_squared_error(labels, predictions, squared=False)
             self.mae = mean_absolute_error(labels, predictions)
             print('Test loss:', test_loss)
