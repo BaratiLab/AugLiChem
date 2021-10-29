@@ -1,14 +1,13 @@
-title: Your awesome title
-author: GitHub User
+title: AugLiChem: Augmentation Library for Chemical Systems
+author: BaratiLab
 email: your-email@domain.com
 description: > # this means to ignore newlines until "twitter_username:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined
+  augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models
+  make AugLiChem easy to use.
 # social links
-twitter_username: jekyllrb
-github_username:  jekyll
-rss: rss
+twitter_username: AmirBaratiFarimani
+github_username:  BaratiLab
 # dribbble_username: jekyll
 # facebook_username: jekyll
 # flickr_username: jekyll
