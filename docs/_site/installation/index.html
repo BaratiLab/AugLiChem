@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Installation | AugLiChem</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Installation" />
+<meta name="author" content="BaratiLab" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
+<meta property="og:description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
+<link rel="canonical" href="http://localhost:4000/installation/" />
+<meta property="og:url" content="http://localhost:4000/installation/" />
+<meta property="og:site_name" content="AugLiChem" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Installation" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/installation/","headline":"Installation","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
+<body><div class="site-sidebar">
+
+    <a class="sidebar-title" href="/">AugLiChem</a>
+
+    
+    
+    <!--  -->
+    <nav class="site-nav">
+      <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+      <label for="nav-trigger">
+        <span class="menu-icon">
+          <svg viewBox="0 0 18 15" width="18px" height="15px">
+            <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+            <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+            <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+          </svg>
+        </span>
+      </label>
+
+      <form class="trigger" method="get" action="/search">
+        <input type="text" name="q" placeholder="Search blog">
+      </form>
+
+      <ul id="page-list" class="trigger sidebar-list">
+        
+          
+          
+            <li class=""><a href="/">AugLiChem</a></li>
+          
+        
+          
+          
+            <li class=""><a href="/crystal/">Crystal</a></li>
+          
+        
+          
+          
+            <li class=""><a href="/molecule/">Molecule</a></li>
+          
+        
+          
+          
+            <li class="active"><a href="/installation/">Installation</a></li>
+          
+        
+          
+          
+            <li class=""><a href="/usage_guide/">Usage</a></li>
+          
+        
+      </ul>
+    <!--  -->
+
+      
+        <ul id="post-list" class="trigger sidebar-list">
+          
+            <li class="">
+              
+              <span>Oct 29, 2021</span><br>
+              <a href="/2021/10/29/release.html">Release</a>
+            </li>
+          
+        </ul>
+      
+    </nav>
+
+</div>
+<div class="main-wrapper"><header class="site-header" role="banner">
+
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">AugLiChem</a>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+        <div class="wrapper">
+          <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Installation</h1>
+  </header>
+
+  <div class="post-content">
+    <p>Welcome to the installation guide. First off, AugLiChem is a <code class="language-plaintext highlighter-rouge">python3.8+</code> package.
+Guides for installation in Linux (Ubuntu) and MacOS ARM64 (M1 chip) architecture are given.
+Installation for Linux is straightforward, but for MacOS ARM64, installation is more involved due to dependencies not yet being supported for the architecture.</p>
+
+<h3 id="linux">Linux</h3>
+
+<p>It is recommended to use an environment manager such as conda to install AugLiChem.
+Instructions can be found <a href="https://conda.io/projects/conda/en/latest/user-guide/install/index.html">here</a>.
+If using conda, creating a new environment is ideal and can be done simply by running the following command:</p>
+
+<p><code class="language-plaintext highlighter-rouge">conda create -n auglichem python=3.8</code></p>
+
+<p>Then activating the new environment with</p>
+
+<p><code class="language-plaintext highlighter-rouge">conda activate auglichem</code></p>
+
+<p>AugLiChem is built primarily with <code class="language-plaintext highlighter-rouge">pytorch</code> and that should be installed independently according to your system specifications.
+After activating your conda environment, <code class="language-plaintext highlighter-rouge">pytorch</code> can be installed easily and instructions are found <a href="https://pytorch.org/">here</a>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">torch_geometric</code> needs to be installed with <code class="language-plaintext highlighter-rouge">conda install pyg -c pyg -c conda-forge</code>.</p>
+
+<p>After pytorch, torch-sparse and torch-scatter need to be installed according to your hardware, with guide here: <a href="https://github.com/rusty1s/pytorch_sparse">torch-sparse</a>.</p>
+
+<p>Once you have <code class="language-plaintext highlighter-rouge">pytorch</code> and <code class="language-plaintext highlighter-rouge">torch_geometric</code> installed, installing AugLiChem can be done using PyPI:</p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install auglichem</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install auglichem</code></p>
+
+<h3 id="macos-arm64-architecture">MacOS ARM64 Architecture</h3>
+
+<p>A more involved install is required to run on the new M1 chips since some of the packages do not have official support yet.
+We are working on a more elegant solution given the current limitations.</p>
+
+<p>First, download this repo.</p>
+
+<p>If you do not have it yet,, conda for ARM64 architecture needs to be installed.
+ This can be done with Miniforge (which contains conda installer) which is installed by following the guide <a href="https://github.com/conda-forge/miniforge">here</a></p>
+
+<p>Once you have miniforge compatible with ARM64 architecture, a new environment with rdkit can be installed.
+If you do not specify <code class="language-plaintext highlighter-rouge">python=3.8</code> it will default to <code class="language-plaintext highlighter-rouge">python=3.9.6</code> as of the time of writing this.</p>
+
+<p>`conda create -n auglichem python=3.8 rdkit’</p>
+
+<p>Now activate the environment:</p>
+
+<p><code class="language-plaintext highlighter-rouge">conda activate auglichem</code></p>
+
+<p>From here, individual packages can be installed:</p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install -c pytorch pytorch</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install -c fastchan torchvision</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install scipy</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install cython</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install scikit-learn</code></p>
+
+<p>Before installing the package, you must go into <code class="language-plaintext highlighter-rouge">setup.py</code> in the main directory and comment out <code class="language-plaintext highlighter-rouge">rdkit-pypi</code> from the <code class="language-plaintext highlighter-rouge">install_requires</code> list.
+It is not supported through pip this way, and since it is already installed, it will throw an error.</p>
+
+<p>Finally, run:</p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install .</code></p>
+
+
+  </div>
+
+</article>
+
+        </div>
+      </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AugLiChem</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">BaratiLab</li><li><a class="u-email" href="mailto:your-email@domain.com">your-email@domain.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/BaratiLab"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">BaratiLab</span></a></li><li><a href="https://www.twitter.com/AmirBaratiF"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">AmirBaratiF</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</div>
+
+    <script>
+      (function() {
+
+        var postList = document.getElementById('post-list');
+	      var activePost = postList.getElementsByClassName('active')[0];
+
+        var post = document.getElementsByClassName('post-content')[0];
+
+        var headings = [];
+
+        var tag_names = {
+            h1:1,
+            h2:1,
+            h3:1,
+            h4:1,
+            h5:1,
+            h6:1
+        };
+
+        function walk(root) {
+            if (root.nodeType === 1 && root.nodeName !== 'script') {
+                if (tag_names.hasOwnProperty(root.nodeName.toLowerCase())) {
+                    headings.push(root);
+                } else {
+                    for (var i = 0; i < root.childNodes.length; i++) {
+                        walk(root.childNodes[i]);
+                    }
+                }
+            }
+        }
+
+        walk(post);
+
+        if (headings.length > 0) {
+          var ul = document.createElement("ul");
+          ul.classList.add("sidebar-headings")
+          activePost.appendChild(ul);
+
+          for (var i=0, max=headings.length; i < max; i++) {
+            var li = document.createElement("li");
+            li.classList.add("sidebar-" + headings[i].tagName.toLowerCase());
+            var a = document.createElement("a");
+            var aText = document.createTextNode(headings[i].innerText);
+            a.appendChild(aText);
+            a.href = "#" + headings[i].id;
+            li.appendChild(a);
+            ul.appendChild(li);
+          }
+        }
+
+      })();
+    </script>
+
+  </body>
+
+</html>

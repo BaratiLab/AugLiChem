@@ -77,18 +77,3 @@ Finally, run:
 
 `pip install .`
 
-
-## Use
-
-Usage guides are provided in the `examples/` directory and provide useful guides for using both the molecular and crystal sides of the package.
-Make sure to install `jupyter` before working with examples, using `conda install jupyter`.
-After installing the package as described above, the example notebooks can be downloaded separately and run locally.
-
-## Authors
-
-## Paper
-
-Our paper can be found at [PAPER URL]
-
-## Citation
-
