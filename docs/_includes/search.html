@@ -1,0 +1,56 @@
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+			  crossorigin="anonymous"></script>
+
+<script>
+	function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+      sParameterName = sURLVariables[i].split('=');
+
+      if (sParameterName[0] === sParam) {
+        return sParameterName[1] === undefined ? true : sParameterName[1];
+      }
+    }
+	};
+
+	$(document).ready(function() {
+
+		var ul = $(".post-list"),
+		    q = getUrlParameter("q"),
+		    re = new RegExp(q, "gi");
+
+		$.getJSON('{{ "/assets/search.json" | absolute_url }}', function(data) {
+			for (var i = 0; i < data.length; i++) {
+				var matching = false;
+				if (data[i].title.search(re) >= 0) {
+					matching = true;
+				} else if (data[i].date.search(re) >= 0) {
+					matching = true;
+				} else if (data[i].category.search(re) >= 0) {
+					matching = true;
+				} else if (data[i].tags.search(re) >= 0) {
+					matching = true;
+				} else if (data[i].content.search(re) >= 0) {
+					matching = true;
+				}
+
+				if (matching == true) {
+					ul.append(
+						$('<li>').append(
+							$('<span>', {'class': 'post-meta', 'text': data[i].date}),
+							$('<h3>').append(
+								$('<a>', {'class': 'post-link', 'href': data[i].url, 'text': data[i].title})
+							)
+						)
+					);
+				}
+			}
+		});
+
+	});
+</script>

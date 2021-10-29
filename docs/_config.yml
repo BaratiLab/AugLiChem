@@ -1,0 +1,46 @@
+title: AugLiChem
+subtitle: Augmentation Library for Chemical Systems
+author: BaratiLab
+email: your-email@domain.com
+description: > # this means to ignore newlines until "twitter_username:"
+  AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined
+  augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models
+  make AugLiChem easy to use.
+# social links
+twitter_username: AmirBaratiF
+github_username:  BaratiLab
+# dribbble_username: jekyll
+# facebook_username: jekyll
+# flickr_username: jekyll
+# instagram_username: jekyll
+# linkedin_username: jekyll
+# pinterest_username: jekyll
+# youtube_username: jekyll
+# googleplus_username: +jekyll
+
+# Mastodon instances
+# mastodon:
+# - username: jekyll
+#   instance: example.com
+# - username: jekyll2
+#   instance: example.com
+
+
+show_excerpts: true # set to true to show excerpts on the homepage
+
+# Minima date format
+# refer to http://shopify.github.io/liquid/filters/date/ if you want to customize this
+minima:
+  date_format: "%b %-d, %Y"
+
+# If you want to link only specific pages in your header, uncomment
+# this and add the path to the pages in order as they should show up
+#header_pages:
+# - about.html
+
+# Build settings
+markdown: kramdown
+remote_theme: pawamoy/jekyll-readthedocs
+exclude:
+  - Gemfile
+  - Gemfile.lock

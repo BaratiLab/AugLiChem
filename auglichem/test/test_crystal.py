@@ -28,13 +28,15 @@ from auglichem.crystal.models import CrystalGraphConvNet as CGCNN
 
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
 
+from pymatgen.core import Structure, Lattice, Molecule
+
 def test_crystal_data():
     '''
         Since automated downloading isn't supported yet, this can't be tested without
         uploading the data set
     '''
     # Check general implementation
-    dataset = CrystalDatasetWrapper("lanthanides", batch_size=1)
+    dataset = CrystalDatasetWrapper("lanthanides", batch_size=1, data_path="./test_download")
     transform = [SupercellTransformation()]
     train, valid, test = dataset.get_data_loaders(transform=transform)
     with warnings.catch_warnings():
@@ -227,42 +229,114 @@ def test_k_fold():
 
 
 def test_rotation():
-    transform = [RotationTransformation()]
+    transform = RotationTransformation([0,0,1], 90)
+
+    coords = [[0, 0, 0], [0.75,0.5,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
+                                  beta=90, gamma=60)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    print(struct)
+    struct = transform.apply_transformation(struct)
+    print(struct)
     pass
 
 
 def test_perturb_structure():
-    transform = [PerturbStructureTransformation()]
+    transform = PerturbStructureTransformation()
+
+    coords = [[0, 0, 0], [0.75,0.5,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
+                                  beta=90, gamma=60)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    print(struct)
+    struct = transform.apply_transformation(struct)
+    print(struct)
     pass
 
 
 def test_remove_sites():
-    tranform = [RemoveSitesTransformation([0])]
+    transform = RemoveSitesTransformation([0])
+
+    coords = [[0, 0, 0], [0.75,0.5,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
+                                  beta=90, gamma=60)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    print(struct)
+    struct = transform.apply_transformation(struct)
+    print(struct)
     pass
 
 
 def test_supercell():
-    transform = [SupercellTransformation()]
+    transform = SupercellTransformation()
+
+    coords = [[0, 0, 0], [0.75,0.5,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
+                                  beta=90, gamma=60)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    print(struct)
+    struct = transform.apply_transformation(struct)
+    print(struct)
     pass
 
 
 def test_translate():
-    transform = [TranslateSitesTransformation()]
+    transform = TranslateSitesTransformation([0], [1,0,0], True)
+
+    coords = [[0, 0, 0], [0.75,0.5,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
+                                  beta=90, gamma=60)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    print(struct)
+    struct = transform.apply_transformation(struct)
+    print(struct)
     pass
 
 
 def test_cubic_supercell():
-    transform = [CubicSupercellTransformation()]
+    transform = CubicSupercellTransformation()
+
+    coords = [[0, 0, 0], [0.75,0.5,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
+                                  beta=90, gamma=60)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    print(struct)
+    struct = transform.apply_transformation(struct)
+    print(struct)
     pass
 
 
 def test_primitive():
-    transfomr = [PrimitiveCellTransformation()]
+    transform = PrimitiveCellTransformation()
+
+    coords = [[0, 0, 0], [0.75,0.5,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
+                                  beta=90, gamma=60)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    print(struct)
+    struct = transform.apply_transformation(struct)
+    print(struct)
     pass
 
 
 def test_swap_axes():
-    transform = [SwapAxesTransformation()]
+    transform = SwapAxesTransformation()
+
+    coords = [[0, 0, 0], [0.75,0.5,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
+                                  beta=90, gamma=60)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    print(struct)
+    struct = transform.apply_transformation(struct)
+    print(struct)
     pass
     
 

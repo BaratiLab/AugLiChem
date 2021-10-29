@@ -29,13 +29,10 @@ setuptools.setup(
                       'matplotlib>=3.4.2',
                       'tensorboard>=2.4.1',
                       'pyyaml>=5.4.1',
-                      'rdkit-pypi',
-
-                      'torch-geometric==1.7.2',
-                      'torch-sparse',
-                      'torch-scatter',
+                      'tqdm',
 
                       'ase>=3.22.0',
                       'pymatgen>=2022.0.11',
+                      'rdkit-pypi',
                      ],
 )
