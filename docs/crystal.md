@@ -1,4 +1,8 @@
-## Crystal 
+---
+layout: page
+title: Crystal
+permalink: /crystal/
+---
 
 Crystal augmentation is done before running.
 

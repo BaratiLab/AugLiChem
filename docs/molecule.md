@@ -1,4 +1,8 @@
-## Molecule
+---
+layout: page
+title: Molecule
+permalink: /molecule/
+---
 
 Molecular augmentation is done at call-time. Graphs are built from rdkit Chem objects.
 
