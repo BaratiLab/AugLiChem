@@ -57,21 +57,21 @@ If you do not specify `python=3.8` it will default to `python=3.9.6` as of the t
 
 Now activate the environment:
 
-`conda activate auglichem`
+`conda activate auglichem`\
 
-From here, individual packages can be installed:
+From here, individual packages can be installed:\
 
-`conda install -c pytorch pytorch`
+`conda install -c pytorch pytorch`\
 
-`conda install -c fastchan torchvision`
+`conda install -c fastchan torchvision`\
 
-`conda install scipy`
+`conda install scipy`\
 
-`pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html`
+`pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html`\
 
-`conda install cython`
+`conda install cython`\
 
-`conda install scikit-learn`
+`conda install scikit-learn`\
 
 Before installing the package, you must go into `setup.py` in the main directory and comment out `rdkit-pypi` from the `install_requires` list.
 It is not supported through pip this way, and since it is already installed, it will throw an error.
