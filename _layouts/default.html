@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+  {%- include head.html -%}
+
+  <body>
+
+    {%- include sidebar.html -%}
+
+    <div class="main-wrapper">
+
+      {%- include header.html -%}
+
+      <main class="page-content" aria-label="Content">
+        <div class="wrapper">
+          {{ content }}
+        </div>
+      </main>
+
+      {%- include footer.html -%}
+
+    </div>
+
+    <script>
+      (function() {
+
+        var postList = document.getElementById('post-list');
+	      var activePost = postList.getElementsByClassName('active')[0];
+
+        var post = document.getElementsByClassName('post-content')[0];
+
+        var headings = [];
+
+        var tag_names = {
+            h1:1,
+            h2:1,
+            h3:1,
+            h4:1,
+            h5:1,
+            h6:1
+        };
+
+        function walk(root) {
+            if (root.nodeType === 1 && root.nodeName !== 'script') {
+                if (tag_names.hasOwnProperty(root.nodeName.toLowerCase())) {
+                    headings.push(root);
+                } else {
+                    for (var i = 0; i < root.childNodes.length; i++) {
+                        walk(root.childNodes[i]);
+                    }
+                }
+            }
+        }
+
+        walk(post);
+
+        if (headings.length > 0) {
+          var ul = document.createElement("ul");
+          ul.classList.add("sidebar-headings")
+          activePost.appendChild(ul);
+
+          for (var i=0, max=headings.length; i < max; i++) {
+            var li = document.createElement("li");
+            li.classList.add("sidebar-" + headings[i].tagName.toLowerCase());
+            var a = document.createElement("a");
+            var aText = document.createTextNode(headings[i].innerText);
+            a.appendChild(aText);
+            a.href = "#" + headings[i].id;
+            li.appendChild(a);
+            ul.appendChild(li);
+          }
+        }
+
+      })();
+    </script>
+
+  </body>
+
+</html>

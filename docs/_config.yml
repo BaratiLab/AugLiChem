@@ -8,7 +8,7 @@ webrick:
 
 # Theme settings
 site_author: Carlos Pereira Atencio
-repo_url: 'https://github.com/carlosperate/jekyll-theme-rtd'
+remote_theme: pawamoy/jekyll-reathedocs
 edit_on_github: true
 github_docs_folder: false
 sticky_navigation: true
