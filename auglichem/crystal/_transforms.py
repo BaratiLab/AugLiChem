@@ -74,7 +74,7 @@ class RotationTransformation(AbstractTransformation):
     The RotationTransformation applies a rotation to a structure.
     """
 
-    def __init__(self):
+    def __init__(self, axis=None, angle=None):
         """
         Args:
             axis (3x1 array): Axis of rotation, e.g., [1, 0, 0]
@@ -82,12 +82,12 @@ class RotationTransformation(AbstractTransformation):
             angle_in_radians (bool): Set to True if angle is supplied in radians.
                 Else degrees are assumed.
         """
-        self.axis = None
-        self.angle = None
+        self.axis = axis
+        self.angle = angle
         # self.angle_in_radians = angle_in_radians
         # self._symmop = SymmOp.from_axis_angle_and_translation(self.axis, self.angle, self.angle_in_radians)
 
-    def apply_transformation(self, structure, axis, angle, angle_in_radians=False):
+    def apply_transformation(self, structure, axis=None, angle=None, angle_in_radians=False):
         """
         Apply the transformation.
         Args:
@@ -95,8 +95,10 @@ class RotationTransformation(AbstractTransformation):
         Returns:
             Rotated Structure.
         """
-        self.axis = axis
-        self.angle = angle
+        if(axis is not None):
+            self.axis = axis
+        if(angle is not None):
+            self.angle = angle
         self.angle_in_radians = angle_in_radians
         self._symmop = SymmOp.from_axis_angle_and_translation(self.axis, self.angle, self.angle_in_radians)
 
@@ -404,7 +406,7 @@ class TranslateSitesTransformation(AbstractTransformation):
     This class translates a set of sites by a certain vector.
     """
 
-    def __init__(self):
+    def __init__(self, indices_to_move, translation_vector, vector_in_frac_coords):
         """
         Args:
             indices_to_move: The indices of the sites to move
@@ -416,16 +418,16 @@ class TranslateSitesTransformation(AbstractTransformation):
                 fractional coordinates, and False if it is in cartesian
                 coordinations. Defaults to True.
         """
-        # self.indices_to_move = indices_to_move
-        # self.translation_vector = np.array(translation_vector)
-        # self.vector_in_frac_coords = vector_in_frac_coords
+        self.indices_to_move = indices_to_move
+        self.translation_vector = np.array(translation_vector)
+        self.vector_in_frac_coords = vector_in_frac_coords
 
-        self.indices_to_move = None
-        self.translation_vector = None
-        self.vector_in_frac_coords = None
+        #self.indices_to_move = None
+        #self.translation_vector = None
+        #self.vector_in_frac_coords = None
 
     def apply_transformation(self, 
-        structure, indices_to_move, translation_vector, 
+        structure, indices_to_move=None, translation_vector=None, 
         vector_in_frac_coords=True
     ):
         """
@@ -436,9 +438,12 @@ class TranslateSitesTransformation(AbstractTransformation):
         Return:
             Returns a copy of structure with sites translated.
         """
-        self.indices_to_move = indices_to_move
-        self.translation_vector = np.array(translation_vector)
-        self.vector_in_frac_coords = vector_in_frac_coords
+        if(indices_to_move is not None):
+            self.indices_to_move = indices_to_move
+        if(translation_vector is not None):
+            self.translation_vector = np.array(translation_vector)
+        if(vector_in_frac_coords is not None):
+            self.vector_in_frac_coords = vector_in_frac_coords
 
         s = structure.copy()
         if self.translation_vector.shape == (len(self.indices_to_move), 3):
