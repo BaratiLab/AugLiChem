@@ -37,6 +37,8 @@ minima:
 # this and add the path to the pages in order as they should show up
 header_pages:
  - README.md
+ - crystal.md
+ - molecule.md
 
 # Build settings
 markdown: kramdown
