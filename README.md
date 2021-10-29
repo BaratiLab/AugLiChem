@@ -73,10 +73,10 @@ From here, individual packages can be installed:
 
 `conda install scikit-learn`
 
-Before installing the package, you must go into `setup.py` and comment out `rdkit-pypi` from the `install\_requires` list.
+Before installing the package, you must go into `setup.py` in the main directory and comment out `rdkit-pypi` from the `install_requires` list.
 It is not supported through pip this way, and since it is already installed, it will throw an error.
 
-Finally, navigate to where you downloaded the repo and run: 
+Finally, run: 
 
 `pip install .`
 
