@@ -37,6 +37,8 @@ Once you have `pytorch` and `torch_geometric` installed, installing AugLiChem ca
 
 `pip install auglichem`
 
+`conda install auglichem`
+
 
 ### MacOS ARM64 Architecture
 
@@ -83,6 +85,7 @@ Finally, navigate to where you downloaded the repo and run:
 
 Usage guides are provided in the `examples/` directory and provide useful guides for using both the molecular and crystal sides of the package.
 Make sure to install `jupyter` before working with examples, using `conda install jupyter`.
+After installing the package as described above, the example notebooks can be downloaded separately and run locally.
 
 ## Authors
 
