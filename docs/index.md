@@ -8,6 +8,3 @@
 layout: home
 ---
 
-README.md
-crystal.md
-molecule.md
