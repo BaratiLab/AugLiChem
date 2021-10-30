@@ -8,7 +8,7 @@ import warnings
 import torch
 from torch_geometric.data import Data as PyG_Data
 
-from auglichem.molecule import RandomAtomMask, RandomBondDelete, Compose, OneOf
+from auglichem.molecule import RandomAtomMask, RandomBondDelete, Compose, OneOf, MotifRemoval
 from auglichem.molecule.data import MoleculeDataset, MoleculeDatasetWrapper
 
 from auglichem.utils import ATOM_LIST, CHIRALITY_LIST, BOND_LIST, BONDDIR_LIST
@@ -91,6 +91,17 @@ def test_atom_mask_mol():
 
 
 
+def test_motif_removal():
+    print("MOTIF REMOVAL")
+    # Dummy data set
+    data = MoleculeDataset("", smiles_data=["C"], labels={'target': [1]}, task='classification')
+    data.target = "target"
+
+    mol = MotifRemoval()(data.__getitem__(0))
+    pass
+
+
+
 def test_bond_delete():
 
     # No bonds in molecule (single atom)
@@ -127,7 +138,7 @@ def test_bond_delete_mol():
     data.target = 'target'
 
     # Mask every atom
-    atom_masked = RandomBondDelete(p=1)(data.__getitem__(0))
+    atom_masked = RandomBondDelete(p=1)(data.__getitem__(0), None)
     assert atom_masked.edge_index.numel() == 0
     assert atom_masked.edge_attr.numel() == 0
 
@@ -259,12 +270,13 @@ def test_consistent_augment():
 
 
 #if __name__ == '__main__':
-#    test_smiles2graph()
-#    test_atom_mask()
-#    test_bond_delete()
-#    test_atom_mask_mol()
-#    test_bond_delete_mol()
-#    test_molecule_data()
-#    test_composition()
-#    test_loading_multitask()
-#    test_consistent_augment()
+    #test_smiles2graph()
+    #test_atom_mask()
+    #test_bond_delete()
+    #test_atom_mask_mol()
+    #test_motif_removal()
+    #test_bond_delete_mol()
+    #test_molecule_data()
+    #test_composition()
+    #test_loading_multitask()
+    #test_consistent_augment()

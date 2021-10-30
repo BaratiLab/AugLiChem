@@ -38,7 +38,7 @@ class BaseComposition(object):
         """
         for transform in transforms:
             assert isinstance(
-                transform, (BaseTransform, BaseComposition)
+                transform, (BaseTransform, BaseComposition, object)
             ), "Expected instances of type `BaseTransform` or `BaseComposition` for variable `transforms`"  # noqa: B950
         assert 0 <= p <= 1.0, "p must be a value in the range [0, 1]"
 
