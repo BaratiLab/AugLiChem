@@ -193,23 +193,21 @@ class SwapAxesTransformation(object):
         self.p = p
 
     def apply_transformation(self, crys):
-        if random.random() > self.p:
-            return AseAtomsAdaptor.get_structure(crys)
-        else:
+        #if random.random() > self.p:
+            #return AseAtomsAdaptor.get_structure(crys)
+        #else:
+        if(True):
             atoms = crys.copy()
-            cell = atoms.cell
+            #cell = atoms.cell
 
             choice = np.random.choice(3, 2, replace=False)
-            cell[:,[choice[0], choice[1]]] = cell[:,[choice[1], choice[0]]] ## axes you want to swap
-            cell[[choice[0], choice[1]]] = cell[[choice[1], choice[0]]]
-            atoms.cell = cell
-            angles = (cell.angles())
-            angles[[choice[0], choice[1]]] = angles[[choice[1], choice[0]]]
-            cell.angles  = angles
+            print(vars(atoms))
+            raise
             pos = (atoms.positions)
             pos[:,[choice[0], choice[1]]] = pos[:,[choice[1], choice[0]]]
             atoms.arrays["positions"] = pos
 
+            print(atoms)
             return AseAtomsAdaptor.get_structure(atoms)
 
     def __str__(self):
@@ -669,46 +667,3 @@ class PrimitiveCellTransformation(AbstractTransformation):
         """
         return False
 
-# for test purpose
-if __name__ == '__main__':
-    cif_file = read("original.cif")  # Path for the cif file
-
-    atoms = cif_file.copy()
-    cell = atoms.cell
-
-    choice = np.random.choice(3, 2, replace = False)
-    cell[:,[choice[0], choice[1]]] = cell[:,[choice[1], choice[0]]] ## axes you want to swap
-    cell[[choice[0], choice[1]]] = cell[[choice[1], choice[0]]]
-    atoms.cell = cell
-    angles = (cell.angles())
-    angles[[choice[0], choice[1]]] = angles[[choice[1], choice[0]]]
-    cell.angles  = angles
-    pos = (atoms.positions)
-    pos[:,[choice[0], choice[1]]] = pos[:,[choice[1], choice[0]]]
-    atoms.arrays["positions"] = pos
-    #write("rotated_1.cif",atoms, format = "cif") # dont need to save 
-    rotated_struct = AseAtomsAdaptor.get_structure(atoms) # rotational swapped object
-    #print(rotated_struct)
-
-    crystal = Structure.from_file("original.cif")
-    print(crystal)
-    num_sites = crystal.num_sites
-    
-    mask_num = max((1, int(np.floor(0.25*num_sites))))
-    indices_trans = np.random.choice(num_sites, mask_num, replace=False)
-    
-    print(indices_trans)
-    translation = np.random.rand(len(indices_trans),3)
-    translate = TranslateSitesTransformation(indices_trans,translation)
-    angle_to_rotate  = np.random.choice(360, 1, replace = False)
-    #rotate = RotationTransformation([1,1,1], angle_to_rotate)
-    #rotated = (rotate.apply_transformation(crystal))
-    primitive = PrimitiveCellTransformation(tolerance = 0.5)
-    print("primitive",primitive.apply_transformation(crystal))
-    cube = CubicSupercellTransformation()
-
-    perturb = PerturbStructureTransformation(distance = 0.5)
-    perturb_ = (perturb.apply_transformation(crystal)) ### perturbed structure object
-    print(perturb_)
-    print(cube.apply_transformation(perturb_)) ### rotated structure object
-    print(translate.apply_transformation(perturb_))

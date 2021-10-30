@@ -1,15 +1,11 @@
 import os
-import pathlib
 import urllib
+from zipfile import ZipFile
 from tqdm import tqdm
-import csv
-import gzip
 
 import requests
-import io
 import zipfile
 
-import sys
 import numpy as np
 import csv
 import json
@@ -80,35 +76,20 @@ class AtomCustomJSONInitializer(AtomInitializer):
             self._embedding[key] = np.array(value, dtype=float)
 
 
-def _urlretrieve(url: str, filename: str, chunk_size: int = 1024) -> None:
-    with open(filename, "wb") as fh:
-        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": USER_AGENT    })) as response:
-            with tqdm(total=response.length) as pbar:
-                for chunk in iter(lambda: response.read(chunk_size), ""):
-                    if not chunk:
-                        break
-                    pbar.update(chunk_size)
-                    fh.write(chunk)
+# Download functions taken from ManufactureNet
+def download_file_from_google_drive(id, destination):
+    URL = "https://docs.google.com/uc?export=download"
 
-def calculate_md5(fpath: str, chunk_size: int = 1024 * 1024) -> str:
-    md5 = hashlib.md5()
-    with open(fpath, 'rb') as f:
-        for chunk in iter(lambda: f.read(chunk_size), b''):
-            md5.update(chunk)
-    return md5.hexdigest()
+    session = requests.Session()
 
+    response = session.get(URL, params = { 'id' : id }, stream = True)
+    token = get_confirm_token(response)
 
-def check_md5(fpath, md5, **kwargs):
-    return md5 == calculate_md5(fpath, **kwargs)
+    if token:
+        params = { 'id' : id, 'confirm' : token }
+        response = session.get(URL, params = params, stream = True)
 
-
-def check_integrity(fpath, md5=None):
-    if not os.path.isfile(fpath):
-        return False
-    if md5 is None:
-        return True
-    return check_md5(fpath, md5)
-
+    save_response_content(response, destination)
 
 def get_confirm_token(response):
     for key, value in response.cookies.items():
@@ -122,9 +103,18 @@ def save_response_content(response, destination):
     CHUNK_SIZE = 32768
 
     with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
+        for chunk in tqdm(response.iter_content(CHUNK_SIZE)):
             if chunk: # filter out keep-alive new chunks
                 f.write(chunk)
+
+
+def extract_files(name, root):
+    Zip = ZipFile(name)
+    Zip.extractall(root)
+
+
+def remove_zip(name):
+    os.remove(name)
 
 
 def download_url(url, root, filename=None):
@@ -135,96 +125,68 @@ def download_url(url, root, filename=None):
         filename (str, optional): Name to save the file under. If None, use the basename of
                                   the URL
     """
-    URL = "https://docs.google.com/uc?export=download"
-    session = requests.Session()
-    response = session.get(URL, params = { 'id' : url }, stream = True)
-    token = get_confirm_token(response)
-    print(token)
+    URL = "https://docs.google.com/uc?export=download/"
+    destination = root+filename
+    if(os.path.isdir(destination[:-4])):
+        print("Data found at: {}".format(destination[:-4]))
+        return destination[:-4]
+    print("Downloading data to: {}...".format(destination[:-4]))
+    download_file_from_google_drive(url, destination)
+    print("Extracting zipfile...")
+    extract_files(destination, root)
+    print("Removing zipfile...")
+    remove_zip(destination)
 
-    if token:
-        params = { 'id' : url, 'confirm' : token }
-        response = session.get(URL, params = params, stream = True)
-
-    save_response_content(response, root+"/lanths")
-
-    raise
-
-    root = os.path.expanduser(root)
-    if not filename:
-        filename = os.path.basename(url)
-    fpath = os.path.join(root, filename)
-
-    os.makedirs(root, exist_ok=True)
-
-    # check if file is already present locally
-    if(os.path.isfile(fpath)):
-        print("Using: {}".format(fpath))
-        return fpath
-
-    # download the file
-    try:
-        print('Downloading ' + url + ' to ' + fpath)
-        _urlretrieve(url, fpath)
-    except (urllib.error.URLError, IOError) as e:  # type: ignore[attr-defined]
-        if url[:5] == 'https':
-            url = url.replace('https:', 'http:')
-            print('Failed download. Trying https -> http instead.'
-                  ' Downloading ' + url + ' to ' + fpath)
-            _urlretrieve(url, fpath)
-        else:
-            raise e
-
-    return fpath
+    return destination[:-4]
 
 def _load_data(dataset, data_path='./data_download'):
     '''
         Loads dataset, sets task to regression for the downloadable sets, gets the atom
         embedding file, and updates the data path.
     '''
-    ###
-    #
-    #   Need to host data sets and download them
-    #
-    ###
+    # Data hosting is done with google drive. You must create a publicly available link
+    # using "get link", then convert it to a downloadable link here:
+    # https://sites.google.com/site/gdocs2direct/
     if(dataset == 'lanthanides'):
         task = 'regression'
         target = ["formation_energy"] #TODO: Need to verify
-        #csv_file_path = download_url("Nothing yet...", data_path)
-        u = "https://drive.google.com/file/d/1YzlWF00JPsHUGtlw7AH3pMGBTlz63Oly/view?usp=sharing"
-        u = "https://drive.google.com/file/d/1YzlWF00JPsHUGtlw7AH3pMGBTlz63Oly/view?usp=sharing"
-        #csv_file_path = download_url(u, data_path)
+        data_id = '1UJtiWE247oKmG_wy0WvwxFQ8rQxKAY2W'
+        csv_file_path = download_url(data_id, data_path, "/lanths.zip")
         csv_file_path = data_path + "/lanths/id_prop.csv"
         embedding_path = data_path + "/lanths/atom_init.json"
         data_path += "/lanths"
     elif(dataset == 'band_gap'):
-        print(data_path)
         task = 'regression'
         target = ["band_gap"]
-        #csv_file_path = download_url("Nothing yet...", data_path)
+        data_id = "11Ybj_JervbFhA14SJ6xcoBvapJ9tySZq"
+        csv_file_path = download_url(data_id, data_path, "/band.zip")
         csv_file_path = data_path + "/band/id_prop.csv"
         embedding_path = data_path + "/band/atom_init.json"
-        data_path += "./band/"
+        data_path += "/band"
     elif(dataset == 'perovskites'):
         task = 'regression'
         target = ["energy"] #TODO: Need to verify
-        #csv_file_path = download_url("Nothing yet...", data_path)
-        csv_file_path = data_path + "/"
-        embedding_path = data_path + "/"
-        data_path = "./"
+        data_id = "1HBN_JNaxHp0x1sB24llfYxEzd1P0T2fE"
+        csv_file_path = download_url(data_id, data_path, "/abx3_cifs.zip")
+        csv_file_path = data_path + "/abx3_cifs/id_prop.csv"
+        embedding_path = data_path + "/abx3_cifs/atom_init.json"
+        data_path += "/abx3_cifs"
     elif(dataset == 'fermi_energy'):
         task = 'regression'
         target = ["fermi_energy"]
-        #csv_file_path = download_url("Nothing yet...", data_path)
-        csv_file_path = data_path + "/"
-        embedding_path = data_path + "/"
-        data_path = "./"
+        data_id = '1gdRhYVLItVKY3OGlhKFFjYntK3p9BLD1'
+        csv_file_path = download_url(data_id, data_path, "/fermi.zip")
+        csv_file_path = data_path + "/fermi/id_prop.csv"
+        embedding_path = data_path + "/fermi/atom_init.json"
+        data_path += "/fermi"
     elif(dataset == 'formation_energy'):
         task = 'regression'
         target = ["formation_energy"]
-        #csv_file_path = download_url("Nothing yet...", data_path)
-        csv_file_path = data_path + "/"
-        embedding_path = data_path + "/"
-        data_path = "./"
+        data_id = "1Xcjfct-J4YBEGFSCR9lhAdLaEzHRJxgU"
+        csv_file_path = download_url(data_id, data_path, "/FE.zip")
+        csv_file_path = data_path + "/FE/id_prop.csv"
+        embedding_path = data_path + "/FE/atom_init.json"
+        data_path += "/FE"
     else:
         raise ValueError("Please select one of the following datasets: lanthanides, band_gap, perovskites, fermi_energy, formation_energy")
         

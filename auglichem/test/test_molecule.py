@@ -141,7 +141,6 @@ def test_smiles2graph():
 
 def test_molecule_data():
     # This has been tested locally
-    assert True
     datasets = [
             "QM7",
             "QM8",
@@ -168,7 +167,8 @@ def test_molecule_data():
         data = MoleculeDatasetWrapper(ds)
         data = MoleculeDatasetWrapper(ds)
         train, valid, test = data.get_data_loaders()
-    #    shutil.rmtree("./data_download")
+    shutil.rmtree("./data_download")
+    assert True
 
 
 def test_composition():
@@ -210,7 +210,7 @@ def test_loading_multitask():
         assert list(data.y.shape) == [1, 27]
 
     # Remove downloaded data
-    #shutil.rmtree("./data_download")
+    shutil.rmtree("./data_download")
 
 
 def test_consistent_augment():
@@ -255,7 +255,7 @@ def test_consistent_augment():
     for i in range(0, len(data)):
         assert all(data.__getitem__(i).x.numpy()[:,0] == 119)
 
-    #shutil.rmtree("./data_download")
+    shutil.rmtree("./data_download")
 
 
 #if __name__ == '__main__':
