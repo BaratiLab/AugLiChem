@@ -3,20 +3,20 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
-<title>Molecule | AugLiChem</title>
+<title>About | AugLiChem</title>
 <meta name="generator" content="Jekyll v3.9.0" />
-<meta property="og:title" content="Molecule" />
+<meta property="og:title" content="About" />
 <meta name="author" content="BaratiLab" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
 <meta property="og:description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
-<link rel="canonical" href="http://localhost:4000/molecule/" />
-<meta property="og:url" content="http://localhost:4000/molecule/" />
+<link rel="canonical" href="http://localhost:4000/about/" />
+<meta property="og:url" content="http://localhost:4000/about/" />
 <meta property="og:site_name" content="AugLiChem" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Molecule" />
+<meta property="twitter:title" content="About" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/molecule/","headline":"Molecule","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
+{"url":"http://localhost:4000/about/","headline":"About","name":"AugLiChem","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebSite","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
 <body><div class="site-sidebar">
@@ -49,7 +49,7 @@
         
           
           
-            <li class=""><a href="/about/">About</a></li>
+            <li class="active"><a href="/about/">About</a></li>
           
         
           
@@ -59,7 +59,7 @@
         
           
           
-            <li class="active"><a href="/molecule/">Molecule</a></li>
+            <li class=""><a href="/molecule/">Molecule</a></li>
           
         
           
@@ -100,50 +100,44 @@
           <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Molecule</h1>
+    <h1 class="post-title">About</h1>
   </header>
 
   <div class="post-content">
-    <p>Molecular augmentation is done at call-time. Graphs are built from rdkit Chem objects.</p>
+    <p>AugLiChem provides models, data sets, and augmentation functions in order to make machine learning for molecular and crystalline systems simple and easy.
+Models and data wrappers are built with PyTorch and take advantage of CPU and GPU support for faster execution.</p>
 
-<h2 id="molecular-representation-on-graphs">Molecular Representation on Graphs</h2>
+<h2 id="package-structure">Package Structure</h2>
 
-<p>Give example here.</p>
+<p>AugLiChem has two submodules: crystal and molecule.
+The directory structure has been designed so using either submodule is as easy as switching <code class="language-plaintext highlighter-rouge">crystal</code> to <code class="language-plaintext highlighter-rouge">molecule</code> in your code, when possible.</p>
 
-<h2 id="data-augmentation">Data Augmentation</h2>
+<p>The directory structure is as follows:</p>
 
-<p>Random atom masking replaces randomly selected node attributes with a mask token.
-The fraction of atoms masked is passed in as an argument, and at least one atom is masked regardless of the fraction selected.
-In the graph representation, the atoms are still there, but masked atoms are all represented by the same token.
-This transformation can be imported and initilized as follows:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import RandomAtomMask
-transform = RandomAtomMask(p=0.25)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AugLiChem/
+  -auglichem/
+    -crystal/
+      -__init__.py  -_compositions.py  -_transforms.py
+      data/
+        -__init__.py  -_load_sets.py  -_crystal_dataset.py
+      -models/
+        -__init__.py  -cgcnn.py  -gin.py  -schnet.py
+    -molecule/
+      -__init__.py  -_compositions.py  -_transforms.py
+      -data/
+        -__init__.py  -_load_sets.py  -_molecule_dataset.py
+      -models/
+        -__init__.py  -afp.py  -deepgcn.py  -gcn.py  -gine.py
+    -test/
+      -test_crystal.py  -test_molecule.py  -test_utils.py
+    -utils/
+      -__init__.py  -_constants.py  -_splitting.py
+  -.travis.yml
+  -LICENSE
+  -README.md
+  -setup.py
 </code></pre></div></div>
 
-<p>Random  bond deletion removes bonds from our graph representation.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import RandomBondDelete
-transform = RandomBondDelete(p=0.25)
-</code></pre></div></div>
-
-<p>Motif removal is different from the other augmentations in that it is deterministic.
-A similarity score is calculated between motifs and the molecule, where motifs above the threshold are retained.
-This threshold can be set by passing in an argument.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import MotifRemoval
-transform = MotifRemoval(0.6)
-</code></pre></div></div>
-
-<p>For a more detailed guide on using these augmentations, please read the usage guide [NEED LINK].</p>
-
-<h2 id="data-sets">Data Sets</h2>
-
-<p>Datasets are downloaded automatically</p>
-
-<h2 id="models">Models</h2>
-
-<p>AttentiveFP</p>
 
   </div>
 
