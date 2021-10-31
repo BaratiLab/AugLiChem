@@ -1,12 +1,16 @@
-# AugLiChem
-[![Build Status](https://travis-ci.com/BaratiLab/AugLiChem.svg?token=JCkBR1Zx861ey4B3mNiz&branch=main)](https://travis-ci.com/BaratiLab/AugLiChem)
-[![codecov](https://codecov.io/gh/BaratiLab/AugLiChem/branch/main/graph/badge.svg?token=p5hPdWXEW1)](https://codecov.io/gh/BaratiLab/AugLiChem)
-
 Welcome to AugLiChem!
 The augmentation library for chemical systems.
 This package supports augmentation for both crystaline and molecular systems, as well as provides automatic downloading for our benchmark datasets, and easy to use model implementations.
 
-[SHOW DATA AUGMENTATION IMAGES FROM PAPER]
+AugLiChem supports three augmentations for molecular compounds: random atom masking, random bond deletion, and substructure removal.
+
+![moleculeaugment](./images/molecule_augment.png)
+
+
+For crystalline systems, five augmentations are supported: random perturbation, random rotation, swap axes, random translation, and supercell transformations.
+
+![crystalaugment](./images/crystal_augment.png)
+
 
 ## Authors
 

@@ -238,12 +238,9 @@ class MoleculeDataset(Dataset):
         # Get edge index and attributes
         edge_index, edge_attr = self._get_edge_index_and_attr(mol)
 
-        # Store number of atoms and bonds
-        num_atoms = mol.GetNumAtoms()
-        num_bonds = mol.GetNumBonds()
-
         # Set up PyG data object
-        molecule = PyG_Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr)
+        molecule = PyG_Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr,
+                            smiles=self.smiles_data[true_index])
 
         if((not self.test_mode) and (index % (self.aug_time+1) != 0)): # Now retains original
             aug_molecule = self.transform(molecule, seed=self.reproduce_seeds[index])

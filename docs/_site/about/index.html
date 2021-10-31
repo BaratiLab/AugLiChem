@@ -3,20 +3,20 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
-<title>Crystal | AugLiChem</title>
+<title>About | AugLiChem</title>
 <meta name="generator" content="Jekyll v3.9.0" />
-<meta property="og:title" content="Crystal" />
+<meta property="og:title" content="About" />
 <meta name="author" content="BaratiLab" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
 <meta property="og:description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
-<link rel="canonical" href="http://localhost:4000/crystal/" />
-<meta property="og:url" content="http://localhost:4000/crystal/" />
+<link rel="canonical" href="http://localhost:4000/about/" />
+<meta property="og:url" content="http://localhost:4000/about/" />
 <meta property="og:site_name" content="AugLiChem" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Crystal" />
+<meta property="twitter:title" content="About" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/crystal/","headline":"Crystal","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
+{"url":"http://localhost:4000/about/","headline":"About","name":"AugLiChem","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebSite","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
 <body><div class="site-sidebar">
@@ -49,12 +49,12 @@
         
           
           
-            <li class=""><a href="/about/">About</a></li>
+            <li class="active"><a href="/about/">About</a></li>
           
         
           
           
-            <li class="active"><a href="/crystal/">Crystal</a></li>
+            <li class=""><a href="/crystal/">Crystal</a></li>
           
         
           
@@ -100,26 +100,44 @@
           <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Crystal</h1>
+    <h1 class="post-title">About</h1>
   </header>
 
   <div class="post-content">
-    <p>Crystals are loaded from CIF files, and the augmentations given can be stored as CIF files.
-We take advantage of this fact and save augmented files next to original files.
-This has the added benefit of allowing easy inspection of augmentations in their native format.</p>
+    <p>AugLiChem provides models, data sets, and augmentation functions in order to make machine learning for molecular and crystalline systems simple and easy.
+Models and data wrappers are built with PyTorch and take advantage of CPU and GPU support for faster execution.</p>
 
-<h2 id="crystal-representation-on-graphs">Crystal Representation on Graphs</h2>
+<h2 id="package-structure">Package Structure</h2>
 
-<p>Give example here.</p>
+<p>AugLiChem has two submodules: crystal and molecule.
+The directory structure has been designed so using either submodule is as easy as switching <code class="language-plaintext highlighter-rouge">crystal</code> to <code class="language-plaintext highlighter-rouge">molecule</code> in your code, when possible.</p>
 
-<h2 id="data-augmentation">Data Augmentation</h2>
+<p>The directory structure is as follows:</p>
 
-<p>Five augmentations are supported.
-SwapAxes, Supercell, RandomRotation</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AugLiChem/
+  -auglichem/
+    -crystal/
+      -__init__.py  -_compositions.py  -_transforms.py
+      data/
+        -__init__.py  -_load_sets.py  -_crystal_dataset.py
+      -models/
+        -__init__.py  -cgcnn.py  -gin.py  -schnet.py
+    -molecule/
+      -__init__.py  -_compositions.py  -_transforms.py
+      -data/
+        -__init__.py  -_load_sets.py  -_molecule_dataset.py
+      -models/
+        -__init__.py  -afp.py  -deepgcn.py  -gcn.py  -gine.py
+    -test/
+      -test_crystal.py  -test_molecule.py  -test_utils.py
+    -utils/
+      -__init__.py  -_constants.py  -_splitting.py
+  -.travis.yml
+  -LICENSE
+  -README.md
+  -setup.py
+</code></pre></div></div>
 
-<h2 id="models">Models</h2>
-
-<p>SchNet, GIN, MegNet, CGCNN</p>
 
   </div>
 

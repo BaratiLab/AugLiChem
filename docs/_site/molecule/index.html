@@ -46,7 +46,10 @@
         
           
           
-            <li class=""><a href="/">AugLiChem</a></li>
+        
+          
+          
+            <li class=""><a href="/about/">About</a></li>
           
         
           
@@ -101,19 +104,109 @@
   </header>
 
   <div class="post-content">
-    <p>Molecular augmentation is done at call-time. Graphs are built from rdkit Chem objects.</p>
+    <p>Molecular augmentation is done at call-time because augmented molecules cannot be stored in the SMILES format.
+Graphs are built from the molecule, and augmentations are done on the graphical representation.</p>
 
-<h2 id="molecular-representation-on-graphs">Molecular Representation on Graphs</h2>
+<h2 id="graphical-representation-of-molecules">Graphical Representation of Molecules</h2>
 
-<p>Give example here.</p>
+<p>Molecules can be very naturally interpreted as graphs.
+A finite number of possible atoms are connected by one of a finite set of bond types, and due to their inherent translational and rotational invariance, cartesian coordinates would be difficult to use.
+We therefore represent atoms as nodes, with the atom type as the node attribute, and bonds are their connections with bond type being captured by the edge attribute.</p>
+
+<p>In methane, we have a carbon atom surrounded by four hydrogen atoms, seen here.</p>
+
+<p><img src="../images/methane.png" alt="methane" /></p>
+
+<p>The central carbon, labeled atom 0, is connected to each hydrogen, numbered 1 through 4.
+Our node attirbute vector, is seen below. Atom number is captured by zero-indexed index in our vector, where the second column is 1 if the atom is a chiral center.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atom_feature = [[5,0],
+                [0,0],
+                [0,0],
+                [0,0],
+                [0,0]]
+</code></pre></div></div>
+
+<p>Our edge index captures the bonds between molecules, and goes both ways.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edge_index = [[0, 1, 0, 2, 0, 3, 0, 4],
+              [1, 0, 2, 0, 3, 0, 4, 0]]
+</code></pre></div></div>
+
+<p>The last piece of information we have is the edge attribute.
+This captures the bond type information, where 0 represents a single bond, and the second columns is 1 if the bond is aromatic.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edge_attribute = [0, 0],
+                 [0, 0],
+                 [0, 0],
+                 [0, 0],
+                 [0, 0],
+                 [0, 0],
+                 [0, 0],
+                 [0, 0]]
+</code></pre></div></div>
+
+<p>With our graph representation, we can use Graph Neural Networks, and can easily augment our data.</p>
 
 <h2 id="data-augmentation">Data Augmentation</h2>
 
-<p>RandomAtomMask, RandomBondDelete</p>
+<p>Random atom masking replaces randomly selected node attributes with a mask token.
+The fraction of atoms masked is passed in as an argument, and at least one atom is masked regardless of the fraction selected.
+In the graph representation, the atoms are still there, but masked atoms are all represented by the same token.
+This transformation can be imported and initilized as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import RandomAtomMask
+transform = RandomAtomMask(p=0.25)
+</code></pre></div></div>
+
+<p>Random  bond deletion removes bonds from our graph representation.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import RandomBondDelete
+transform = RandomBondDelete(p=0.25)
+</code></pre></div></div>
+
+<p>Motif removal is different from the other augmentations in that it is deterministic.
+A similarity score is calculated between motifs and the molecule, where motifs above the threshold are retained.
+This threshold can be set by passing in an argument.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import MotifRemoval
+transform = MotifRemoval(0.6)
+</code></pre></div></div>
+
+<p>For a more detailed guide on using these augmentations, please read the usage guide [NEED LINK].</p>
+
+<h2 id="data-sets">Data Sets</h2>
+
+<p>Automatic downloading and cleaning is supported for a number of standard benchmark sets, available from moleculenet.
+These benchmarks represent four different biological and physical settings: biophysics, physical chemistry, physiology, and quantum mechanics.
+AugLiChem provides support for data sets in each setting:</p>
+<ul>
+  <li>Biophysics:
+    <ul>
+      <li>MUV, HIV, PCBA, BACE</li>
+    </ul>
+  </li>
+  <li>Physical Chemistry:
+    <ul>
+      <li>ESOL, FreeSolv, Lipophilicity</li>
+    </ul>
+  </li>
+  <li>Physiology:
+    <ul>
+      <li>BBBP, Tox21, ToxCast, SIDER, ClinTox</li>
+    </ul>
+  </li>
+  <li>Quantum Mechanics:
+    <ul>
+      <li>QM7, QM8, QM9</li>
+    </ul>
+  </li>
+</ul>
 
 <h2 id="models">Models</h2>
 
-<p>AttentiveFP</p>
+<p>In addition to data sets, AugLiChem has popular models implemented and ready to use with our graph data.
+<a href="https://pubs.acs.org/doi/10.1021/acs.jmedchem.9b00959">AttentiveFP</a>, <a href="https://arxiv.org/abs/1609.02907">Graph Convolutional Netowrk</a>, <a href="https://arxiv.org/abs/1904.03751">Deep Graph Convolutional Network</a>, and <a href="https://arxiv.org/abs/1905.12265">Modified Graph Isomorphism Network</a> are all supported, and readers are referred to the respective papers for the model architecture.</p>
 
   </div>
 
