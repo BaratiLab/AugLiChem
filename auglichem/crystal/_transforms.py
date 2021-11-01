@@ -1,5 +1,6 @@
 from __future__ import print_function, division
 
+import sys
 import csv
 import functools
 import json
@@ -37,7 +38,8 @@ class AseAtomsAdaptor:
         """
         if not structure.is_ordered:
             raise ValueError("ASE Atoms only supports ordered structures")
-        if not ase_loaded:
+        #if not ase_loaded:
+        if('ase' not in sys.modules):
             raise ImportError(
                 "AseAtomsAdaptor requires ase package.\n" "Use `pip install ase` or `conda install ase -c conda-forge`"
             )
@@ -197,17 +199,13 @@ class SwapAxesTransformation(object):
             #return AseAtomsAdaptor.get_structure(crys)
         #else:
         if(True):
-            atoms = crys.copy()
-            #cell = atoms.cell
+            atoms = AseAtomsAdaptor().get_atoms(crys)
 
             choice = np.random.choice(3, 2, replace=False)
-            print(vars(atoms))
-            raise
             pos = (atoms.positions)
             pos[:,[choice[0], choice[1]]] = pos[:,[choice[1], choice[0]]]
             atoms.arrays["positions"] = pos
 
-            print(atoms)
             return AseAtomsAdaptor.get_structure(atoms)
 
     def __str__(self):
