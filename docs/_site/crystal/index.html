@@ -110,58 +110,129 @@ This has the added benefit of allowing easy inspection of augmentations in their
 
 <h2 id="crystal-representation-on-graphs">Crystal Representation on Graphs</h2>
 
-<p>Give example here.</p>
+<p>Bonding in crystalline systems is not as concretely defined as for molecules.
+In order to construct a graph, atoms are considered bonded to their N nearest neighbors.</p>
+
+<p><img src="../images/NaCl_numbered.png" alt="crytal_numbered" /></p>
+
+<p>In this example, we have a NaCl crystal with Cl atoms labeled 0,1,2, and 3, and Na atoms labeled 4,5,6, and 7, which is behind atom 0.
+We will consider each atom to be bonded to its three closest neighbors.
+The atom feature captures the atom type, where atom index as labeled above is the index of our vector.
+The second column is 1 if the atom is a chiral center, 0 if not.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atom_feature = [[16,0],
+                [16,0],
+                [16,0],
+                [16,0],
+                [10,0],
+                [10,0],
+                [10,0],
+                [10,0]]
+</code></pre></div></div>
+
+<p>Our edge index captures the bonds between atoms, and goes both ways.
+We see even for relatively small systems, working with graph representations manually can become quite cumbersome.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edge_index = [[0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7],
+              [4, 5, 6, 4, 6, 7, 4, 5, 7, 5, 6, 7, 0, 1, 2, 0, 2, 3, 0, 1, 3, 1, 2, 3]]
+</code></pre></div></div>
+
+<p>Lastly, the edge attribute consists of single bonds, zero-indexed like for molecular representations.
+The second column is 1 if the bond is aromatic.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edge_attribute = [[0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0],
+                  [0, 0]]
+
+</code></pre></div></div>
+
+<p>With our graph representation, we can use Graph Neural Networks, and can easily augment our data.</p>
 
 <h2 id="data-augmentation">Data Augmentation</h2>
 
-<p><img src="../images/original_crystal.png" alt="crystal" /></p>
+<p><img src="../images/NaCl.png" alt="crystal" /></p>
 
 <p>Five augmentations are supported for crystals.
 We take the original structure seen above</p>
 
-<p><img src="../images/perturbation.png" alt="perturb" /></p>
+<h3 id="perturbation">Perturbation</h3>
+
+<p><img src="../images/NaCl_perturb.png" alt="perturb" /></p>
 
 <p>In the random perturbation augmentation all the sites in the crystalline systemare randomly perturbed by a distance between0 to 1 A. This augmentationis especially useful in breaking the symmetries that exist between the sites inthe crystals.
-This transformation can be imported and initilized as follows:</p>
+This transformation can be imported and initilized as follows, where <code class="language-plaintext highlighter-rouge">distance</code> constrols how far each site is perturbed in a random direction, and <code class="language-plaintext highlighter-rouge">min_distance</code> controls the minimum distance each site is perturbed:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.crystal import PerturbStructureTransformation
-transform = PerturbStructureTransformation()
+transform = PerturbStructureTransformation(distance=0.01, min_distance=0.005)
 </code></pre></div></div>
 
-<p><img src="../images/rotation.png" alt="perturb" /></p>
+<h3 id="rotation">Rotation</h3>
+
+<p><img src="../images/NaCl_rotate.png" alt="rotate" /></p>
 
 <p>In the random rotation transform, we randomly rotate the sites in the crystalbetween-90 to 90degrees. To generate a strong augmentation we initiallyuse  the  random  perturbation  augmentation  to  generate  the  initial  strcuturewhich is then rotated randomly.
-This transformation can be imported and initilized as follows:</p>
+This transformation can be imported and initilized as follows, where <code class="language-plaintext highlighter-rouge">axis</code> selects the axis to rotate about, and <code class="language-plaintext highlighter-rouge">angle</code> is the rotation in degrees:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.crystal import RotationTransformation
-transform = RotationTransformation()
+transform = RotationTransformation(axis=[1,0,0], angle=90)
 </code></pre></div></div>
 
-<p><img src="../images/swap_axes.png" alt="perturb" /></p>
+<h3 id="swap-axes">Swap Axes</h3>
+
+<p><img src="../images/NaCl_swapped.png" alt="swapped" /></p>
 
 <p>In the swap axes transformation of the crystal, we swap the coordinates of thesites in the crystal between two axes. For example, we may swap the x and they axes coordinates or the y and z axes coordinates. The swap axes transformgreatly displaces the locations of all the sites in the crystal.
-This transformation can be imported and initilized as follows:</p>
+This transformation can be imported and initilized as follows, where the axes are randomly selected, and so no parameters are needed for initialization:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.crystal import SwapAxesTransformation
 transform = SwapAxesTransformation()
 </code></pre></div></div>
 
-<p><img src="../images/translation.png" alt="perturb" /></p>
+<h3 id="translation">Translation</h3>
+
+<p><img src="../images/NaCl_translate.png" alt="translate" /></p>
 
 <p>The random translate transform randomly displaces a site in the crystal bya distance between0 to 1 A. In this work, we randomly select 25% of thesites in the crystal and displace them. This creates an augmentation different from the random perturb augmentation as not all the sites in the crystal aredisplaced.
-This transformation can be imported and initilized as follows:</p>
+This transformation can be imported and initilized as follows, where <code class="language-plaintext highlighter-rouge">indices_to_move</code> selects which atoms to move, <code class="language-plaintext highlighter-rouge">translation_vector</code> provides a 1x3 vector for each selected atom to be translated, and <code class="language-plaintext highlighter-rouge">vector_in_frac_coords</code> controls whether or not the translation vector is interpreted as fractional coordinates of the unit cell:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.crystal import TranslateSitesTransformation
-transform = TranslateSitesTransformation()
+transform = TranslateSitesTransformation(
+                      indices_to_move=[0,1],
+                      translation_vector=[[1,0,0],[0,0,1]],
+      		      vector_in_frac_coords=True
+            )
 </code></pre></div></div>
 
-<p><img src="../images/supercell.png" alt="perturb" /></p>
+<h3 id="supercell">Supercell</h3>
+
+<p><img src="../images/NaCl_super.png" alt="supercell" /></p>
 
 <p>The supercell transformation produces a supercell of the crystalline system.The distinct feature of the supercell of the crystal is that after transformationthe supercell represents the same crystal with a larger volume. There exists alinear mapping between the basis vectors of crystal and the basis vectors ofthe supercell.
-This transformation can be imported and initilized as follows:</p>
+This transformation can be imported and initilized as follows, where <code class="language-plaintext highlighter-rouge">scaling_matrix</code> is a 3x3 matrix that repeats the unit cell to create the supercell:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.crystal import SupercellTransformation
-transform = SupercellTransformation()
+transform = SupercellTransformation(scaling_matrix=[[1,2,0],[0,3,1],[4,1,1]])
 </code></pre></div></div>
 
 <p>For a more detailed guide on using these augmentations, please read the <a href="../usage_guide">usage guide</a>.</p>

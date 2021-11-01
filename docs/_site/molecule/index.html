@@ -150,7 +150,9 @@ This captures the bond type information, where 0 represents a single bond, and t
 
 <h2 id="data-augmentation">Data Augmentation</h2>
 
-<p><img src="../images/atom_mask.png" alt="bond_delete" /></p>
+<h3 id="atom-masking">Atom Masking</h3>
+
+<p><img src="../images/Picture1.png" alt="bond_delete" /></p>
 
 <p>Random atom masking replaces randomly selected node attributes with a mask token.
 The fraction of atoms masked is passed in as an argument, and at least one atom is masked regardless of the fraction selected.
@@ -161,13 +163,17 @@ This transformation can be imported and initilized as follows:</p>
 transform = RandomAtomMask(p=0.25)
 </code></pre></div></div>
 
-<p><img src="../images/bond_delete.png" alt="bond_delete" /></p>
+<h3 id="bond-deletion">Bond Deletion</h3>
+
+<p><img src="../images/Picture2.png" alt="bond_delete" /></p>
 
 <p>Random  bond deletion removes bonds from our graph representation.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import RandomBondDelete
 transform = RandomBondDelete(p=0.25)
 </code></pre></div></div>
+
+<h3 id="motif-removal">Motif Removal</h3>
 
 <p><img src="../images/motif.png" alt="motif" /></p>
 

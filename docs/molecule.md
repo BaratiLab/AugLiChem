@@ -55,7 +55,9 @@ With our graph representation, we can use Graph Neural Networks, and can easily 
 
 ## Data Augmentation
 
-![bond_delete](../images/atom_mask.png)
+### Atom Masking
+
+![bond_delete](../images/Picture1.png)
 
 Random atom masking replaces randomly selected node attributes with a mask token.
 The fraction of atoms masked is passed in as an argument, and at least one atom is masked regardless of the fraction selected.
@@ -67,7 +69,9 @@ from auglichem.molecule import RandomAtomMask
 transform = RandomAtomMask(p=0.25)
 ```
 
-![bond_delete](../images/bond_delete.png)
+### Bond Deletion
+
+![bond_delete](../images/Picture2.png)
 
 Random  bond deletion removes bonds from our graph representation.
 
@@ -76,6 +80,8 @@ from auglichem.molecule import RandomBondDelete
 transform = RandomBondDelete(p=0.25)
 ```
 
+
+### Motif Removal
 
 ![motif](../images/motif.png)
 
