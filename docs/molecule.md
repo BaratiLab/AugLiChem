@@ -55,6 +55,10 @@ With our graph representation, we can use Graph Neural Networks, and can easily 
 
 ## Data Augmentation
 
+### Atom Masking
+
+![bond_delete](../images/Picture1.png)
+
 Random atom masking replaces randomly selected node attributes with a mask token.
 The fraction of atoms masked is passed in as an argument, and at least one atom is masked regardless of the fraction selected.
 In the graph representation, the atoms are still there, but masked atoms are all represented by the same token.
@@ -65,6 +69,10 @@ from auglichem.molecule import RandomAtomMask
 transform = RandomAtomMask(p=0.25)
 ```
 
+### Bond Deletion
+
+![bond_delete](../images/Picture2.png)
+
 Random  bond deletion removes bonds from our graph representation.
 
 ```
@@ -72,6 +80,10 @@ from auglichem.molecule import RandomBondDelete
 transform = RandomBondDelete(p=0.25)
 ```
 
+
+### Motif Removal
+
+![motif](../images/motif.png)
 
 Motif removal is different from the other augmentations in that it is deterministic.
 A similarity score is calculated between motifs and the molecule, where motifs above the threshold are retained.
@@ -82,7 +94,7 @@ from auglichem.molecule import MotifRemoval
 transform = MotifRemoval(0.6)
 ```
 
-For a more detailed guide on using these augmentations, please read the usage guide [NEED LINK].
+For a more detailed guide on using these augmentations, please read the [usage guide](../usage_guide).
 
 ## Data Sets
 
@@ -101,4 +113,4 @@ AugLiChem provides support for data sets in each setting:
 ## Models
 
 In addition to data sets, AugLiChem has popular models implemented and ready to use with our graph data.
-[AttentiveFP](https://pubs.acs.org/doi/10.1021/acs.jmedchem.9b00959), [Graph Convolutional Netowrk](https://arxiv.org/abs/1609.02907), [Deep Graph Convolutional Network](https://arxiv.org/abs/1904.03751), and [Modified Graph Isomorphism Network](https://arxiv.org/abs/1905.12265) are all supported, and readers are referred to the respective papers for the model architecture.
+[AttentiveFP](https://pubs.acs.org/doi/10.1021/acs.jmedchem.9b00959), [Graph Convolutional Netowrk](https://arxiv.org/abs/1609.02907), [Deep Graph Convolutional Network](https://arxiv.org/abs/1904.03751), and [Modified Graph Isomorphism Network](https://arxiv.org/abs/1905.12265) are all supported, and readers are referred to the respective papers for the model details.

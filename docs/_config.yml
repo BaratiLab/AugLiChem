@@ -25,6 +25,8 @@ github_username:  BaratiLab
 # - username: jekyll2
 #   instance: example.com
 
+#title-img: ./images/logo.png
+title-img: logo.png
 
 show_excerpts: true # set to true to show excerpts on the homepage
 

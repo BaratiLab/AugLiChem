@@ -150,6 +150,10 @@ This captures the bond type information, where 0 represents a single bond, and t
 
 <h2 id="data-augmentation">Data Augmentation</h2>
 
+<h3 id="atom-masking">Atom Masking</h3>
+
+<p><img src="../images/Picture1.png" alt="bond_delete" /></p>
+
 <p>Random atom masking replaces randomly selected node attributes with a mask token.
 The fraction of atoms masked is passed in as an argument, and at least one atom is masked regardless of the fraction selected.
 In the graph representation, the atoms are still there, but masked atoms are all represented by the same token.
@@ -159,11 +163,19 @@ This transformation can be imported and initilized as follows:</p>
 transform = RandomAtomMask(p=0.25)
 </code></pre></div></div>
 
+<h3 id="bond-deletion">Bond Deletion</h3>
+
+<p><img src="../images/Picture2.png" alt="bond_delete" /></p>
+
 <p>Random  bond deletion removes bonds from our graph representation.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import RandomBondDelete
 transform = RandomBondDelete(p=0.25)
 </code></pre></div></div>
+
+<h3 id="motif-removal">Motif Removal</h3>
+
+<p><img src="../images/motif.png" alt="motif" /></p>
 
 <p>Motif removal is different from the other augmentations in that it is deterministic.
 A similarity score is calculated between motifs and the molecule, where motifs above the threshold are retained.
@@ -173,7 +185,7 @@ This threshold can be set by passing in an argument.</p>
 transform = MotifRemoval(0.6)
 </code></pre></div></div>
 
-<p>For a more detailed guide on using these augmentations, please read the usage guide [NEED LINK].</p>
+<p>For a more detailed guide on using these augmentations, please read the <a href="../usage_guide">usage guide</a>.</p>
 
 <h2 id="data-sets">Data Sets</h2>
 
@@ -206,7 +218,7 @@ AugLiChem provides support for data sets in each setting:</p>
 <h2 id="models">Models</h2>
 
 <p>In addition to data sets, AugLiChem has popular models implemented and ready to use with our graph data.
-<a href="https://pubs.acs.org/doi/10.1021/acs.jmedchem.9b00959">AttentiveFP</a>, <a href="https://arxiv.org/abs/1609.02907">Graph Convolutional Netowrk</a>, <a href="https://arxiv.org/abs/1904.03751">Deep Graph Convolutional Network</a>, and <a href="https://arxiv.org/abs/1905.12265">Modified Graph Isomorphism Network</a> are all supported, and readers are referred to the respective papers for the model architecture.</p>
+<a href="https://pubs.acs.org/doi/10.1021/acs.jmedchem.9b00959">AttentiveFP</a>, <a href="https://arxiv.org/abs/1609.02907">Graph Convolutional Netowrk</a>, <a href="https://arxiv.org/abs/1904.03751">Deep Graph Convolutional Network</a>, and <a href="https://arxiv.org/abs/1905.12265">Modified Graph Isomorphism Network</a> are all supported, and readers are referred to the respective papers for the model details.</p>
 
   </div>
 

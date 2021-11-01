@@ -153,7 +153,7 @@ def test_k_fold():
         assert error.args[0] == "Please select a fold < 5"
 
     # Remove directory
-    #shutil.rmtree(dataset.data_path)
+    shutil.rmtree(dataset.data_path)
 
     dataset = CrystalDatasetWrapper("lanthanides", kfolds=2,
                                     data_path="../../examples/data_download")
@@ -174,7 +174,7 @@ def test_k_fold():
     _check_train_transform(train_loader.dataset.data_path, transform, 1)
 
     # Remove directory
-    #shutil.rmtree(dataset.data_path)
+    shutil.rmtree(dataset.data_path)
 
 
 def test_rotation():
@@ -278,20 +278,20 @@ def test_primitive():
 def test_swap_axes():
     #TODO: This does not work yet.
     assert True
-    #transform = SwapAxesTransformation()
+    transform = SwapAxesTransformation()
 
-    #coords = [[0, 0, 0], [0.75,0.5,0.75]]
-    #lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
-    #                              beta=90, gamma=60)
-    #struct = Structure(lattice, ["Si", "Si"], coords)
-    #
-    #print(struct)
-    #struct = transform.apply_transformation(struct)
-    #print(struct)
-    #pass
+    coords = [[0, 0, 0], [0.75,0.5,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
+                                  beta=90, gamma=60)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    print(struct)
+    struct = transform.apply_transformation(struct)
+    print(struct)
+    pass
     
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     #test_crystal_data()
     #test_data_download()
     #test_composition()
@@ -303,4 +303,4 @@ if __name__ == '__main__':
     #test_translate()
     #test_cubic_supercell()
     #test_primitive()
-    test_swap_axes()
+    #test_swap_axes()
