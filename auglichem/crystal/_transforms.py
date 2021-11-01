@@ -81,13 +81,9 @@ class RotationTransformation(AbstractTransformation):
         Args:
             axis (3x1 array): Axis of rotation, e.g., [1, 0, 0]
             angle (float): Angle to rotate
-            angle_in_radians (bool): Set to True if angle is supplied in radians.
-                Else degrees are assumed.
         """
         self.axis = axis
         self.angle = angle
-        # self.angle_in_radians = angle_in_radians
-        # self._symmop = SymmOp.from_axis_angle_and_translation(self.axis, self.angle, self.angle_in_radians)
 
     def apply_transformation(self, structure, axis=None, angle=None, angle_in_radians=False):
         """
@@ -192,6 +188,8 @@ class SwapAxesTransformation(object):
     Swap coordinate axes in the crystal strucutre.
     """
     def __init__(self, p=0.5):
+        #TODO: Shouldn't this always call the transformation?
+        #TODO: Decide if its probabilistic or not, and if we should use random seeding.
         self.p = p
 
     def apply_transformation(self, crys):
@@ -402,7 +400,7 @@ class TranslateSitesTransformation(AbstractTransformation):
     This class translates a set of sites by a certain vector.
     """
 
-    def __init__(self, indices_to_move, translation_vector, vector_in_frac_coords):
+    def __init__(self, indices_to_move, translation_vector, vector_in_frac_coords=True):
         """
         Args:
             indices_to_move: The indices of the sites to move
