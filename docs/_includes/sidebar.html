@@ -1,6 +1,10 @@
 <div class="site-sidebar">
 
-    <a class="sidebar-title" href="{{ "/" | relative_url }}">{{ site.title | escape }}</a>
+    <a class="sidebar-title" href="{{ "/" | relative_url }}">
+    <img src="../images/logo.png" alt="drawing" width="20"/>
+	    {{ site.title | escape }}
+    <img src="../images/logo.png" alt="drawing" width="20"/>
+    </a>
 
     {% assign default_paths = site.pages | map: "path" %}
     {% assign page_paths = site.header_pages | default: default_paths %}

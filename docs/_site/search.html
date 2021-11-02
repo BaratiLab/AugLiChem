@@ -3,20 +3,20 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
-<title>About | AugLiChem</title>
+<title>AugLiChem | AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.</title>
 <meta name="generator" content="Jekyll v3.9.0" />
-<meta property="og:title" content="About" />
+<meta property="og:title" content="AugLiChem" />
 <meta name="author" content="BaratiLab" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
 <meta property="og:description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
-<link rel="canonical" href="http://localhost:4000/about/" />
-<meta property="og:url" content="http://localhost:4000/about/" />
+<link rel="canonical" href="http://localhost:4000/search.html" />
+<meta property="og:url" content="http://localhost:4000/search.html" />
 <meta property="og:site_name" content="AugLiChem" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="About" />
+<meta property="twitter:title" content="AugLiChem" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/about/","headline":"About","name":"AugLiChem","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebSite","@context":"https://schema.org"}</script>
+{"url":"http://localhost:4000/search.html","headline":"AugLiChem","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
 <body><div class="site-sidebar">
@@ -53,7 +53,7 @@
         
           
           
-            <li class="active"><a href="/about/">About</a></li>
+            <li class=""><a href="/about/">About</a></li>
           
         
           
@@ -108,51 +108,65 @@
 </header>
 <main class="page-content" aria-label="Content">
         <div class="wrapper">
-          <article class="post">
+          <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+			  crossorigin="anonymous"></script>
 
-  <header class="post-header">
-    <h1 class="post-title">About</h1>
-  </header>
+<script>
+	function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
 
-  <div class="post-content">
-    <p>AugLiChem provides models, data sets, and augmentation functions in order to make machine learning for molecular and crystalline systems simple and easy.
-Models and data wrappers are built with PyTorch and take advantage of CPU and GPU support for faster execution.</p>
+    for (i = 0; i < sURLVariables.length; i++) {
+      sParameterName = sURLVariables[i].split('=');
 
-<h2 id="package-structure">Package Structure</h2>
+      if (sParameterName[0] === sParam) {
+        return sParameterName[1] === undefined ? true : sParameterName[1];
+      }
+    }
+	};
 
-<p>AugLiChem has two submodules: crystal and molecule.
-The directory structure has been designed so using either submodule is as easy as switching <code class="language-plaintext highlighter-rouge">crystal</code> to <code class="language-plaintext highlighter-rouge">molecule</code> in your code, when possible.</p>
+	$(document).ready(function() {
 
-<p>The directory structure is as follows:</p>
+		var ul = $(".post-list"),
+		    q = getUrlParameter("q"),
+		    re = new RegExp(q, "gi");
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AugLiChem/
-  -auglichem/
-    -crystal/
-      -__init__.py  -_compositions.py  -_transforms.py
-      data/
-        -__init__.py  -_load_sets.py  -_crystal_dataset.py
-      -models/
-        -__init__.py  -cgcnn.py  -gin.py  -schnet.py
-    -molecule/
-      -__init__.py  -_compositions.py  -_transforms.py
-      -data/
-        -__init__.py  -_load_sets.py  -_molecule_dataset.py
-      -models/
-        -__init__.py  -afp.py  -deepgcn.py  -gcn.py  -gine.py
-    -test/
-      -test_crystal.py  -test_molecule.py  -test_utils.py
-    -utils/
-      -__init__.py  -_constants.py  -_splitting.py
-  -.travis.yml
-  -LICENSE
-  -README.md
-  -setup.py
-</code></pre></div></div>
+		$.getJSON('http://localhost:4000/assets/search.json', function(data) {
+			for (var i = 0; i < data.length; i++) {
+				var matching = false;
+				if (data[i].title.search(re) >= 0) {
+					matching = true;
+				} else if (data[i].date.search(re) >= 0) {
+					matching = true;
+				} else if (data[i].category.search(re) >= 0) {
+					matching = true;
+				} else if (data[i].tags.search(re) >= 0) {
+					matching = true;
+				} else if (data[i].content.search(re) >= 0) {
+					matching = true;
+				}
+
+				if (matching == true) {
+					ul.append(
+						$('<li>').append(
+							$('<span>', {'class': 'post-meta', 'text': data[i].date}),
+							$('<h3>').append(
+								$('<a>', {'class': 'post-link', 'href': data[i].url, 'text': data[i].title})
+							)
+						)
+					);
+				}
+			}
+		});
+
+	});
+</script>
 
 
-  </div>
-
-</article>
+<ul class="post-list"></ul>
 
         </div>
       </main><footer class="site-footer h-card">

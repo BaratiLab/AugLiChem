@@ -27,5 +27,3 @@ Our paper can be found at [PAPER URL]
 ## License
 AugLiChem is MIT licensed, as found in the [LICENSE](https://github.com/BaratiLab/AugLiChem/blob/main/LICENSE) file. Please note that some of the dependencies AugLiChem uses may be licensed under different terms.
 
-<img src="./images/logo.png" alt="drawing" width="150"/>
-
