@@ -173,8 +173,10 @@ class CrystalDataset(Dataset):
         self.data_path = data_path
         self.transform = transform
         self._augmented = False # To control runaway augmentation
-        self.seed = seed
         self.num_neighbors = num_neighbors
+
+        self.seed = seed
+
 
         # After specifying data set
         if(id_prop_augment is None):
@@ -185,6 +187,7 @@ class CrystalDataset(Dataset):
             self.atom_init_file = atom_init_file
             self.ari = ari
         
+
         self.max_num_nbr, self.radius = max_num_nbr, radius
 
         assert os.path.exists(self.data_path), 'root_dir does not exist!'
@@ -200,6 +203,10 @@ class CrystalDataset(Dataset):
         assert os.path.exists(self.atom_init_file), 'atom_init.json does not exist!'
         self.gdf = lambda dist: self._gaussian_distance(dist, dmin=dmin, dmax=self.radius,
                                                         step=step)
+
+        # Seeding used for reproducible tranformations
+        self.reproduce_seeds = list(range(self.__len__()))
+        np.random.shuffle(self.reproduce_seeds)
 
         self.on_the_fly_augment = on_the_fly_augment
         if(self.on_the_fly_augment):
@@ -307,9 +314,17 @@ class CrystalDataset(Dataset):
                 if(os.path.exists(self.data_path + '/' + id_name + '.cif')):
                     continue
 
-                aug_crystal = t.apply_transformation(
+                try:
+                    seed_idx = np.argwhere(self.id_prop_augment[:,0] == id_prop[0])[0][0]
+                    aug_crystal = t.apply_transformation(
                                     Structure.from_file(os.path.join(self.data_path,
-                                    id_prop[0]+'.cif')))
+                                    id_prop[0]+'.cif')),
+                                    seed=self.reproduce_seeds[seed_idx])
+                except IndexError:
+                    print(int(id_prop[0]))
+                    print(len(self.reproduce_seeds))
+                    raise
+                            
                 cif.CifWriter(aug_crystal).write_file(self.data_path + '/' + id_name + '.cif')
 
         if(not self._k_fold_cv):
