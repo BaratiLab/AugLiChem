@@ -41,9 +41,10 @@ header_pages:
  - README.md
  - about.md
  - crystal.md
+ - crystal_usage.md
  - molecule.md
+ - molecule_usage.md
  - install_guide.md
- - usage_guide.md
 
 # Build settings
 markdown: kramdown

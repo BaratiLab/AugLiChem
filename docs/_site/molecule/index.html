@@ -21,7 +21,11 @@
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
 <body><div class="site-sidebar">
 
-    <a class="sidebar-title" href="/">AugLiChem</a>
+    <a class="sidebar-title" href="/">
+    <img src="../images/logo.png" alt="drawing" width="20"/>
+	    AugLiChem
+    <img src="../images/logo.png" alt="drawing" width="20"/>
+    </a>
 
     
     
@@ -59,17 +63,22 @@
         
           
           
+            <li class=""><a href="/crystal_usage/">Crystal Usage</a></li>
+          
+        
+          
+          
             <li class="active"><a href="/molecule/">Molecule</a></li>
           
         
           
           
-            <li class=""><a href="/installation/">Installation</a></li>
+            <li class=""><a href="/usage_guide/">Molecule Usage</a></li>
           
         
           
           
-            <li class=""><a href="/usage_guide/">Usage</a></li>
+            <li class=""><a href="/installation/">Installation</a></li>
           
         
       </ul>
@@ -92,7 +101,9 @@
 <div class="main-wrapper"><header class="site-header" role="banner">
 
   <div class="wrapper">
-    <a class="site-title" rel="author" href="/">AugLiChem</a>
+    <a class="site-title" rel="author" href="/">
+	    AugLiChem
+    </a>
   </div>
 </header>
 <main class="page-content" aria-label="Content">
@@ -120,30 +131,30 @@ We therefore represent atoms as nodes, with the atom type as the node attribute,
 <p>The central carbon, labeled atom 0, is connected to each hydrogen, numbered 1 through 4.
 Our node attirbute vector, is seen below. Atom number is captured by zero-indexed index in our vector, where the second column is 1 if the atom is a chiral center.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atom_feature = [[5,0],
-                [0,0],
-                [0,0],
-                [0,0],
-                [0,0]]
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">atom_feature</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">5</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span>
 </code></pre></div></div>
 
 <p>Our edge index captures the bonds between molecules, and goes both ways.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edge_index = [[0, 1, 0, 2, 0, 3, 0, 4],
-              [1, 0, 2, 0, 3, 0, 4, 0]]
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">edge_index</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
 </code></pre></div></div>
 
 <p>The last piece of information we have is the edge attribute.
 This captures the bond type information, where 0 represents a single bond, and the second columns is 1 if the bond is aromatic.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edge_attribute = [0, 0],
-                 [0, 0],
-                 [0, 0],
-                 [0, 0],
-                 [0, 0],
-                 [0, 0],
-                 [0, 0],
-                 [0, 0]]
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">edge_attribute</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
 </code></pre></div></div>
 
 <p>With our graph representation, we can use Graph Neural Networks, and can easily augment our data.</p>
@@ -159,8 +170,8 @@ The fraction of atoms masked is passed in as an argument, and at least one atom 
 In the graph representation, the atoms are still there, but masked atoms are all represented by the same token.
 This transformation can be imported and initilized as follows:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import RandomAtomMask
-transform = RandomAtomMask(p=0.25)
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">auglichem.molecule</span> <span class="kn">import</span> <span class="n">RandomAtomMask</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">RandomAtomMask</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h3 id="bond-deletion">Bond Deletion</h3>
@@ -169,9 +180,8 @@ transform = RandomAtomMask(p=0.25)
 
 <p>Random  bond deletion removes bonds from our graph representation.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import RandomBondDelete
-transform = RandomBondDelete(p=0.25)
-</code></pre></div></div>
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">auglichem.molecule</span> <span class="kn">import</span> <span class="n">RandomBondDelete</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">RandomBondDelete</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span></code></pre></figure>
 
 <h3 id="motif-removal">Motif Removal</h3>
 
@@ -181,11 +191,12 @@ transform = RandomBondDelete(p=0.25)
 A similarity score is calculated between motifs and the molecule, where motifs above the threshold are retained.
 This threshold can be set by passing in an argument.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import MotifRemoval
-transform = MotifRemoval(0.6)
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">auglichem.molecule</span> <span class="kn">import</span> <span class="n">MotifRemoval</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">MotifRemoval</span><span class="p">(</span><span class="mf">0.6</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p>For a more detailed guide on using these augmentations, please read the <a href="../usage_guide">usage guide</a>.</p>
+<p>For a more detailed guide on using these augmentations, please read the <a href="../usage_guide">usage guide</a>.
+In addition to the guide provided here, ready to use notebooks demonstrate both <a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/molecule_dataset.ipynb">single</a> and <a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/molecule_multitarget_dataset.ipynb">multitarget</a> training for both regression and classification.</p>
 
 <h2 id="data-sets">Data Sets</h2>
 

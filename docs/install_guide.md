@@ -34,8 +34,6 @@ Once you have `pytorch` and `torch_geometric` installed, installing AugLiChem ca
 
 `pip install auglichem`
 
-`conda install auglichem`
-
 
 ### MacOS ARM64 Architecture
 
