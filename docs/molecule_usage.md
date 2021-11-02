@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Molecule Usage
-permalink: /usage_guide/
+permalink: /molecule_usage/
 ---
 
 AugLiChem has been designed from the ground up with ease-of-use in mind.
@@ -90,6 +90,25 @@ dataset = MoleculeDatasetWrapper(
 - `data_path` (str, optional default=None): specify path to save/lookup data. Default
             creates `data_download` directory and stores data there
 - `seed` (int, optional, default=None): Random seed to use for reproducibility
+
+After loading our data, our `dataset` object has additional information from the parent class, `MoleculeDataset` that may be useful to look at.
+We can look at the SMILES representation of each molecule in the data, as well as the targets:
+
+```python
+>>> print(dataset.smiles_data)
+['[C@@H]1([C@@H]([C@@H]([C@H]([C@@H]([C@@H]1Cl)Cl)Cl)Cl)Cl)Cl'
+ '[C@H]([C@@H]([C@@H](C(=O)[O-])O)O)([C@H](C(=O)[O-])O)O'
+ '[H]/[NH+]=C(/C1=CC(=O)/C(=C\\C=c2ccc(=C([NH3+])N)cc2)/C=C1)\\N' ...
+ 'O=[Zn]' 'OCl(=O)(=O)=O' 'S=[Se]=S']
+```
+
+and the labels can be viewed with:
+
+```python
+>>> print(dataset.labels)
+{'CT_TOX': array([0, 0, 0, ..., 0, 0, 0]), 'FDA_APPROVED': array([1, 1, 1, ..., 1, 1, 1])}
+```
+
 
 ### Data Splitting
 Using the wrapper class is preferred for easy training because of the data loader function, which creates pytorch-geometric data loaders that are easy to iterate over.

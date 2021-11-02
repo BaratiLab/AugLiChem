@@ -3,9 +3,9 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
-<title>Molecule Usage | AugLiChem</title>
+<title>Usage | AugLiChem</title>
 <meta name="generator" content="Jekyll v3.9.0" />
-<meta property="og:title" content="Molecule Usage" />
+<meta property="og:title" content="Usage" />
 <meta name="author" content="BaratiLab" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
@@ -14,9 +14,9 @@
 <meta property="og:url" content="http://localhost:4000/usage_guide/" />
 <meta property="og:site_name" content="AugLiChem" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Molecule Usage" />
+<meta property="twitter:title" content="Usage" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/usage_guide/","headline":"Molecule Usage","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
+{"url":"http://localhost:4000/usage_guide/","headline":"Usage","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
 <body><div class="site-sidebar">
@@ -73,7 +73,7 @@
         
           
           
-            <li class="active"><a href="/usage_guide/">Molecule Usage</a></li>
+            <li class=""><a href="/molecule_usage/">Molecule Usage</a></li>
           
         
           
@@ -111,7 +111,7 @@
           <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Molecule Usage</h1>
+    <h1 class="post-title">Usage</h1>
   </header>
 
   <div class="post-content">
@@ -120,356 +120,194 @@ Fully functional notebooks are available at our github in the <code class="langu
 In-depth documentation of each function is given in the docstrings and can be printed out using python’s built-in <code class="language-plaintext highlighter-rouge">help()</code> function.
 Using PyTorch’s CUDA support, all models and data sets can be used with GPUs.</p>
 
-<p>This guide explains all of the features of the package.
-We have also provided jupyter notebooks that are ready to run after installation.
-Links to notebooks that demonstrate each type of training are provided below:</p>
-
-<ul>
-  <li>Molecule:
-    <ul>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/molecule_dataset.ipynb">Single target</a></li>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/molecule_multitarget_dataset.ipynb">Multitarget</a></li>
-    </ul>
-  </li>
-  <li>Crystal:
-    <ul>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_dataset.ipynb">Standard training</a></li>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_kfold_dataset.ipynb">Automatic k-fold cross validation</a></li>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_dataset.ipynb">CGCNN standard training</a></li>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_kfold_dataset.ipynb">CGCNN k-fold cross validation</a>.</li>
-    </ul>
-  </li>
-</ul>
-
 <h2 id="molecule-usage">Molecule Usage</h2>
 
 <p>The first step is to import the relevant modules.
 AugLiChem is largely self-contained, and so we import transformations, data wrapper, and models.</p>
 
-<h3 id="setup">Setup</h3>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">auglichem.molecule</span> <span class="kn">import</span> <span class="n">RandomAtomMask</span><span class="p">,</span> <span class="n">RandomBondDelete</span><span class="p">,</span> <span class="n">MotifRemoval</span>
-<span class="kn">from</span> <span class="nn">auglichem.molecule.data</span> <span class="kn">import</span> <span class="n">MoleculeDatasetWrapper</span>
-<span class="kn">from</span> <span class="nn">auglichem.molecule.models</span> <span class="kn">import</span> <span class="n">AttentiveFP</span><span class="p">,</span> <span class="n">GCN</span><span class="p">,</span> <span class="n">DeepGCN</span><span class="p">,</span> <span class="n">GINE</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.molecule import RandomAtomMask, RandomBondDelete, MotifRemoval
+from auglichem.molecule.data import MoleculeDatasetWrapper
+from auglichem.molecule.models import AttentiveFP as afp
 </code></pre></div></div>
 
 <p>Next, we set up our transformations.
 Transformations can be set up as a list or single transformation.
 When using a list, each molecule is transformed by all transformations passed in.</p>
 
-<h3 id="creating-augmentations">Creating augmentations</h3>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span>
-      <span class="n">RandomAtomMask</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">]),</span>
-      <span class="n">RandomBondDelete</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]),</span>
-      <span class="n">MotifRemoval</span><span class="p">(</span><span class="mf">0.6</span><span class="p">)</span>
-<span class="p">]</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>transforms = [
+      RandomAtomMask([0.1,0.3]),
+      RandomBondDelete([0.1, 0.4]),
+      MotifRemoval(0.6)
+]
 </code></pre></div></div>
 <p>RandomAtomMask and RandomBondDelete take in either a list of two number, or a single number, which represents the fraction of atoms to mask and bonds to delete, respectively.
 When a list is passed in, a number is sampled uniformly between the two values for each molecule and used for the masking/deletion fraction.
 MotifRemoval is deterministic, and uses a similarity score between motifs and the original molecule.
 Motifs that are above the similarity score threshold, the passed in parameter, are retained for the augmented molecule data.</p>
 
-<h3 id="data-loading">Data Loading</h3>
 <p>After initializing our transformations, we are ready to initialize our data set.
 Data sets are selected with a string, and are automatically downloaded to <code class="language-plaintext highlighter-rouge">./data_download</code> by default.
 This directory is created if it is not present, and does not download the data again if it is already present.
 Batch size, validation size, and test size for training and evaluation are set here.
 The transforms are passed in here and scaffold splitting is supported.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dataset</span> <span class="o">=</span> <span class="n">MoleculeDatasetWrapper</span><span class="p">(</span>
-             <span class="n">dataset</span><span class="o">=</span><span class="s">"ClinTox"</span><span class="p">,</span>
-             <span class="n">transform</span><span class="o">=</span><span class="n">transforms</span><span class="p">,</span>
-             <span class="n">split</span><span class="o">=</span><span class="s">"scaffold"</span><span class="p">,</span>
-             <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
-             <span class="n">num_workers</span><span class="o">=</span><span class="mi">0</span>
-             <span class="n">valid_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-             <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-             <span class="n">aug_time</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-             <span class="n">data_path</span><span class="o">=</span><span class="s">"./data_download"</span><span class="p">,</span>
-             <span class="n">seed</span><span class="o">=</span><span class="bp">None</span>
-<span class="p">)</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dataset = MoleculeDatasetWrapper("ClinTox", transform=transforms, batch_size=128, valid_size=0.1, test_size=0.1)
 </code></pre></div></div>
-<p><code class="language-plaintext highlighter-rouge">MoleculeDatasetWrapper</code> arguments:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">dataset</code> (str): One of the datasets available from MoleculeNet
-             (http://moleculenet.ai/datasets-1)</li>
-  <li><code class="language-plaintext highlighter-rouge">transform</code> (Compose, OneOf, RandomAtomMask, RandomBondDelete object): transormations
-             to apply to the data at call time.</li>
-  <li><code class="language-plaintext highlighter-rouge">split</code> (str, optional default=scaffold): random or scaffold. The splitting strategy
-                                      used for train/test/validation set creation.</li>
-  <li><code class="language-plaintext highlighter-rouge">batch_size</code> (int, optional default=64): Batch size used in training</li>
-  <li><code class="language-plaintext highlighter-rouge">num_workers</code> (int, optional default=0): Number of workers used in loading data</li>
-  <li><code class="language-plaintext highlighter-rouge">valid_size</code> (float in [0,1], optional default=0.1):</li>
-  <li><code class="language-plaintext highlighter-rouge">test_size</code> (float in [0,1],  optional default=0.1):</li>
-  <li><code class="language-plaintext highlighter-rouge">aug_time</code> (int, optional default=0): Number of times to call each augmentation</li>
-  <li><code class="language-plaintext highlighter-rouge">data_path</code> (str, optional default=None): specify path to save/lookup data. Default
-          creates <code class="language-plaintext highlighter-rouge">data_download</code> directory and stores data there</li>
-  <li><code class="language-plaintext highlighter-rouge">seed</code> (int, optional, default=None): Random seed to use for reproducibility</li>
-</ul>
 
-<h3 id="data-splitting">Data Splitting</h3>
 <p>Using the wrapper class is preferred for easy training because of the data loader function, which creates pytorch-geometric data loaders that are easy to iterate over.
 With multi-target data sets, such as ClinTox, we specify the target we want here.
 If no target is selected, the first target in the downloaded data file is used.
 Multiple targets can be selected for multi-target training by passing in a list of targets, or ‘all’ to use all of them.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">train_loader</span><span class="p">,</span> <span class="n">valid_loader</span><span class="p">,</span> <span class="n">test_loader</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="n">get_data_loaders</span><span class="p">(</span><span class="s">"FDA_APPROVED"</span><span class="p">)</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>train_loader, valid_loader, test_loader = dataset.get_data_loaders("FDA_APPROVED")
 </code></pre></div></div>
-<p><code class="language-plaintext highlighter-rouge">MoleculeDatasetWrapper.get_data_loaders()</code> argument:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">target</code> (str, list of str, optional): Target name to get data loaders for. If None,
-   	                           returns the loaders for the first target. If ‘all’
-                                 returns data for all targets at once, ideal for
-                                 multitarget trainimg.</li>
-</ul>
-
-<p>Returns:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">train/valid/test_loader</code> (DataLoader): Data loaders containing the train, validation
-                                      and test splits of our data.</li>
-</ul>
 
 <p>Now that our data is ready for training and evalutaion, we initialize our model.
 Task, either regression or classification needs to be passed in.
 Our dataset object stores this in the <code class="language-plaintext highlighter-rouge">task</code> attribute.</p>
 
-<h3 id="model-initialization">Model Initialization</h3>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">AttentiveFP</span><span class="p">(</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">dataset</span><span class="p">.</span><span class="n">task</span><span class="p">,</span>
-            <span class="n">emb_dim</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
-            <span class="n">num_layers</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-            <span class="n">num_timesteps</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-            <span class="n">drop_ratio</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">output_dim</span><span class="o">=</span><span class="bp">None</span>
-<span class="p">)</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>model = afp(task=dataset.task)
 </code></pre></div></div>
-<p><code class="language-plaintext highlighter-rouge">AttentiveFP</code> arguments:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">task</code> (str): ‘classification’ or ‘regression’</li>
-  <li><code class="language-plaintext highlighter-rouge">edge_dim</code> (int): Edge feature dimensionality.</li>
-  <li><code class="language-plaintext highlighter-rouge">num_layers</code> (int): Number of GNN layers.</li>
-  <li><code class="language-plaintext highlighter-rouge">num_timesteps</code> (int): Number of iterative refinement steps for global readout.</li>
-  <li><code class="language-plaintext highlighter-rouge">dropout</code> (float, optional): Dropout probability. (default: :obj:<code class="language-plaintext highlighter-rouge">0.0</code>)</li>
-  <li><code class="language-plaintext highlighter-rouge">output_dim</code> (int, optional): Output dimension. Defaults to 1 if task=’regression’, 2 if task=’classification’. Pass in the number of targets if doing multi-target classification.</li>
-</ul>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">DeepGCN</span><span class="p">(</span>
-	<span class="p">[</span><span class="n">THIS</span> <span class="n">NEEDS</span> <span class="n">TO</span> <span class="n">BE</span> <span class="n">FILLED</span> <span class="n">IN</span><span class="p">]</span>
-<span class="p">)</span>
-</code></pre></div></div>
-<p><code class="language-plaintext highlighter-rouge">DeepGCN</code> arguments:</p>
-<ul>
-  <li><strong>I DON’T KNOW YET</strong></li>
-</ul>
+<p>From here, we are ready to train using standard PyTorch training procedure.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">GCN</span><span class="p">(</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">dataset</span><span class="p">.</span><span class="n">task</span><span class="p">,</span>
-            <span class="n">emb_dim</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
-            <span class="n">feat_dim</span><span class="o">=</span><span class="mi">256</span>
-            <span class="n">num_layers</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-            <span class="n">pool</span><span class="o">=</span><span class="s">'mean'</span>
-            <span class="n">drop_ratio</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">output_dim</span><span class="o">=</span><span class="bp">None</span>
-<span class="p">)</span>
-</code></pre></div></div>
-<p><code class="language-plaintext highlighter-rouge">GCN</code> arguments:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">task</code> (str): ‘classification’ or ‘regression’</li>
-  <li><code class="language-plaintext highlighter-rouge">edge_dim</code> (int): Edge feature dimensionality.</li>
-  <li><code class="language-plaintext highlighter-rouge">feature_dim</code> (int): Feature dimensionality before final prediction layers.</li>
-  <li><code class="language-plaintext highlighter-rouge">num_layers</code> (int): Number of GNN layers.</li>
-  <li>‘pool’ (str): Pooling function to be used. One of ‘mean’, ‘add’, ‘max’.</li>
-  <li><code class="language-plaintext highlighter-rouge">drop_ratio</code> (float, optional): Dropout probability. (default: :obj:<code class="language-plaintext highlighter-rouge">0.0</code>)</li>
-  <li><code class="language-plaintext highlighter-rouge">output_dim</code> (int, optional): Output dimension. Defaults to 1 if task=’regression’, 2 if task=’classification’. Pass in the number of targets if doing multi-target classification.
-After initializing one of the models as seen above, we are ready to train using standard PyTorch training procedure.</li>
-</ul>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">GINE</span><span class="p">(</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">dataset</span><span class="p">.</span><span class="n">task</span><span class="p">,</span>
-            <span class="n">emb_dim</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
-            <span class="n">feat_dim</span><span class="o">=</span><span class="mi">256</span>
-            <span class="n">num_layers</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-            <span class="n">pool</span><span class="o">=</span><span class="s">'mean'</span>
-            <span class="n">drop_ratio</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">output_dim</span><span class="o">=</span><span class="bp">None</span>
-<span class="p">)</span>
-</code></pre></div></div>
-<p><code class="language-plaintext highlighter-rouge">GINE</code> arguments:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">task</code> (str): ‘classification’ or ‘regression’</li>
-  <li><code class="language-plaintext highlighter-rouge">edge_dim</code> (int): Edge feature dimensionality.</li>
-  <li><code class="language-plaintext highlighter-rouge">feature_dim</code> (int): Feature dimensionality before final prediction layers.</li>
-  <li><code class="language-plaintext highlighter-rouge">num_layers</code> (int): Number of GNN layers.</li>
-  <li>‘pool’ (str): Pooling function to be used. One of ‘mean’, ‘add’, ‘max’.</li>
-  <li><code class="language-plaintext highlighter-rouge">drop_ratio</code> (float, optional): Dropout probability. (default: :obj:<code class="language-plaintext highlighter-rouge">0.0</code>)</li>
-  <li><code class="language-plaintext highlighter-rouge">output_dim</code> (int, optional): Output dimension. Defaults to 1 if task=’regression’, 2 if task=’classification’. Pass in the number of targets if doing multi-target classification.
-After initializing one of the models as seen above, we are ready to train using standard PyTorch training procedure.</li>
-</ul>
-
-<h2 id="single-target-training">Single Target Training</h2>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
-<span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import torch
+criterion = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
 </code></pre></div></div>
 
 <p>Now we have our training loop.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">bn</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>for epoch in range(100):
+    for bn, data in tqdm(enumerate(train_loader)):
 
-        <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        optimizer.zero_grad()
         
-        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">flatten</span><span class="p">())</span>
+        _, pred = model(data)
+        loss = criterion(pred, data.y.flatten())
 
-        <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+        loss.backward()
+        optimizer.step()
 </code></pre></div></div>
 
-<h3 id="evaluation">Evaluation</h3>
 <p>Evaluation requires storing all predections and labels for each batch, and so we have</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">roc_auc_score</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from sklearn.metrics import roc_auc_score
 
-<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
-    <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+with torch.no_grad():
+    model.eval()
         
-   <span class="n">all_preds</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">all_labels</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+   all_preds = []
+    all_labels = []
+    for data in test_loader:
+        _, pred = model(data)
 
-        <span class="c1"># Hold on to all predictions and labels
-</span>        <span class="n">all_preds</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pred</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">all_labels</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">)</span>
+        # Hold on to all predictions and labels
+        all_preds.extend(pred[:,1])
+        all_labels.extend(data.y)
     
-    <span class="n">metric</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">pred</span><span class="p">.</span><span class="n">cpu</span><span class="p">().</span><span class="n">detach</span><span class="p">()[:,</span><span class="mi">1</span><span class="p">])</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">"TEST ROC: {1:.3f}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+    metric = roc_auc_score(data.y.cpu(), pred.cpu().detach()[:,1])
+    print("TEST ROC: {1:.3f}".format(metric))
 </code></pre></div></div>
 
-<h2 id="multi-target-training">Multi-target Training</h2>
+<h2 id="crystal-usage">Crystal Usage</h2>
 
-<p>AugLiChem supports multi-target training as well.
-When working with a data set that has multiple targets, we can pass in a list of targets we want, or use all targets at once.
-In this example, we use QM8, a multi-target regression set.</p>
+<p>Using the crystal submodule is very similar to molecule.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dataset</span> <span class="o">=</span> <span class="n">MoleculeDatasetWrapper</span><span class="p">(</span><span class="s">"QM8"</span><span class="p">,</span> <span class="n">data_path</span><span class="o">=</span><span class="s">"./data_download"</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">train_loader</span><span class="p">,</span> <span class="n">valid_loader</span><span class="p">,</span> <span class="n">test_loader</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="n">get_data_loaders</span><span class="p">(</span><span class="s">"all"</span><span class="p">)</span>
+<p>The first step is to import the relevant modules.
+AugLiChem is largely self-contained, and so we import transformations, data wrapper, and models.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from auglichem.crystal import RotationTransformation, PerturbStructureTransformation
+from auglichem.crystal.data import CrystalDatasetWrapper
+from auglichem.crystal.models import SchNet
 </code></pre></div></div>
 
-<p>Because many of these data sets often have labels for some, but not all targets, empty label values have been filled with a placeholder that we skip during training.
-Our training setup is the same as in single-target training:</p>
+<p>Next, we set up our transformations.
+Transformations can be set up as a list or single transformation.
+When using a list, each molecule is transformed by all transformations passed in.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>transforms = [
+	RotationTransformation(),
+	PerturbStructureTransformation()
+]
+</code></pre></div></div>
+<p>RandomAtomMask and RandomBondDelete take in either a list of two number, or a single number, which represents the fraction of atoms to mask and bonds to delete, respectively.
+When a list is passed in, a number is sampled uniformly between the two values for each molecule and used for the masking/deletion fraction.
+MotifRemoval is deterministic, and uses a similarity score between motifs and the original molecule.
+Motifs that are above the similarity score threshold, the passed in parameter, are retained for the augmented molecule data.</p>
+
+<p>After initializing our transformations, we are ready to initialize our data set.
+Data sets are selected with a string, and are automatically downloaded to <code class="language-plaintext highlighter-rouge">./data_download</code> by default.
+This directory is created if it is not present, and does not download the data again if it is already present.
+Batch size, validation size, and test size for training and evaluation are set here.
+Unlike molecule, CrystalDatasetWrapper handles transformations when splitting the data.
+Random splitting, and k-fold cross validation are supported.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dataset = CrystalDatasetWrapper("lanthanides", batch_size=128, valid_size=0.1, test_size=0.1)
 </code></pre></div></div>
 
-<p>In our training loop, we see that we only compute the loss when we have a label corresponding to a molecule.</p>
+<p>Using the wrapper class is necessary for easy training in the crystal sets because of the data loader function, which creates pytorch-geometric data loaders that are easy to iterate over.
+Crystal data sets are augmented when getting the data loaders and augmented CIF files are stored next to the originals.
+Loading original or augmented CIF files is handled automatically by the loaders, where only the training set uses the augmented files.
+Note: this function call may take a while the first time due to loading, transforming, and saving thousands of files. However, if augmented files are present, they will not be augmented again, and running the code again will be significantly faster.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">bn</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>
-        <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="mf">0.</span>
-        
-        <span class="c1"># Get prediction for all data
-</span>        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">.</span><span class="n">dataset</span><span class="p">.</span><span class="n">target</span><span class="p">):</span>
-            <span class="c1"># Get indices where target has a value
-</span>            <span class="n">good_idx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">[:,</span><span class="n">idx</span><span class="p">]</span><span class="o">!=-</span><span class="mi">999999999</span><span class="p">)</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>train_loader, valid_loader, test_loader = dataset.get_data_loaders(transform=transforms)
+</code></pre></div></div>
+
+<p>Now that our data is ready for training and evalutaion, we initialize our model.
+Task, either regression or classification needs to be passed in.
+Our dataset object stores this in the <code class="language-plaintext highlighter-rouge">task</code> attribute.
+Note: CGCNN uses a different implementation and needs to be initialized and trained differently.
+A working example of this is given in <code class="language-plaintext highlighter-rouge">examples/</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>model = SchNet(task=dataset.task)
+</code></pre></div></div>
+
+<p>From here, we are ready to train using standard PyTorch training procedure.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import torch
+criterion = torch.nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
+</code></pre></div></div>
+
+<p>Now we have our training loop. Pymatgen throws a lot of warnings, which we suppress.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    for epoch in range(1):
+        for bn, data in tqdm(enumerate(train_loader)):        
+            optimizer.zero_grad()
+
+            # Comment out the following line and uncomment the line after for cuda
+            pred = model(data)
+            #pred = model(data.cuda())
             
-            <span class="n">current_preds</span> <span class="o">=</span> <span class="n">pred</span><span class="p">[:,</span><span class="n">idx</span><span class="p">][</span><span class="n">good_idx</span><span class="p">]</span>
-            <span class="n">current_labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">[:,</span><span class="n">idx</span><span class="p">][</span><span class="n">good_idx</span><span class="p">]</span>
-            
-            <span class="n">loss</span> <span class="o">+=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">current_preds</span><span class="p">,</span> <span class="n">current_labels</span><span class="p">)</span>
-        
-        <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+            loss = criterion(pred, data.y)
+
+            loss.backward()
+            optimizer.step()
 </code></pre></div></div>
 
-<p>When evaluating, we need to iterate over all targets, and also skip data when there is no label</p>
+<p>Evaluation requires storing all predections and labels for each batch, and so we have:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from sklearn.metrics import mean_absolute_error 
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    with torch.no_grad():
+        model.eval()
+        preds = torch.Tensor([])
+        targets = torch.Tensor([])
+        for data in test_loader:
+            #pred = model(data)
+            pred = model(data.cuda())
+            preds = torch.cat((preds, pred.cpu()))
+            targets = torch.cat((targets, data.y.cpu()))
+
+        mae = mean_absolute_error(preds, targets)   
     
-    <span class="c1"># All targets we're evaluating
-</span>    <span class="n">target_list</span> <span class="o">=</span> <span class="n">test_loader</span><span class="p">.</span><span class="n">dataset</span><span class="p">.</span><span class="n">target</span>
-    
-    <span class="c1"># Dictionaries to keep track of predictions and labels for all targets
-</span>    <span class="n">all_preds</span> <span class="o">=</span> <span class="p">{</span><span class="n">target</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">target_list</span><span class="p">}</span>
-    <span class="n">all_labels</span> <span class="o">=</span> <span class="p">{</span><span class="n">target</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">target_list</span><span class="p">}</span>
-    
-    <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
-        <span class="c1"># Get prediction for all data
-</span>        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">target_list</span><span class="p">):</span>
-            <span class="c1"># Get indices where target has a value
-</span>            <span class="n">good_idx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">[:,</span><span class="n">idx</span><span class="p">]</span><span class="o">!=-</span><span class="mi">999999999</span><span class="p">)</span>
-            
-            <span class="n">current_preds</span> <span class="o">=</span> <span class="n">pred</span><span class="p">[:,</span><span class="n">idx</span><span class="p">][</span><span class="n">good_idx</span><span class="p">]</span>
-            <span class="n">current_labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">[:,</span><span class="n">idx</span><span class="p">][</span><span class="n">good_idx</span><span class="p">]</span>
-            
-            <span class="c1"># Save predictions and targets
-</span>            <span class="n">all_preds</span><span class="p">[</span><span class="n">target</span><span class="p">].</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">current_preds</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">cpu</span><span class="p">().</span><span class="n">numpy</span><span class="p">()))</span>
-            <span class="n">all_labels</span><span class="p">[</span><span class="n">target</span><span class="p">].</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">current_labels</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">cpu</span><span class="p">().</span><span class="n">numpy</span><span class="p">()))</span>
-
-    <span class="n">scores</span> <span class="o">=</span> <span class="p">{</span><span class="n">target</span><span class="p">:</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">target_list</span><span class="p">}</span>
-    <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">target_list</span><span class="p">:</span>
-        <span class="n">scores</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">all_labels</span><span class="p">[</span><span class="n">target</span><span class="p">],</span> <span class="n">all_preds</span><span class="p">[</span><span class="n">target</span><span class="p">],</span>
-                                            <span class="n">squared</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">"{0} TEST RMSE: {1:.5f}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">scores</span><span class="p">[</span><span class="n">target</span><span class="p">]))</span>
-</code></pre></div></div>
-
-<h2 id="training-with-cuda">Training with CUDA</h2>
-
-<p>AugLiChem takes advantage of PyTorch’s CUDA support to leverage GPUs for faster training and evaluation.
-To initialize a model on our GPU, we call the <code class="language-plaintext highlighter-rouge">.cuda()</code> function.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">GCN</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">dataset</span><span class="p">.</span><span class="n">task</span><span class="p">)</span>
-<span class="n">model</span><span class="p">.</span><span class="n">cuda</span><span class="p">()</span>
-</code></pre></div></div>
-<p>Our training setup is the same as before:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">MSELoss</span><span class="p">()</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>The only difference in our training loop is putting our data on the GPU as we train:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">bn</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>
-
-        <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
-        
-        <span class="c1"># data -&gt; GPU
-</span>        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">cuda</span><span class="p">())</span>
-        
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">pred</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">flatten</span><span class="p">())</span>
-
-        <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
-</code></pre></div></div>
-
-<p>Which we also do for evaluation:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">task</span> <span class="o">=</span> <span class="n">test_loader</span><span class="p">.</span><span class="n">dataset</span><span class="p">.</span><span class="n">task</span>
-    <span class="n">set_str</span> <span class="o">=</span> <span class="s">"VALIDATION"</span> <span class="k">if</span> <span class="n">validation</span> <span class="k">else</span> <span class="s">"TEST"</span>
-    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
-        <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
-        
-        <span class="n">all_preds</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">all_labels</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
-
-            <span class="c1"># data -&gt; GPU
-</span>            <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">cuda</span><span class="p">())</span>
-            
-            <span class="c1"># Hold on to all predictions and labels
-</span>            <span class="n">all_preds</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
-            <span class="n">all_labels</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">)</span>
-        
-        <span class="n">metric</span> <span class="o">=</span> <span class="n">mse</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">pred</span><span class="p">.</span><span class="n">cpu</span><span class="p">().</span><span class="n">detach</span><span class="p">(),</span> <span class="n">squared</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">"TEST RMSE: {0:.3f}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+    set_str = "VALIDATION" if(validation) else "TEST"
+    print("{0} MAE: {1:.3f}".format(set_str, mae))
 </code></pre></div></div>
 
   </div>
