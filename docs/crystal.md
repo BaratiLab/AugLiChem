@@ -13,7 +13,7 @@ This has the added benefit of allowing easy inspection of augmentations in their
 Bonding in crystalline systems is not as concretely defined as for molecules.
 In order to construct a graph, atoms are considered bonded to their N nearest neighbors.
 
-![crytal_numbered](../images/NaCl_numbered.png)
+![crystal_numbered](./NaCl_numbered.png)
 
 In this example, we have a NaCl crystal with Cl atoms labeled 0,1,2, and 3, and Na atoms labeled 4,5,6, and 7, which is behind atom 0.
 We will consider each atom to be bonded to its three closest neighbors.
