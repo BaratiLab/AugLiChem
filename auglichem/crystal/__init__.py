@@ -5,6 +5,7 @@ from auglichem.crystal._transforms import (
         SupercellTransformation,
         TranslateSitesTransformation,
         CubicSupercellTransformation,
-        PrimitiveCellTransformation
+        PrimitiveCellTransformation,
+        SwapAxesTransformation,
 )
 from auglichem.crystal._compositions import Compose, OneOf

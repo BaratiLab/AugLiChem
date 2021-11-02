@@ -32,7 +32,8 @@ from auglichem.crystal._transforms import (
         SupercellTransformation,
         TranslateSitesTransformation,
         CubicSupercellTransformation,
-        PrimitiveCellTransformation
+        PrimitiveCellTransformation,
+        SwapAxesTransformation,
 )
 
 from auglichem.utils import (
