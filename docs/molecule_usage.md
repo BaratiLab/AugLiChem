@@ -41,7 +41,7 @@ Transformations can be set up as a list or single transformation.
 When using a list, each molecule is transformed by all transformations passed in.
 
 
-### Creating augmentations
+### Creating Augmentations
 ```python
 transforms = [
       RandomAtomMask([0.1,0.3]),
@@ -76,12 +76,12 @@ dataset = MoleculeDatasetWrapper(
 )
 ```
 `MoleculeDatasetWrapper` arguments:
-- `dataset` (str): One of the datasets available from MoleculeNet
-               (http://moleculenet.ai/datasets-1)
-- `transform` (Compose, OneOf, RandomAtomMask, RandomBondDelete object): transormations
-               to apply to the data at call time.
+- `dataset` (str): One of our dataset: lanthanides, perovskites, band_gap, fermi_energy, or formation_energy
+- `transform` (AbstractTransformation, optional): A crystal transformation
+
 - `split` (str, optional default=scaffold): random or scaffold. The splitting strategy
                                         used for train/test/validation set creation.
+- `split` (str, default=random): Method of splitting data into train, validation, and test. Ignored if doing k-fold cross validation.
 - `batch_size` (int, optional default=64): Batch size used in training
 - `num_workers` (int, optional default=0): Number of workers used in loading data
 - `valid_size` (float in [0,1], optional default=0.1): 
@@ -90,6 +90,7 @@ dataset = MoleculeDatasetWrapper(
 - `data_path` (str, optional default=None): specify path to save/lookup data. Default
             creates `data_download` directory and stores data there
 - `seed` (int, optional, default=None): Random seed to use for reproducibility
+- `cgcnn` (bool, optional, default=False): Set to True is using built-in CGCNN model.
 
 After loading our data, our `dataset` object has additional information from the parent class, `MoleculeDataset` that may be useful to look at.
 We can look at the SMILES representation of each molecule in the data, as well as the targets:
@@ -108,7 +109,6 @@ and the labels can be viewed with:
 >>> print(dataset.labels)
 {'CT_TOX': array([0, 0, 0, ..., 0, 0, 0]), 'FDA_APPROVED': array([1, 1, 1, ..., 1, 1, 1])}
 ```
-
 
 ### Data Splitting
 Using the wrapper class is preferred for easy training because of the data loader function, which creates pytorch-geometric data loaders that are easy to iterate over.
@@ -272,7 +272,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
 In our training loop, we see that we only compute the loss when we have a label corresponding to a molecule.
 
 ```python
-for epoch in range(2):
+for epoch in range(100):
     for bn, data in tqdm(enumerate(train_loader)):
         optimizer.zero_grad()
         loss = 0.

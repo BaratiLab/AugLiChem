@@ -24,7 +24,8 @@
     <a class="sidebar-title" href="/">
     <img src="../images/logo.png" alt="drawing" width="20"/>
 	    AugLiChem
-    <img src="../images/logo.png" alt="drawing" width="20"/>
+
+    <img src="../images/Project.png" alt="drawing" width="20"/>
     </a>
 
     
@@ -156,7 +157,7 @@ AugLiChem is largely self-contained, and so we import transformations, data wrap
 Transformations can be set up as a list or single transformation.
 When using a list, each molecule is transformed by all transformations passed in.</p>
 
-<h3 id="creating-augmentations">Creating augmentations</h3>
+<h3 id="creating-augmentations">Creating Augmentations</h3>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span>
       <span class="n">RandomAtomMask</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">]),</span>
       <span class="n">RandomBondDelete</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]),</span>
@@ -190,12 +191,13 @@ The transforms are passed in here and scaffold splitting is supported.</p>
 </code></pre></div></div>
 <p><code class="language-plaintext highlighter-rouge">MoleculeDatasetWrapper</code> arguments:</p>
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">dataset</code> (str): One of the datasets available from MoleculeNet
-             (http://moleculenet.ai/datasets-1)</li>
-  <li><code class="language-plaintext highlighter-rouge">transform</code> (Compose, OneOf, RandomAtomMask, RandomBondDelete object): transormations
-             to apply to the data at call time.</li>
+  <li><code class="language-plaintext highlighter-rouge">dataset</code> (str): One of our dataset: lanthanides, perovskites, band_gap, fermi_energy, or formation_energy</li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">transform</code> (AbstractTransformation, optional): A crystal transformation</p>
+  </li>
   <li><code class="language-plaintext highlighter-rouge">split</code> (str, optional default=scaffold): random or scaffold. The splitting strategy
                                       used for train/test/validation set creation.</li>
+  <li><code class="language-plaintext highlighter-rouge">split</code> (str, default=random): Method of splitting data into train, validation, and test. Ignored if doing k-fold cross validation.</li>
   <li><code class="language-plaintext highlighter-rouge">batch_size</code> (int, optional default=64): Batch size used in training</li>
   <li><code class="language-plaintext highlighter-rouge">num_workers</code> (int, optional default=0): Number of workers used in loading data</li>
   <li><code class="language-plaintext highlighter-rouge">valid_size</code> (float in [0,1], optional default=0.1):</li>
@@ -204,6 +206,7 @@ The transforms are passed in here and scaffold splitting is supported.</p>
   <li><code class="language-plaintext highlighter-rouge">data_path</code> (str, optional default=None): specify path to save/lookup data. Default
           creates <code class="language-plaintext highlighter-rouge">data_download</code> directory and stores data there</li>
   <li><code class="language-plaintext highlighter-rouge">seed</code> (int, optional, default=None): Random seed to use for reproducibility</li>
+  <li><code class="language-plaintext highlighter-rouge">cgcnn</code> (bool, optional, default=False): Set to True is using built-in CGCNN model.</li>
 </ul>
 
 <p>After loading our data, our <code class="language-plaintext highlighter-rouge">dataset</code> object has additional information from the parent class, <code class="language-plaintext highlighter-rouge">MoleculeDataset</code> that may be useful to look at.
@@ -381,7 +384,7 @@ Our training setup is the same as in single-target training:</p>
 
 <p>In our training loop, we see that we only compute the loss when we have a label corresponding to a molecule.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">bn</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>
         <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="mf">0.</span>
