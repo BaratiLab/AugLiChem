@@ -74,7 +74,7 @@ With our graph representation, we can use Graph Neural Networks, and can easily 
 
 ## Data Augmentation
 
-![crystal](images/nacl.png)
+![crystal](images/Nacl.png)
 
 Five augmentations are supported for crystals.
 We take the original structure seen above
