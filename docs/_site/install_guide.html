@@ -156,7 +156,7 @@ We are working on a more elegant solution given the current limitations.</p>
 <p>Once you have miniforge compatible with ARM64 architecture, a new environment with rdkit can be installed.
 If you do not specify <code class="language-plaintext highlighter-rouge">python=3.8</code> it will default to <code class="language-plaintext highlighter-rouge">python=3.9.6</code> as of the time of writing this.</p>
 
-<p>`conda create -n auglichem python=3.8 rdkit’</p>
+<p><code class="language-plaintext highlighter-rouge">conda create -n auglichem python=3.8 rdkit</code></p>
 
 <p>Now activate the environment:</p>
 
@@ -170,13 +170,18 @@ If you do not specify <code class="language-plaintext highlighter-rouge">python=
 
 <p><code class="language-plaintext highlighter-rouge">conda install scipy</code></p>
 
-<p><code class="language-plaintext highlighter-rouge">pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html</code></p>
-
 <p><code class="language-plaintext highlighter-rouge">conda install cython</code></p>
 
 <p><code class="language-plaintext highlighter-rouge">conda install scikit-learn</code></p>
 
-<p>Before installing the package, you must go into <code class="language-plaintext highlighter-rouge">setup.py</code> in the main directory and comment out <code class="language-plaintext highlighter-rouge">rdkit-pypi</code> from the <code class="language-plaintext highlighter-rouge">install_requires</code> list.
+<p><code class="language-plaintext highlighter-rouge">pip install torch-scatter -f https://data.pyg.org/whl/torch-1.10.0+cpu.html</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install torch-geometric</code></p>
+
+<p>Before installing the package, you must go into <code class="language-plaintext highlighter-rouge">setup.py</code> in the main directory and comment out <code class="language-plaintext highlighter-rouge">rdkit-pypi</code> and <code class="language-plaintext highlighter-rouge">tensorboard</code> from the <code class="language-plaintext highlighter-rouge">install_requires</code> list since they are already installed.
+Not commenting these packages out will result in an error during installation.
 It is not supported through pip this way, and since it is already installed, it will throw an error.</p>
 
 <p>Finally, run:</p>
