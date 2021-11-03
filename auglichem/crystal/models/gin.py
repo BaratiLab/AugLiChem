@@ -59,10 +59,9 @@ class GINet(nn.Module):
     Args:
         num_layer (int): the number of GNN layers
         emb_dim (int): dimensionality of embeddings
-        JK (str): last, concat, max or sum.
-        max_pool_layer (int): the layer from which we use max pool rather than add pool for neighbor aggregation
+        feat_dim (int): feature dimenstion
         drop_ratio (float): dropout rate
-        gnn_type: gin, gcn, graphsage, gat
+        pool (str): pooling function
     Output:
         node representations
     """

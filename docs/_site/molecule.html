@@ -10,21 +10,22 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
 <meta property="og:description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
-<link rel="canonical" href="http://localhost:4000/molecule/" />
-<meta property="og:url" content="http://localhost:4000/molecule/" />
+<link rel="canonical" href="http://localhost:4000/molecule.html" />
+<meta property="og:url" content="http://localhost:4000/molecule.html" />
 <meta property="og:site_name" content="AugLiChem" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Molecule" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/molecule/","headline":"Molecule","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
+{"url":"http://localhost:4000/molecule.html","headline":"Molecule","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
 <body><div class="site-sidebar">
 
     <a class="sidebar-title" href="/">
-    <img src="../images/logo.png" alt="drawing" width="20"/>
+    <img src="images/logo.png" alt="drawing" width="20"/>
 	    AugLiChem
-    <img src="../images/logo.png" alt="drawing" width="20"/>
+
+    <img src="images/Project.png" alt="drawing" width="20"/>
     </a>
 
     
@@ -53,32 +54,32 @@
         
           
           
-            <li class=""><a href="/about/">About</a></li>
+            <li class=""><a href="/about.html">About</a></li>
           
         
           
           
-            <li class=""><a href="/crystal/">Crystal</a></li>
+            <li class=""><a href="/crystal.html">Crystal</a></li>
           
         
           
           
-            <li class=""><a href="/crystal_usage/">Crystal Usage</a></li>
+            <li class=""><a href="/crystal_usage.html">Crystal Usage</a></li>
           
         
           
           
-            <li class="active"><a href="/molecule/">Molecule</a></li>
+            <li class="active"><a href="/molecule.html">Molecule</a></li>
           
         
           
           
-            <li class=""><a href="/molecule_usage/">Molecule Usage</a></li>
+            <li class=""><a href="/molecule_usage.html">Molecule Usage</a></li>
           
         
           
           
-            <li class=""><a href="/installation/">Installation</a></li>
+            <li class=""><a href="/install_guide.html">Installation</a></li>
           
         
       </ul>
@@ -126,7 +127,7 @@ We therefore represent atoms as nodes, with the atom type as the node attribute,
 
 <p>In methane, we have a carbon atom surrounded by four hydrogen atoms, seen here.</p>
 
-<p><img src="../images/methane.png" alt="methane" /></p>
+<p><img src="/images/methane.png" alt="methane" /></p>
 
 <p>The central carbon, labeled atom 0, is connected to each hydrogen, numbered 1 through 4.
 Our node attirbute vector, is seen below. Atom number is captured by zero-indexed index in our vector, where the second column is 1 if the atom is a chiral center.</p>
@@ -163,7 +164,7 @@ This captures the bond type information, where 0 represents a single bond, and t
 
 <h3 id="atom-masking">Atom Masking</h3>
 
-<p><img src="../images/Picture1.png" alt="bond_delete" /></p>
+<p><img src="/images/Picture1.png" alt="bond_delete" /></p>
 
 <p>Random atom masking replaces randomly selected node attributes with a mask token.
 The fraction of atoms masked is passed in as an argument, and at least one atom is masked regardless of the fraction selected.
@@ -176,7 +177,7 @@ This transformation can be imported and initilized as follows:</p>
 
 <h3 id="bond-deletion">Bond Deletion</h3>
 
-<p><img src="../images/Picture2.png" alt="bond_delete" /></p>
+<p><img src="/images/Picture2.png" alt="bond_delete" /></p>
 
 <p>Random  bond deletion removes bonds from our graph representation.</p>
 
@@ -185,7 +186,7 @@ This transformation can be imported and initilized as follows:</p>
 
 <h3 id="motif-removal">Motif Removal</h3>
 
-<p><img src="../images/motif.png" alt="motif" /></p>
+<p><img src="/images/motif.png" alt="motif" /></p>
 
 <p>Motif removal is different from the other augmentations in that it is deterministic.
 A similarity score is calculated between motifs and the molecule, where motifs above the threshold are retained.

@@ -85,7 +85,8 @@ class RotationTransformation(AbstractTransformation):
         self.axis = axis
         self.angle = angle
 
-    def apply_transformation(self, structure, axis=None, angle=None, angle_in_radians=False):
+    def apply_transformation(self, structure, axis=None, angle=None, angle_in_radians=False,
+                             seed=None):
         """
         Apply the transformation.
         Args:
@@ -97,6 +98,7 @@ class RotationTransformation(AbstractTransformation):
             self.axis = axis
         if(angle is not None):
             self.angle = angle
+
         self.angle_in_radians = angle_in_radians
         self._symmop = SymmOp.from_axis_angle_and_translation(self.axis, self.angle, self.angle_in_radians)
 
@@ -150,7 +152,7 @@ class PerturbStructureTransformation(AbstractTransformation):
         self.distance = distance
         self.min_distance = min_distance
 
-    def apply_transformation(self, structure: Structure) -> Structure:
+    def apply_transformation(self, structure: Structure, seed=None) -> Structure:
         """
         Apply the transformation.
         Args:
@@ -159,6 +161,8 @@ class PerturbStructureTransformation(AbstractTransformation):
             Structure with sites perturbed.
         """
         s = structure.copy()
+        if(seed is not None):
+            np.random.seed(seed) # Pymatgen uses numpy random
         s.perturb(self.distance, min_distance=self.min_distance)
         return s
 
@@ -187,24 +191,24 @@ class SwapAxesTransformation(object):
     """
     Swap coordinate axes in the crystal strucutre.
     """
-    def __init__(self, p=0.5):
+    def __init__(self):
         #TODO: Shouldn't this always call the transformation?
         #TODO: Decide if its probabilistic or not, and if we should use random seeding.
-        self.p = p
+        pass
 
-    def apply_transformation(self, crys):
-        #if random.random() > self.p:
-            #return AseAtomsAdaptor.get_structure(crys)
-        #else:
-        if(True):
-            atoms = AseAtomsAdaptor().get_atoms(crys)
+    def apply_transformation(self, crys, seed=None, _test_choice=None):
+        atoms = AseAtomsAdaptor().get_atoms(crys)
 
-            choice = np.random.choice(3, 2, replace=False)
-            pos = (atoms.positions)
-            pos[:,[choice[0], choice[1]]] = pos[:,[choice[1], choice[0]]]
-            atoms.arrays["positions"] = pos
+        if(seed is not None):
+            np.random.seed(seed)
+        choice = np.random.choice(3, 2, replace=False)
+        if(_test_choice is not None):
+            choice = _test_choice
+        pos = (atoms.positions)
+        pos[:,[choice[0], choice[1]]] = pos[:,[choice[1], choice[0]]]
+        atoms.arrays["positions"] = pos
 
-            return AseAtomsAdaptor.get_structure(atoms)
+        return AseAtomsAdaptor.get_structure(atoms)
 
     def __str__(self):
         return "SwapAxesTransformation"
@@ -225,7 +229,7 @@ class RemoveSitesTransformation(AbstractTransformation):
 
         self.indices_to_remove = indices_to_remove
 
-    def apply_transformation(self, structure):
+    def apply_transformation(self, structure, seed=None):
         """
         Apply the transformation.
         Arg:
@@ -365,7 +369,7 @@ class SupercellTransformation(AbstractTransformation):
         """
         return SupercellTransformation([[scale_a, 0, 0], [0, scale_b, 0], [0, 0, scale_c]])
 
-    def apply_transformation(self, structure):
+    def apply_transformation(self, structure, seed=None):
         """
         Apply the transformation.
         Args:
@@ -416,13 +420,10 @@ class TranslateSitesTransformation(AbstractTransformation):
         self.translation_vector = np.array(translation_vector)
         self.vector_in_frac_coords = vector_in_frac_coords
 
-        #self.indices_to_move = None
-        #self.translation_vector = None
-        #self.vector_in_frac_coords = None
 
     def apply_transformation(self, 
         structure, indices_to_move=None, translation_vector=None, 
-        vector_in_frac_coords=True
+        vector_in_frac_coords=None, seed=None
     ):
         """
         Apply the transformation.
@@ -518,7 +519,7 @@ class CubicSupercellTransformation(AbstractTransformation):
         self.force_diagonal = force_diagonal
         self.transformation_matrix = None
 
-    def apply_transformation(self, structure: Structure) -> Structure:
+    def apply_transformation(self, structure: Structure, seed=None) -> Structure:
         """
         The algorithm solves for a transformation matrix that makes the
         supercell cubic. The matrix must have integer entries, so entries are
@@ -632,7 +633,7 @@ class PrimitiveCellTransformation(AbstractTransformation):
         """
         self.tolerance = tolerance
 
-    def apply_transformation(self, structure):
+    def apply_transformation(self, structure, seed=None):
         """
         Returns most primitive cell for structure.
         Args:

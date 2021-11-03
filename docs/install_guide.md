@@ -1,7 +1,6 @@
 ---
 layout: page
 title: Installation
-permalink: /installation/
 ---
 
 Welcome to the installation guide. First off, AugLiChem is a `python3.8+` package.

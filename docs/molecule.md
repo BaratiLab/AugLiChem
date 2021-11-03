@@ -1,7 +1,6 @@
 ---
 layout: page
 title: Molecule
-permalink: /molecule/
 ---
 
 Molecular augmentation is done at call-time because augmented molecules cannot be stored in the SMILES format.
@@ -16,7 +15,7 @@ We therefore represent atoms as nodes, with the atom type as the node attribute,
 In methane, we have a carbon atom surrounded by four hydrogen atoms, seen here.
 
 
-![methane](../images/methane.png)
+![methane](images/methane.png)
 
 The central carbon, labeled atom 0, is connected to each hydrogen, numbered 1 through 4.
 Our node attirbute vector, is seen below. Atom number is captured by zero-indexed index in our vector, where the second column is 1 if the atom is a chiral center.
@@ -57,7 +56,7 @@ With our graph representation, we can use Graph Neural Networks, and can easily 
 
 ### Atom Masking
 
-![bond_delete](../images/Picture1.png)
+![bond_delete](images/Picture1.png)
 
 Random atom masking replaces randomly selected node attributes with a mask token.
 The fraction of atoms masked is passed in as an argument, and at least one atom is masked regardless of the fraction selected.
@@ -71,7 +70,7 @@ transform = RandomAtomMask(p=0.25)
 
 ### Bond Deletion
 
-![bond_delete](../images/Picture2.png)
+![bond_delete](images/Picture2.png)
 
 Random  bond deletion removes bonds from our graph representation.
 
@@ -83,7 +82,7 @@ transform = RandomBondDelete(p=0.25)
 
 ### Motif Removal
 
-![motif](../images/motif.png)
+![motif](images/motif.png)
 
 Motif removal is different from the other augmentations in that it is deterministic.
 A similarity score is calculated between motifs and the molecule, where motifs above the threshold are retained.

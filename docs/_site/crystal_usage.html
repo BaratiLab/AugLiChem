@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Crystal Usage | AugLiChem</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Crystal Usage" />
+<meta name="author" content="BaratiLab" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
+<meta property="og:description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
+<link rel="canonical" href="http://localhost:4000/crystal_usage.html" />
+<meta property="og:url" content="http://localhost:4000/crystal_usage.html" />
+<meta property="og:site_name" content="AugLiChem" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Crystal Usage" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/crystal_usage.html","headline":"Crystal Usage","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
+<body><div class="site-sidebar">
+
+    <a class="sidebar-title" href="/">
+    <img src="images/logo.png" alt="drawing" width="20"/>
+	    AugLiChem
+
+    <img src="images/Project.png" alt="drawing" width="20"/>
+    </a>
+
+    
+    
+    <!--  -->
+    <nav class="site-nav">
+      <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+      <label for="nav-trigger">
+        <span class="menu-icon">
+          <svg viewBox="0 0 18 15" width="18px" height="15px">
+            <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+            <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+            <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+          </svg>
+        </span>
+      </label>
+
+      <form class="trigger" method="get" action="/search">
+        <input type="text" name="q" placeholder="Search blog">
+      </form>
+
+      <ul id="page-list" class="trigger sidebar-list">
+        
+          
+          
+        
+          
+          
+            <li class=""><a href="/about.html">About</a></li>
+          
+        
+          
+          
+            <li class=""><a href="/crystal.html">Crystal</a></li>
+          
+        
+          
+          
+            <li class="active"><a href="/crystal_usage.html">Crystal Usage</a></li>
+          
+        
+          
+          
+            <li class=""><a href="/molecule.html">Molecule</a></li>
+          
+        
+          
+          
+            <li class=""><a href="/molecule_usage.html">Molecule Usage</a></li>
+          
+        
+          
+          
+            <li class=""><a href="/install_guide.html">Installation</a></li>
+          
+        
+      </ul>
+    <!--  -->
+
+      
+        <ul id="post-list" class="trigger sidebar-list">
+          
+            <li class="">
+              
+              <span>Oct 29, 2021</span><br>
+              <a href="/2021/10/29/release.html">Release</a>
+            </li>
+          
+        </ul>
+      
+    </nav>
+
+</div>
+<div class="main-wrapper"><header class="site-header" role="banner">
+
+  <div class="wrapper">
+    <a class="site-title" rel="author" href="/">
+	    AugLiChem
+    </a>
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+        <div class="wrapper">
+          <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Crystal Usage</h1>
+  </header>
+
+  <div class="post-content">
+    <h2 id="crystal-usage">Crystal Usage</h2>
+
+<p>The first step is to import relevant modules.
+Auglichem is largely self-contained, and so we import transforamtions, data wrapper, and models.</p>
+
+<ul>
+  <li>Example Notebooks:
+    <ul>
+      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_dataset.ipynb">Standard training</a></li>
+      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_kfold_dataset.ipynb">Automatic k-fold cross validation</a></li>
+      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_dataset.ipynb">CGCNN standard training</a></li>
+      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_kfold_dataset.ipynb">CGCNN k-fold cross validation</a>.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="setup">Setup</h3>
+<p>The first step is to import the relevant modules.
+AugLiChem is largely self-contained, and so we import transformations, data wrapper, and models.</p>
+
+<h3 id="creating-augmentations">Creating Augmentations</h3>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">auglichem.crystal</span> <span class="kn">import</span> <span class="p">(</span><span class="n">PerturbStructureTransformation</span><span class="p">,</span>
+                               <span class="n">RotationTransformation</span><span class="p">,</span>
+                               <span class="n">SwapAxesTransformation</span><span class="p">,</span>
+                               <span class="n">TranslateSitesTransformation</span><span class="p">,</span>
+                               <span class="n">SupercellTransformation</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">auglichem.crystal.data</span> <span class="kn">import</span> <span class="n">CrystalDatasetWrapper</span>
+<span class="kn">from</span> <span class="nn">auglichem.crystal.models</span> <span class="kn">import</span> <span class="n">SchNet</span><span class="p">,</span> <span class="n">GINet</span><span class="p">,</span> <span class="n">CrystalGraphConvNet</span>
+</code></pre></div></div>
+
+<p>Next, we set up our transformations.
+Transformations can be set up as a list or single transformation.
+When using a list, each molecule is transformed by all transformations passed in.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">PerturbStructureTransformation</span><span class="p">(</span><span class="n">distance</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">min_distance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">),</span>
+	<span class="n">RotationTransformation</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">),</span>
+        <span class="n">SwapAxesTransformation</span><span class="p">(),</span>
+        <span class="n">TranslateSitesTransformation</span><span class="p">(</span><span class="n">indices_to_move</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">translation_vector</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                                     <span class="n">vector_in_frac_coords</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+        <span class="n">SupercellTransformation</span><span class="p">(</span><span class="n">scaling_matrix</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]),</span>
+<span class="p">]</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">PertubStructureTransformation</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">distance</code> (float, optional, default=0.01): Distance of perturbation in angstroms. All sites will be perturbed by exactly that distance in a random direction. Units in Angstroms.</li>
+  <li><code class="language-plaintext highlighter-rouge">min_distance</code> (float, optional, default=None): if None, all displacements will be equidistant. If int or float, perturb each site a distance drawn from the uniform distribution between ‘min_distance’ and ‘distance’. Units in Angstroms.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">RotationTransformation</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">axis</code> (list or np.array of ints with shape=(3,1)): Axis of rotation, e.g., [1, 0, 0]</li>
+  <li><code class="language-plaintext highlighter-rouge">angle</code> (float): Angle to rotate in degrees</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">SwapAxesTransformation</code> arugments:</p>
+<ul>
+  <li>None. Axes are randomly selected and swapped.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">TranslateSitesTransformation</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">indices_to_move</code> (list of ints): The indices of the sites to move.</li>
+  <li><code class="language-plaintext highlighter-rouge">translation_vector</code> (list or np.array of floats, shape=(len(indices_to_move), 3)): Vector to move the sites. Each translation vector is applied to the corresponding site in the indices_to_move.</li>
+  <li><code class="language-plaintext highlighter-rouge">vector_in_frac_coords</code> (bool, default=True): Set to True if the translation vector is in fractional coordinates, and False if it is in cartesian coordinations.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">SupercellTransformation</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">scaling_matrix</code> (list or np.array of ints with shape=(3,3), default=identity matrix): A matrix of transforming the lattice vectors. Defaults to the identity matrix. Has to be all integers. e.g., [[2,1,0],[0,3,0],[0,0,1]] generates a new structure with lattice vectors a” = 2a + b, b” = 3b, c” = c where a, b, and c are the lattice vectors of the original structure.</li>
+</ul>
+
+<h3 id="data-loading">Data Loading</h3>
+
+<p>After initializing our transformations, we are ready to initialize our data set.
+Data sets are selected with a string, and are automatically downloaded to <code class="language-plaintext highlighter-rouge">./data_download</code> by default.
+This directory is created if it is not present, and does not download the data again if it is already present.
+Batch size, validation size, and test size for training and evaluation are set here.
+Unlike molecule, CrystalDatasetWrapper handles transformations when splitting the data.
+Random splitting, and k-fold cross validation are supported.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dataset</span> <span class="o">=</span> <span class="n">CrystalDatasetWrapper</span><span class="p">(</span><span class="s">"lanthanides"</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">valid_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dataset</span> <span class="o">=</span> <span class="n">CrystalDatasetWrapper</span><span class="p">(</span>
+             <span class="n">dataset</span><span class="o">=</span><span class="s">"lanthanides"</span><span class="p">,</span>
+             <span class="n">transform</span><span class="o">=</span><span class="n">transforms</span><span class="p">,</span>
+             <span class="n">split</span><span class="o">=</span><span class="s">"scaffold"</span><span class="p">,</span>
+             <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+             <span class="n">num_workers</span><span class="o">=</span><span class="mi">0</span>
+             <span class="n">valid_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+             <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+             <span class="n">data_path</span><span class="o">=</span><span class="s">"./data_download"</span><span class="p">,</span>
+             <span class="n">target</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+	     <span class="n">kfolds</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">seed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">cgcnn</span><span class="o">=</span><span class="bp">False</span>
+<span class="p">)</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">CrystalDatasetWrapper</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">dataset</code> (str): One of the datasets available from MoleculeNet
+             (http://moleculenet.ai/datasets-1)</li>
+  <li><code class="language-plaintext highlighter-rouge">transform</code> (Compose, OneOf, RandomAtomMask, RandomBondDelete object): transormations
+             to apply to the data at call time.</li>
+  <li><code class="language-plaintext highlighter-rouge">split</code> (str, optional default=scaffold): random or scaffold. The splitting strategy
+                                      used for train/test/validation set creation.</li>
+  <li><code class="language-plaintext highlighter-rouge">batch_size</code> (int, optional default=64): Batch size used in training</li>
+  <li><code class="language-plaintext highlighter-rouge">num_workers</code> (int, optional default=0): Number of workers used in loading data</li>
+  <li><code class="language-plaintext highlighter-rouge">valid_size</code> (float in [0,1], optional default=0.1):</li>
+  <li><code class="language-plaintext highlighter-rouge">test_size</code> (float in [0,1],  optional default=0.1):</li>
+  <li><code class="language-plaintext highlighter-rouge">target</code> (str, optional, default=None): Target variable</li>
+  <li><code class="language-plaintext highlighter-rouge">data_path</code> (str, optional default=None): specify path to save/lookup data. Default
+          creates <code class="language-plaintext highlighter-rouge">data_download</code> directory and stores data there</li>
+  <li><code class="language-plaintext highlighter-rouge">kfolds</code> (int, default=0, folds &gt; 1): Number of folds to use in k-fold cross
+                       validation. kfolds &gt; 1 for data to be split</li>
+  <li><code class="language-plaintext highlighter-rouge">seed</code> (int, optional, default=None): Random seed to use for reproducibility</li>
+</ul>
+
+<p>Using the wrapper class is necessary for easy training in the crystal sets because of the data loader function, which creates pytorch-geometric data loaders that are easy to iterate over.
+Crystal data sets are augmented when getting the data loaders and augmented CIF files are stored next to the originals.
+Loading original or augmented CIF files is handled automatically by the loaders, where only the training set uses the augmented files.
+Note: this function call may take a while the first time due to loading, transforming, and saving thousands of files. However, if augmented files are present, they will not be augmented again, and running the code again will be significantly faster.</p>
+
+<p>After loading our data, our <code class="language-plaintext highlighter-rouge">dataset</code> object has additional information from the parent class, <code class="language-plaintext highlighter-rouge">CrystalDataset</code> that may be useful to look at. We can look at the CIF ids and their correspongind label:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">.</span><span class="n">id_prop_augment</span><span class="p">)</span>
+<span class="p">[[</span><span class="s">'0'</span> <span class="s">'0.099463'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'1'</span> <span class="s">'-0.63467'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'2'</span> <span class="s">'-0.725799'</span><span class="p">]</span>
+ <span class="p">...</span>
+ <span class="p">[</span><span class="s">'4189'</span> <span class="s">'-1.004029'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'4190'</span> <span class="s">'-3.7094099999999997'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'4191'</span> <span class="s">'-3.6372910000000003'</span><span class="p">]]</span>
+</code></pre></div></div>
+
+<p>as well as the updated data path:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">.</span><span class="n">data_path</span><span class="p">)</span>
+<span class="p">.</span><span class="o">/</span><span class="n">data_download</span><span class="o">/</span><span class="n">lanths</span>
+</code></pre></div></div>
+
+<h3 id="data-splitting">Data Splitting</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">train_loader</span><span class="p">,</span> <span class="n">valid_loader</span><span class="p">,</span> <span class="n">test_loader</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="n">get_data_loaders</span><span class="p">(</span>
+                                                     <span class="n">target</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                                     <span class="n">transform</span><span class="o">=</span><span class="n">transforms</span><span class="p">,</span>
+                                                     <span class="n">fold</span><span class="o">=</span><span class="bp">None</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">CsytalDatasetWrapper.get_data_loaders()</code> argument:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">target</code> (str, optional, default=None): The target label for training. Currently all
+                          crystal datasets are single-target, and so this parameter
+                          is truly optional.</li>
+  <li><code class="language-plaintext highlighter-rouge">transform</code> (AbstractTransformation, optional, default=None): The data transformation
+                          we will use for data augmentation.</li>
+  <li><code class="language-plaintext highlighter-rouge">fold</code> (int, optiona, default=None): Which of k folds to use for training. Will
+                          throw an error if specified and k-fold CV is not
+                          done in the class instantiaion. This overrides
+                          valid_size and test_size</li>
+</ul>
+
+<p>Returns:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">train/valid/test_loader</code> (DataLoader): Data loaders containing the train, validation
+                                      and test splits of our data.</li>
+</ul>
+
+<p>Now that our data is ready for training and evalutaion, we initialize our model.
+Task, either regression or classification needs to be passed in.
+Our dataset object stores this in the <code class="language-plaintext highlighter-rouge">task</code> attribute.
+Note: CGCNN uses a different implementation and needs to be initialized and trained differently.
+This is covered at the end of this guide and a working example of this is given in <code class="language-plaintext highlighter-rouge">examples/</code>.</p>
+
+<p>After splitting the data, we can see which CIF files are in each data loader.
+Augmented files only appear in the training set:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">train_loader</span><span class="p">.</span><span class="n">dataset</span><span class="p">.</span><span class="n">id_prop_augment</span><span class="p">)</span>
+<span class="p">[[</span><span class="s">'1762'</span> <span class="s">'-3.933583'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'1762_perturbed'</span> <span class="s">'-3.933583'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'1762_rotated'</span> <span class="s">'-3.933583'</span><span class="p">]</span>
+ <span class="p">...</span>
+ <span class="p">[</span><span class="s">'826_swapaxes'</span> <span class="s">'-1.640507'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'826_translate'</span> <span class="s">'-1.640507'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'826_supercell'</span> <span class="s">'-1.640507'</span><span class="p">]]</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">valid_loader</span><span class="p">.</span><span class="n">dataset</span><span class="p">.</span><span class="n">id_prop_augment</span><span class="p">)</span>
+<span class="p">[[</span><span class="s">'2183'</span> <span class="s">'-0.266351'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'3898'</span> <span class="s">'0.542863'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'167'</span> <span class="s">'-0.22298400000000002'</span><span class="p">]</span>
+ <span class="p">...</span>
+ <span class="p">[</span><span class="s">'1660'</span> <span class="s">'-3.824347'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'644'</span> <span class="s">'-2.436586'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'2777'</span> <span class="s">'0.173244'</span><span class="p">]]</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">test_set</span><span class="p">.</span><span class="n">dataset</span><span class="p">.</span><span class="n">id_prop_augment</span><span class="p">)</span>
+<span class="p">[[</span><span class="s">'778'</span> <span class="s">'-0.403455'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'1381'</span> <span class="s">'-3.686927'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'3728'</span> <span class="s">'-0.459214'</span><span class="p">]</span>
+ <span class="p">...</span>
+ <span class="p">[</span><span class="s">'699'</span> <span class="s">'-3.096345'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'528'</span> <span class="s">'-2.411031'</span><span class="p">]</span>
+ <span class="p">[</span><span class="s">'2355'</span> <span class="s">'-0.660257'</span><span class="p">]]</span>
+</code></pre></div></div>
+
+<h3 id="model-initialization">Model Initialization</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">SchNet</span><span class="p">(</span>
+          <span class="n">hidden_channels</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+          <span class="n">num_filters</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+          <span class="n">num_interactions</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+          <span class="n">num_gaussians</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+          <span class="n">cutoff</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+          <span class="n">max_num_neighbors</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+          <span class="n">readout</span><span class="o">=</span><span class="s">'add'</span><span class="p">,</span>
+          <span class="n">dipole</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+          <span class="n">mean</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+          <span class="n">std</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+          <span class="n">atomref</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">SchNet</code> arguments:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">hidden_channels</code> (int, optional): Hidden embedding size.
+  (default: :obj:<code class="language-plaintext highlighter-rouge">128</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">num_filters</code> (int, optional): The number of filters to use.
+  (default: :obj:<code class="language-plaintext highlighter-rouge">128</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">num_interactions</code> (int, optional): The number of interaction blocks.
+  (default: :obj:<code class="language-plaintext highlighter-rouge">6</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">num_gaussians</code> (int, optional): The number of gaussians :math:<code class="language-plaintext highlighter-rouge">\mu</code>.
+  (default: :obj:<code class="language-plaintext highlighter-rouge">50</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">cutoff</code> (float, optional): Cutoff distance for interatomic interactions.
+  (default: :obj:<code class="language-plaintext highlighter-rouge">10.0</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">max_num_neighbors</code> (int, optional): The maximum number of neighbors to
+  collect for each node within the :attr:<code class="language-plaintext highlighter-rouge">cutoff</code> distance.
+  (default: :obj:<code class="language-plaintext highlighter-rouge">32</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">readout</code> (string, optional): Whether to apply :obj:<code class="language-plaintext highlighter-rouge">"add"</code> or
+  :obj:<code class="language-plaintext highlighter-rouge">"mean"</code> global aggregation. (default: :obj:<code class="language-plaintext highlighter-rouge">"add"</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">dipole</code> (bool, optional): If set to :obj:<code class="language-plaintext highlighter-rouge">True</code>, will use the magnitude
+  of the dipole moment to make the final prediction, <em>e.g.</em>, for
+  target 0 of :class:<code class="language-plaintext highlighter-rouge">torch_geometric.datasets.QM9</code>.
+  (default: :obj:<code class="language-plaintext highlighter-rouge">False</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">mean</code> (float, optional): The mean of the property to predict.
+  (default: :obj:<code class="language-plaintext highlighter-rouge">None</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">std</code> (float, optional): The standard deviation of the property to
+  predict. (default: :obj:<code class="language-plaintext highlighter-rouge">None</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">atomref</code> (torch.Tensor, optional): The reference of single-atom
+  properties.
+  Expects a vector of shape :obj:<code class="language-plaintext highlighter-rouge">(max_atomic_number, )</code>.</li>
+</ul>
+
+<p>Our SchNet implementation comes from <a href="http://www.quantum-machine.org/datasets/trained_schnet_models.zip">here</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">GINet</span><span class="p">(</span>
+          <span class="n">num_layer</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+          <span class="n">emb_dim</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+          <span class="n">feat_dim</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+          <span class="n">drop_ratio</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+          <span class="n">pool</span><span class="o">=</span><span class="s">'mean'</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">GINet</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">num_layer</code> (int): the number of GNN layers</li>
+  <li><code class="language-plaintext highlighter-rouge">emb_dim</code> (int): dimensionality of embeddings</li>
+  <li><code class="language-plaintext highlighter-rouge">feat_dim</code> (int): dimensionality of feature</li>
+  <li><code class="language-plaintext highlighter-rouge">drop_ratio</code> (float): dropout rate</li>
+  <li><code class="language-plaintext highlighter-rouge">pool</code> (str): One of ‘mean’, ‘add’, ‘max’</li>
+</ul>
+
+<h3 id="training">Training</h3>
+
+<p>From here, we are ready to train using standard PyTorch training procedure.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">MSELoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now we have our training loop. Pymatgen throws a lot of warnings, which we suppress.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">warnings</span><span class="p">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="p">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">"ignore"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">bn</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>        
+            <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+
+            <span class="c1"># Comment out the following line and uncomment the line after for cuda
+</span>            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="c1">#pred = model(data.cuda())
+</span>            
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Evaluation requires storing all predections and labels for each batch, and so we have:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_absolute_error</span> 
+
+<span class="k">with</span> <span class="n">warnings</span><span class="p">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="p">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">"ignore"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">preds</span><span class="p">,</span> <span class="n">pred</span><span class="p">.</span><span class="n">cpu</span><span class="p">()))</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">targets</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">cpu</span><span class="p">()))</span>
+
+        <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>   
+    
+    <span class="n">set_str</span> <span class="o">=</span> <span class="s">"VALIDATION"</span> <span class="k">if</span><span class="p">(</span><span class="n">validation</span><span class="p">)</span> <span class="k">else</span> <span class="s">"TEST"</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"{0} MAE: {1:.3f}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">set_str</span><span class="p">,</span> <span class="n">mae</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h3 id="k-fold-cross-validation">K-Fold Cross Validation</h3>
+
+<p><code class="language-plaintext highlighter-rouge">CrystalDatasetWrapper</code> additionally supports automatic k-fold cross validation with few changes to the code.
+We first specify the number of folds we would like when initializing the dataset:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dataset</span> <span class="o">=</span> <span class="n">CrystalDatasetWrapper</span><span class="p">(</span><span class="s">"lanthanides"</span><span class="p">,</span> <span class="n">kfolds</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                                <span class="n">valid_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>From there, we simply specify which fold we would like when splitting the data:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">train_loader</span><span class="p">,</span> <span class="n">valid_loader</span><span class="p">,</span> <span class="n">test_loader</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="n">get_data_loaders</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Note: This takes longer to split because every CIF file is augmented at this point.
+Augmenting all CIF files now speeds up obtaining the other folds later.</p>
+
+<p>From here, we are ready to initialize our model, train, and evaluate as before:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">GINet</span><span class="p">(</span>
+<span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">MSELoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">warnings</span><span class="p">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="p">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">"ignore"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">bn</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>        
+            <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+
+            <span class="c1"># Comment out the following line and uncomment the line after for cuda
+</span>            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Evalutation is also done in the same way:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_absolute_error</span> 
+
+<span class="k">with</span> <span class="n">warnings</span><span class="p">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="p">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">"ignore"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">preds</span><span class="p">,</span> <span class="n">pred</span><span class="p">.</span><span class="n">cpu</span><span class="p">()))</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">targets</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">cpu</span><span class="p">()))</span>
+
+        <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>   
+    
+    <span class="n">set_str</span> <span class="o">=</span> <span class="s">"VALIDATION"</span> <span class="k">if</span><span class="p">(</span><span class="n">validation</span><span class="p">)</span> <span class="k">else</span> <span class="s">"TEST"</span>
+</code></pre></div></div>
+
+<p>Obtaining the next fold is as easy as splitting the data again, with a different fold number passed in:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">train_loader</span><span class="p">,</span> <span class="n">valid_loader</span><span class="p">,</span> <span class="n">test_loader</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="n">get_data_loaders</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Training and evalutation are then done in the same way as before.</p>
+
+<h3 id="training-with-cuda">Training with CUDA</h3>
+
+<p>AugLiChem takes advantage of PyTorch’s CUDA support to leverage GPUs for faster training and evaluation. To initialize a model on our GPU, we call the .cuda() function.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">SchNet</span><span class="p">(</span>
+<span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">cuda</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Our training setup is the same as before:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">MSELoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The only difference in our training loop is putting our data on the GPU as we train:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">warnings</span><span class="p">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="p">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">"ignore"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">bn</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>
+            <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+
+	    <span class="c1"># data -&gt; GPU
+</span>            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">cuda</span><span class="p">())</span>
+
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Which we also do for evaluation:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_absolute_error</span>
+
+<span class="k">with</span> <span class="n">warnings</span><span class="p">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="p">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">"ignore"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
+      
+            <span class="c1"># data -&gt; GPU
+</span>            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">cuda</span><span class="p">())</span>
+            <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">preds</span><span class="p">,</span> <span class="n">pred</span><span class="p">.</span><span class="n">cpu</span><span class="p">()))</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">targets</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">cpu</span><span class="p">()))</span>
+            
+        <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        
+    <span class="n">set_str</span> <span class="o">=</span> <span class="s">"VALIDATION"</span> <span class="k">if</span><span class="p">(</span><span class="n">validation</span><span class="p">)</span> <span class="k">else</span> <span class="s">"TEST"</span>
+</code></pre></div></div>
+
+<h3 id="crystal-graph-convolutional-network">Crystal Graph Convolutional Network</h3>
+
+<p>The built in CGCNN implementation is based on an older version of pytorch-geometric and requires slightly different model initialization, training, and data handling.
+The data handling is done automatically with AugLiChem when the <code class="language-plaintext highlighter-rouge">cgcnn=True</code> flag is passed in when initializing a <code class="language-plaintext highlighter-rouge">CrystalDatasetWrapper</code> object.</p>
+
+<p>Our setup and transformations are the same as before.
+Initializing CGCNN requires information about our data:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">structures</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">orig_atom_fea_len</span> <span class="o">=</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">nbr_fea_len</span> <span class="o">=</span> <span class="n">structures</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">CrystalGraphConvNet</span><span class="p">(</span>
+                <span class="n">orig_atom_fea_len</span><span class="o">=</span><span class="n">orig_atom_fea</span><span class="p">,</span>
+                <span class="n">nbr_fea_len</span><span class="o">=</span><span class="n">nbr_fea_len</span><span class="p">,</span>
+                <span class="n">atom_fea_len</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+                <span class="n">n_conv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">h_efa_len</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                <span class="n">n_h</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">CrystalGraphConvNet</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">orig_atom_fea_len</code> (int): Number of atom features in the input.</li>
+  <li><code class="language-plaintext highlighter-rouge">nbr_fea_len</code> (int): Number of bond features.</li>
+  <li><code class="language-plaintext highlighter-rouge">atom_fea_len</code> (int, optional, default=64): Number of hidden atom features in the convolutional layers</li>
+  <li><code class="language-plaintext highlighter-rouge">n_conv</code> (int, optional, default=3): Number of convolutional layers</li>
+  <li><code class="language-plaintext highlighter-rouge">h_fea_len</code> (int, optional, default=128): Number of hidden features after pooling</li>
+  <li><code class="language-plaintext highlighter-rouge">n_h</code> (int, optional, default=1): Number of hidden layers after pooling</li>
+</ul>
+
+<p>Our training setup is the same as before:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">MSELoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>In training, we build our data object from the data loader output</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">warnings</span><span class="p">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="p">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">"ignore"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">bn</span><span class="p">,</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>
+            <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            
+            <span class="n">input_var</span> <span class="o">=</span> <span class="p">(</span><span class="n">Variable</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                         <span class="n">Variable</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                         <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                         <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">input_var</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+            <span class="c1">#loss = criterion(pred, target.cuda())
+</span>
+            <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Which we also do for evaluation:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+    <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
+        <span class="n">input_var</span> <span class="o">=</span> <span class="p">(</span><span class="n">Variable</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                     <span class="n">Variable</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                     <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                     <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">input_var</span><span class="p">)</span>
+        
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">preds</span><span class="p">,</span> <span class="n">pred</span><span class="p">.</span><span class="n">cpu</span><span class="p">().</span><span class="n">detach</span><span class="p">()))</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">targets</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+        
+    <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>   
+<span class="n">set_str</span> <span class="o">=</span> <span class="s">"VALIDATION"</span> <span class="k">if</span><span class="p">(</span><span class="n">validation</span><span class="p">)</span> <span class="k">else</span> <span class="s">"TEST"</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"TEST MAE: {0:.3f}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">mae</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h3 id="crystal-graph-convolutional-network-with-cuda">Crystal Graph Convolutional Network with CUDA</h3>
+
+<p>AugLiChem takes advantage of PyTorch’s CUDA support to leverage GPUs for faster training and evaluation. To initialize a model on our GPU, we call the .cuda() function.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">structures</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">orig_atom_fea_len</span> <span class="o">=</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">nbr_fea_len</span> <span class="o">=</span> <span class="n">structures</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">CrystalGraphConvNet</span><span class="p">(</span><span class="n">orig_atom_fea_len</span><span class="p">,</span> <span class="n">nbr_fea_len</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="n">cuda</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>In training, we build our data object from the data loader output as before:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">warnings</span><span class="p">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="p">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">"ignore"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">bn</span><span class="p">,</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>
+            <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+
+            <span class="n">input_var</span> <span class="o">=</span> <span class="p">(</span><span class="n">Variable</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">cuda</span><span class="p">()),</span>
+                         <span class="n">Variable</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">cuda</span><span class="p">()),</span>
+                         <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">cuda</span><span class="p">(),</span>
+                         <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">input_var</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">target</span><span class="p">.</span><span class="n">cuda</span><span class="p">())</span>
+
+            <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Which we also do for evaluation:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">([])</span>
+    <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">test_loader</span><span class="p">:</span>
+    
+        <span class="n">input_var</span> <span class="o">=</span> <span class="p">(</span><span class="n">Variable</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">cuda</span><span class="p">()),</span>
+                     <span class="n">Variable</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">cuda</span><span class="p">()),</span>
+                     <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">cuda</span><span class="p">(),</span>
+                     <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">input_var</span><span class="p">)</span>
+    
+        <span class="n">preds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">preds</span><span class="p">,</span> <span class="n">pred</span><span class="p">.</span><span class="n">cpu</span><span class="p">().</span><span class="n">detach</span><span class="p">()))</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">((</span><span class="n">targets</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+    
+    <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>   
+<span class="n">set_str</span> <span class="o">=</span> <span class="s">"VALIDATION"</span> <span class="k">if</span><span class="p">(</span><span class="n">validation</span><span class="p">)</span> <span class="k">else</span> <span class="s">"TEST"</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"TEST MAE: {0:.3f}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">mae</span><span class="p">))</span>
+</code></pre></div></div>
+
+  </div>
+
+</article>
+
+        </div>
+      </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">AugLiChem</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">BaratiLab</li><li><a class="u-email" href="mailto:your-email@domain.com">your-email@domain.com</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/BaratiLab"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">BaratiLab</span></a></li><li><a href="https://www.twitter.com/AmirBaratiF"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">AmirBaratiF</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</div>
+
+    <script>
+      (function() {
+
+        var postList = document.getElementById('post-list');
+	      var activePost = postList.getElementsByClassName('active')[0];
+
+        var post = document.getElementsByClassName('post-content')[0];
+
+        var headings = [];
+
+        var tag_names = {
+            h1:1,
+            h2:1,
+            h3:1,
+            h4:1,
+            h5:1,
+            h6:1
+        };
+
+        function walk(root) {
+            if (root.nodeType === 1 && root.nodeName !== 'script') {
+                if (tag_names.hasOwnProperty(root.nodeName.toLowerCase())) {
+                    headings.push(root);
+                } else {
+                    for (var i = 0; i < root.childNodes.length; i++) {
+                        walk(root.childNodes[i]);
+                    }
+                }
+            }
+        }
+
+        walk(post);
+
+        if (headings.length > 0) {
+          var ul = document.createElement("ul");
+          ul.classList.add("sidebar-headings")
+          activePost.appendChild(ul);
+
+          for (var i=0, max=headings.length; i < max; i++) {
+            var li = document.createElement("li");
+            li.classList.add("sidebar-" + headings[i].tagName.toLowerCase());
+            var a = document.createElement("a");
+            var aText = document.createTextNode(headings[i].innerText);
+            a.appendChild(aText);
+            a.href = "#" + headings[i].id;
+            li.appendChild(a);
+            ul.appendChild(li);
+          }
+        }
+
+      })();
+    </script>
+
+  </body>
+
+</html>
