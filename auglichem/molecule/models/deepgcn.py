@@ -154,6 +154,9 @@ class GENConv(MessagePassing):
 
 class DeepGCN(nn.Module):
     def __init__(self, 
+        task='classification', num_layer=28, emb_dim=300, 
+        feat_dim=256, pool='mean', drop_ratio=0, output_dim=None, **kwargs
+    ):
         """
           Inputs:
           -------
@@ -176,9 +179,6 @@ class DeepGCN(nn.Module):
           --------
           None
         """
-        task='classification', num_layer=28, emb_dim=300, 
-        feat_dim=256, pool='mean', drop_ratio=0, output_dim=None, **kwargs
-    ):
         super(DeepGCN, self).__init__()
         self.num_layer = num_layer
         self.emb_dim = emb_dim
