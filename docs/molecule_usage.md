@@ -1,7 +1,6 @@
 ---
 layout: page
 title: Molecule Usage
-permalink: /molecule_usage/
 ---
 
 AugLiChem has been designed from the ground up with ease-of-use in mind.
@@ -14,15 +13,9 @@ This guide explains all of the features of the package.
 We have also provided jupyter notebooks that are ready to run after installation.
 Links to notebooks that demonstrate each type of training are provided below:
 
-- Molecule:
+- Example Notebooks:
   - [Single target](https://github.com/BaratiLab/AugLiChem/blob/main/examples/molecule_dataset.ipynb)
   - [Multitarget](https://github.com/BaratiLab/AugLiChem/blob/main/examples/molecule_multitarget_dataset.ipynb)
-- Crystal:
-  - [Standard training](https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_dataset.ipynb)
-  - [Automatic k-fold cross validation](https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_kfold_dataset.ipynb)
-  - [CGCNN standard training](https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_dataset.ipynb)
-  - [CGCNN k-fold cross validation](https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_kfold_dataset.ipynb).
-
 
 ## Molecule Usage
 
@@ -156,11 +149,31 @@ model = AttentiveFP(
 
 ```python
 model = DeepGCN(
-	[THIS NEEDS TO BE FILLED IN]
+            emb_dim = 128,
+            aggr: str = 'softmax',
+            t: float = 1.0,
+            learn_t: bool = False,
+            p: float = 1.0,
+            learn_p: bool = False,
+            msg_norm: bool = False,
+            learn_msg_scale: bool = False,
+            norm: str = 'batch',
+            num_layer: int = 2,
+            eps: float = 1e-7
 )
 ```
 `DeepGCN` arguments:
-- **I DON'T KNOW YET**
+- `emb_dim` (int): Edge feature dimensionality.
+- `aggr` (str, optional, default='softmax'): Aggregate function, one of 'softmax', 'softmax_sg', 'power', 'add', 'mean', 'max'.
+- `t` (float optional, default=1.0): Scaling parameter for softmax and softmax_sg aggregation.
+- `learn_t` (bool optional, default=False): Flag to learn t or not.
+- `p` (float, optional, default=1.0): Power used for power aggreagation.
+- `learn_p` (bool, optional, default=False): Flag to learn p or not.
+- `msg_norm` (bool, optional, default=False): Flag to normalize messages or not.
+- `learn_msg_scale` (bool, optional, default=False): Flag to learn message norm or not.
+- `norm` (str, optional, default ='batch'): Type of norm to use in MLP. One of 'batch', 'layer', or 'instance'.
+- `num_layer` (int, optional, default=2): Number of layers in the network.
+- `eps` (float, optional, default=1e-7): Small value to add to message output.
 
 ```python
 model = GCN(

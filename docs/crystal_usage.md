@@ -1,13 +1,19 @@
 ---
 layout: page
 title: Crystal Usage
-permalink: /crystal_usage/
 ---
 
 ## Crystal Usage
 
 The first step is to import relevant modules.
 Auglichem is largely self-contained, and so we import transforamtions, data wrapper, and models.
+
+- Example Notebooks:
+  - [Standard training](https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_dataset.ipynb)
+  - [Automatic k-fold cross validation](https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_kfold_dataset.ipynb)
+  - [CGCNN standard training](https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_dataset.ipynb)
+  - [CGCNN k-fold cross validation](https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_kfold_dataset.ipynb).
+
 
 ### Setup
 The first step is to import the relevant modules.

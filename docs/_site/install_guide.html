@@ -3,29 +3,29 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
-<title>About | AugLiChem</title>
+<title>Installation | AugLiChem</title>
 <meta name="generator" content="Jekyll v3.9.0" />
-<meta property="og:title" content="About" />
+<meta property="og:title" content="Installation" />
 <meta name="author" content="BaratiLab" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
 <meta property="og:description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
-<link rel="canonical" href="http://localhost:4000/about/" />
-<meta property="og:url" content="http://localhost:4000/about/" />
+<link rel="canonical" href="http://localhost:4000/install_guide.html" />
+<meta property="og:url" content="http://localhost:4000/install_guide.html" />
 <meta property="og:site_name" content="AugLiChem" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="About" />
+<meta property="twitter:title" content="Installation" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/about/","headline":"About","name":"AugLiChem","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebSite","@context":"https://schema.org"}</script>
+{"url":"http://localhost:4000/install_guide.html","headline":"Installation","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
 <body><div class="site-sidebar">
 
     <a class="sidebar-title" href="/">
-    <img src="../images/logo.png" alt="drawing" width="20"/>
+    <img src="images/logo.png" alt="drawing" width="20"/>
 	    AugLiChem
 
-    <img src="../images/Project.png" alt="drawing" width="20"/>
+    <img src="images/Project.png" alt="drawing" width="20"/>
     </a>
 
     
@@ -54,32 +54,32 @@
         
           
           
-            <li class="active"><a href="/about/">About</a></li>
+            <li class=""><a href="/about.html">About</a></li>
           
         
           
           
-            <li class=""><a href="/crystal/">Crystal</a></li>
+            <li class=""><a href="/crystal.html">Crystal</a></li>
           
         
           
           
-            <li class=""><a href="/crystal_usage/">Crystal Usage</a></li>
+            <li class=""><a href="/crystal_usage.html">Crystal Usage</a></li>
           
         
           
           
-            <li class=""><a href="/molecule/">Molecule</a></li>
+            <li class=""><a href="/molecule.html">Molecule</a></li>
           
         
           
           
-            <li class=""><a href="/molecule_usage/">Molecule Usage</a></li>
+            <li class=""><a href="/molecule_usage.html">Molecule Usage</a></li>
           
         
           
           
-            <li class=""><a href="/installation/">Installation</a></li>
+            <li class="active"><a href="/install_guide.html">Installation</a></li>
           
         
       </ul>
@@ -112,43 +112,76 @@
           <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">About</h1>
+    <h1 class="post-title">Installation</h1>
   </header>
 
   <div class="post-content">
-    <p>AugLiChem provides models, data sets, and augmentation functions in order to make machine learning for molecular and crystalline systems simple and easy.
-Models and data wrappers are built with PyTorch and take advantage of CPU and GPU support for faster execution.</p>
+    <p>Welcome to the installation guide. First off, AugLiChem is a <code class="language-plaintext highlighter-rouge">python3.8+</code> package.
+Guides for installation in Linux (Ubuntu) and MacOS ARM64 (M1 chip) architecture are given.
+Installation for Linux is straightforward, but for MacOS ARM64, installation is more involved due to dependencies not yet being supported for the architecture.</p>
 
-<h2 id="package-structure">Package Structure</h2>
+<h3 id="linux">Linux</h3>
 
-<p>AugLiChem has two submodules: crystal and molecule.
-The directory structure has been designed so using either submodule is as easy as switching <code class="language-plaintext highlighter-rouge">crystal</code> to <code class="language-plaintext highlighter-rouge">molecule</code> in your code, when possible.</p>
+<p>It is recommended to use an environment manager such as conda to install AugLiChem.
+Instructions can be found <a href="https://conda.io/projects/conda/en/latest/user-guide/install/index.html">here</a>.
+If using conda, creating a new environment is ideal and can be done simply by running the following command:</p>
 
-<p>The directory structure is as follows:</p>
+<p><code class="language-plaintext highlighter-rouge">conda create -n auglichem python=3.8</code></p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AugLiChem/
-  -auglichem/
-    -crystal/
-      -__init__.py  -_compositions.py  -_transforms.py
-      data/
-        -__init__.py  -_load_sets.py  -_crystal_dataset.py
-      -models/
-        -__init__.py  -cgcnn.py  -gin.py  -schnet.py
-    -molecule/
-      -__init__.py  -_compositions.py  -_transforms.py
-      -data/
-        -__init__.py  -_load_sets.py  -_molecule_dataset.py
-      -models/
-        -__init__.py  -afp.py  -deepgcn.py  -gcn.py  -gine.py
-    -test/
-      -test_crystal.py  -test_molecule.py  -test_utils.py
-    -utils/
-      -__init__.py  -_constants.py  -_splitting.py
-  -.travis.yml
-  -LICENSE
-  -README.md
-  -setup.py
-</code></pre></div></div>
+<p>Then activating the new environment with</p>
+
+<p><code class="language-plaintext highlighter-rouge">conda activate auglichem</code></p>
+
+<p>AugLiChem is built primarily with <code class="language-plaintext highlighter-rouge">pytorch</code> and that should be installed independently according to your system specifications.
+After activating your conda environment, <code class="language-plaintext highlighter-rouge">pytorch</code> can be installed easily and instructions are found <a href="https://pytorch.org/">here</a>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">torch_geometric</code> needs to be installed with <code class="language-plaintext highlighter-rouge">conda install pyg -c pyg -c conda-forge</code>.</p>
+
+<p>After pytorch, torch-sparse and torch-scatter need to be installed according to your hardware, with guide here: <a href="https://github.com/rusty1s/pytorch_sparse">torch-sparse</a>.</p>
+
+<p>Once you have <code class="language-plaintext highlighter-rouge">pytorch</code> and <code class="language-plaintext highlighter-rouge">torch_geometric</code> installed, installing AugLiChem can be done using PyPI:</p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install auglichem</code></p>
+
+<h3 id="macos-arm64-architecture">MacOS ARM64 Architecture</h3>
+
+<p>A more involved install is required to run on the new M1 chips since some of the packages do not have official support yet.
+We are working on a more elegant solution given the current limitations.</p>
+
+<p>First, download this repo.</p>
+
+<p>If you do not have it yet,, conda for ARM64 architecture needs to be installed.
+ This can be done with Miniforge (which contains conda installer) which is installed by following the guide <a href="https://github.com/conda-forge/miniforge">here</a></p>
+
+<p>Once you have miniforge compatible with ARM64 architecture, a new environment with rdkit can be installed.
+If you do not specify <code class="language-plaintext highlighter-rouge">python=3.8</code> it will default to <code class="language-plaintext highlighter-rouge">python=3.9.6</code> as of the time of writing this.</p>
+
+<p>`conda create -n auglichem python=3.8 rdkit’</p>
+
+<p>Now activate the environment:</p>
+
+<p><code class="language-plaintext highlighter-rouge">conda activate auglichem</code></p>
+
+<p>From here, individual packages can be installed:</p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install -c pytorch pytorch</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install -c fastchan torchvision</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install scipy</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install cython</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">conda install scikit-learn</code></p>
+
+<p>Before installing the package, you must go into <code class="language-plaintext highlighter-rouge">setup.py</code> in the main directory and comment out <code class="language-plaintext highlighter-rouge">rdkit-pypi</code> from the <code class="language-plaintext highlighter-rouge">install_requires</code> list.
+It is not supported through pip this way, and since it is already installed, it will throw an error.</p>
+
+<p>Finally, run:</p>
+
+<p><code class="language-plaintext highlighter-rouge">pip install .</code></p>
 
 
   </div>

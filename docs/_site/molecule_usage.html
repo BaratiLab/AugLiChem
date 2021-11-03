@@ -10,22 +10,22 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
 <meta property="og:description" content="AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use." />
-<link rel="canonical" href="http://localhost:4000/molecule_usage/" />
-<meta property="og:url" content="http://localhost:4000/molecule_usage/" />
+<link rel="canonical" href="http://localhost:4000/molecule_usage.html" />
+<meta property="og:url" content="http://localhost:4000/molecule_usage.html" />
 <meta property="og:site_name" content="AugLiChem" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Molecule Usage" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/molecule_usage/","headline":"Molecule Usage","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
+{"url":"http://localhost:4000/molecule_usage.html","headline":"Molecule Usage","author":{"@type":"Person","name":"BaratiLab"},"description":"AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models make AugLiChem easy to use.","@type":"WebPage","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="AugLiChem" /></head>
 <body><div class="site-sidebar">
 
     <a class="sidebar-title" href="/">
-    <img src="../images/logo.png" alt="drawing" width="20"/>
+    <img src="images/logo.png" alt="drawing" width="20"/>
 	    AugLiChem
 
-    <img src="../images/Project.png" alt="drawing" width="20"/>
+    <img src="images/Project.png" alt="drawing" width="20"/>
     </a>
 
     
@@ -54,32 +54,32 @@
         
           
           
-            <li class=""><a href="/about/">About</a></li>
+            <li class=""><a href="/about.html">About</a></li>
           
         
           
           
-            <li class=""><a href="/crystal/">Crystal</a></li>
+            <li class=""><a href="/crystal.html">Crystal</a></li>
           
         
           
           
-            <li class=""><a href="/crystal_usage/">Crystal Usage</a></li>
+            <li class=""><a href="/crystal_usage.html">Crystal Usage</a></li>
           
         
           
           
-            <li class=""><a href="/molecule/">Molecule</a></li>
+            <li class=""><a href="/molecule.html">Molecule</a></li>
           
         
           
           
-            <li class="active"><a href="/molecule_usage/">Molecule Usage</a></li>
+            <li class="active"><a href="/molecule_usage.html">Molecule Usage</a></li>
           
         
           
           
-            <li class=""><a href="/installation/">Installation</a></li>
+            <li class=""><a href="/install_guide.html">Installation</a></li>
           
         
       </ul>
@@ -126,18 +126,10 @@ We have also provided jupyter notebooks that are ready to run after installation
 Links to notebooks that demonstrate each type of training are provided below:</p>
 
 <ul>
-  <li>Molecule:
+  <li>Example Notebooks:
     <ul>
       <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/molecule_dataset.ipynb">Single target</a></li>
       <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/molecule_multitarget_dataset.ipynb">Multitarget</a></li>
-    </ul>
-  </li>
-  <li>Crystal:
-    <ul>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_dataset.ipynb">Standard training</a></li>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_kfold_dataset.ipynb">Automatic k-fold cross validation</a></li>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_dataset.ipynb">CGCNN standard training</a></li>
-      <li><a href="https://github.com/BaratiLab/AugLiChem/blob/main/examples/crystal_cgcnn_kfold_dataset.ipynb">CGCNN k-fold cross validation</a>.</li>
     </ul>
   </li>
 </ul>
@@ -272,12 +264,32 @@ Our dataset object stores this in the <code class="language-plaintext highlighte
 </ul>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">DeepGCN</span><span class="p">(</span>
-	<span class="p">[</span><span class="n">THIS</span> <span class="n">NEEDS</span> <span class="n">TO</span> <span class="n">BE</span> <span class="n">FILLED</span> <span class="n">IN</span><span class="p">]</span>
+            <span class="n">emb_dim</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+            <span class="n">aggr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">'softmax'</span><span class="p">,</span>
+            <span class="n">t</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">learn_t</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">learn_p</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">msg_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">learn_msg_scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="n">norm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">'batch'</span><span class="p">,</span>
+            <span class="n">num_layer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-7</span>
 <span class="p">)</span>
 </code></pre></div></div>
 <p><code class="language-plaintext highlighter-rouge">DeepGCN</code> arguments:</p>
 <ul>
-  <li><strong>I DON’T KNOW YET</strong></li>
+  <li><code class="language-plaintext highlighter-rouge">emb_dim</code> (int): Edge feature dimensionality.</li>
+  <li><code class="language-plaintext highlighter-rouge">aggr</code> (str, optional, default=’softmax’): Aggregate function, one of ‘softmax’, ‘softmax_sg’, ‘power’, ‘add’, ‘mean’, ‘max’.</li>
+  <li><code class="language-plaintext highlighter-rouge">t</code> (float optional, default=1.0): Scaling parameter for softmax and softmax_sg aggregation.</li>
+  <li><code class="language-plaintext highlighter-rouge">learn_t</code> (bool optional, default=False): Flag to learn t or not.</li>
+  <li><code class="language-plaintext highlighter-rouge">p</code> (float, optional, default=1.0): Power used for power aggreagation.</li>
+  <li><code class="language-plaintext highlighter-rouge">learn_p</code> (bool, optional, default=False): Flag to learn p or not.</li>
+  <li><code class="language-plaintext highlighter-rouge">msg_norm</code> (bool, optional, default=False): Flag to normalize messages or not.</li>
+  <li><code class="language-plaintext highlighter-rouge">learn_msg_scale</code> (bool, optional, default=False): Flag to learn message norm or not.</li>
+  <li><code class="language-plaintext highlighter-rouge">norm</code> (str, optional, default =’batch’): Type of norm to use in MLP. One of ‘batch’, ‘layer’, or ‘instance’.</li>
+  <li><code class="language-plaintext highlighter-rouge">num_layer</code> (int, optional, default=2): Number of layers in the network.</li>
+  <li><code class="language-plaintext highlighter-rouge">eps</code> (float, optional, default=1e-7): Small value to add to message output.</li>
 </ul>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">GCN</span><span class="p">(</span>
