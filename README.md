@@ -5,6 +5,7 @@
 Welcome to AugLiChem!
 The augmentation library for chemical systems.
 This package supports augmentation for both crystaline and molecular systems, as well as provides automatic downloading for our benchmark datasets, and easy to use model implementations.
+In depth documentation about how to use AugLiChem, make use of transformations, and train models is given on our [website](https://baratilab.github.io/AugLiChem/).
 
 
 ## Installation
@@ -42,18 +43,18 @@ Once you have `pytorch` and `torch_geometric` installed, installing AugLiChem ca
 
 ### MacOS ARM64 Architecture
 
-A more involved install is required to run on the new M1 chips since some of the packages do not have official support yet.
+A more involved install is required to run on the new M1 chips since some of the packages do not     have official support yet.
 We are working on a more elegant solution given the current limitations.
 
 First, download this repo.
 
 If you do not have it yet,, conda for ARM64 architecture needs to be installed.
- This can be done with Miniforge (which contains conda installer) which is installed by following the guide [here](https://github.com/conda-forge/miniforge)
+ This can be done with Miniforge (which contains conda installer) which is installed by following     the guide [here](https://github.com/conda-forge/miniforge)
 
-Once you have miniforge compatible with ARM64 architecture, a new environment with rdkit can be installed.
-If you do not specify `python=3.8` it will default to `python=3.9.6` as of the time of writing this.
+Once you have miniforge compatible with ARM64 architecture, a new environment with rdkit can be i    nstalled.
+If you do not specify `python=3.8` it will default to `python=3.9.6` as of the time of writing th    is.
 
-`conda create -n auglichem python=3.8 rdkit'
+`conda create -n auglichem python=3.8 rdkit`
 
 Now activate the environment:
 
@@ -67,21 +68,25 @@ From here, individual packages can be installed:
 
 `conda install scipy`
 
-`pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html`
 
 `conda install cython`
 
 `conda install scikit-learn`
 
-Before installing the package, you must go into `setup.py` in the main directory and comment out `rdkit-pypi` from the `install_requires` list.
-It is not supported through pip this way, and since it is already installed, it will throw an error.
+`pip install torch-scatter -f https://data.pyg.org/whl/torch-1.10.0+cpu.html`
 
-Finally, run: 
+`pip install torch-sparse -f https://data.pyg.org/whl/torch-1.10.0+cpu.html`
+
+`pip install torch-geometric`
+
+Before installing the package, you must go into `setup.py` in the main directory and comment out     `rdkit-pypi` and `tensorboard` from the `install_requires` list since they are already installed.
+Not commenting these packages out will result in an error during installation.
+It is not supported through pip this way, and since it is already installed, it will throw an err    or.
+
+Finally, run:
 
 `pip install .`
 
-
-## Use
 
 Usage guides are provided in the `examples/` directory and provide useful guides for using both the molecular and crystal sides of the package.
 Make sure to install `jupyter` before working with examples, using `conda install jupyter`.

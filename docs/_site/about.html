@@ -121,8 +121,9 @@ Models and data wrappers are built with PyTorch and take advantage of CPU and GP
 
 <h2 id="data-pipeline">Data Pipeline</h2>
 
-<p>A lot goes on under the hood in AugLiChem
-Augmented data is only used in the training set.</p>
+<p>AugLiChem’s data and augmentation pipelines handle the work necessary to make machine learning easier.
+These pipelines are outlined below.
+It is important to note, augmented data is only used in the training sets.</p>
 
 <h3 id="data-loading">Data Loading</h3>
 
@@ -144,16 +145,6 @@ Molecule data comes in the SMILES string format.
 Due to the standardization of this format, augmented molecules cannot be stored easily, and we do augmentation at call time when iterating over the data.
 Crystal data is stored in CIF files, and the augmentations are first done, stored in CIF files next to the originals, and then loaded when called.</p>
 
-<h3 id="molecule-augmentation">Molecule Augmentation</h3>
-
-<p><img src="./images/molecule_pipeline.png" alt="molecule_pipeline" /></p>
-
-<p>The first step is data splitting.
-Scaffold splitting is supported for molecule data and is used to split the data into train, validation, and test sets with size specified before splitting.</p>
-
-<p>The <code class="language-plaintext highlighter-rouge">__getitem__</code> method is called to load data during the training loop.
-Data augmentation happens in this function, where the training data always retains an original copy of the molecule.</p>
-
 <h3 id="crystal-augmentation">Crystal Augmentation</h3>
 
 <p><img src="./images/crystal_pipeline.png" alt="crystal_pipeline" /></p>
@@ -163,6 +154,16 @@ Random splitting is supported for molecule data and is used to split the data in
 For k-fold cross validation, all data is augmented during splitting, but only augmented data is added to the training set.</p>
 
 <p>Once the data has been augmented for the training set, the <code class="language-plaintext highlighter-rouge">__getitem__</code> function is called to load the CIF file and return the graph representation.</p>
+
+<h3 id="molecule-augmentation">Molecule Augmentation</h3>
+
+<p><img src="./images/molecule_pipeline.png" alt="molecule_pipeline" /></p>
+
+<p>The first step is data splitting.
+Scaffold splitting is supported for molecule data and is used to split the data into train, validation, and test sets with size specified before splitting.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">__getitem__</code> method is called to load data during the training loop.
+Data augmentation happens in this function, where the training data always retains an original copy of the molecule.</p>
 
 <h2 id="package-structure">Package Structure</h2>
 
