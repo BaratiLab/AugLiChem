@@ -32,17 +32,6 @@ Molecule data comes in the SMILES string format.
 Due to the standardization of this format, augmented molecules cannot be stored easily, and we do augmentation at call time when iterating over the data.
 Crystal data is stored in CIF files, and the augmentations are first done, stored in CIF files next to the originals, and then loaded when called.
 
-### Molecule Augmentation
-
-![molecule_pipeline](./images/molecule_pipeline.png)
-
-The first step is data splitting.
-Scaffold splitting is supported for molecule data and is used to split the data into train, validation, and test sets with size specified before splitting.
-
-The `__getitem__` method is called to load data during the training loop.
-Data augmentation happens in this function, where the training data always retains an original copy of the molecule.
-
-
 ### Crystal Augmentation
 
 ![crystal_pipeline](./images/crystal_pipeline.png)
@@ -52,6 +41,17 @@ Random splitting is supported for molecule data and is used to split the data in
 For k-fold cross validation, all data is augmented during splitting, but only augmented data is added to the training set.
 
 Once the data has been augmented for the training set, the `__getitem__` function is called to load the CIF file and return the graph representation.
+
+
+### Molecule Augmentation
+
+![molecule_pipeline](./images/molecule_pipeline.png)
+
+The first step is data splitting.
+Scaffold splitting is supported for molecule data and is used to split the data into train, validation, and test sets with size specified before splitting.
+
+The `__getitem__` method is called to load data during the training loop.
+Data augmentation happens in this function, where the training data always retains an original copy of the molecule.
 
 
 ## Package Structure
