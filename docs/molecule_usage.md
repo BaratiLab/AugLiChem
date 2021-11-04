@@ -24,7 +24,7 @@ AugLiChem is largely self-contained, and so we import transformations, data wrap
 
 ### Setup
 ```python
-from auglichem.molecule import RandomAtomMask, RandomBondDelete, MotifRemoval
+from auglichem.molecule import Compose, RandomAtomMask, RandomBondDelete, MotifRemoval
 from auglichem.molecule.data import MoleculeDatasetWrapper
 from auglichem.molecule.models import AttentiveFP, GCN, DeepGCN, GINE
 ```
@@ -36,16 +36,27 @@ When using a list, each molecule is transformed by all transformations passed in
 
 ### Creating Augmentations
 ```python
-transforms = [
+transforms = Compose([
       RandomAtomMask([0.1,0.3]),
       RandomBondDelete([0.1, 0.4]),
       MotifRemoval(0.6)
-]
+])
 ```
-RandomAtomMask and RandomBondDelete take in either a list of two number, or a single number, which represents the fraction of atoms to mask and bonds to delete, respectively.
-When a list is passed in, a number is sampled uniformly between the two values for each molecule and used for the masking/deletion fraction.
-MotifRemoval is deterministic, and uses a similarity score between motifs and the original molecule.
-Motifs that are above the similarity score threshold, the passed in parameter, are retained for the augmented molecule data.
+`RandomAtomMask` arguments:
+- `p` (float, list of floats, default=0.5): Probability of each atom being masked in the molecule. Masks at least one atom. If list, a value is randomly sampled uniformly between the passed in bounds for each molecule.
+
+`RandomBondDelete` arguments:
+- `p` (float, list of floats, default=0.5): Probability of each bond being deleted in the molecule. If list, a value is randomly sampled uniformly between the passed in bounds for each molecule.
+
+`MotifRemoval` arguments:
+- `similarity_threshold`: Threshold to retain motifs in augmented structure.
+
+The `Compose` object is used to apply multiple transformations at once.
+It takes in transformations and applies them one at a time when called.
+
+`Compose` arguments:
+- `transforms` (list of transforms): A list of transforms to be applied.
+- `p` (float, optional, default=1): The probability of each transformation being applied.
 
 ### Data Loading
 After initializing our transformations, we are ready to initialize our data set.
