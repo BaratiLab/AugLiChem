@@ -140,7 +140,7 @@ Links to notebooks that demonstrate each type of training are provided below:</p
 AugLiChem is largely self-contained, and so we import transformations, data wrapper, and models.</p>
 
 <h3 id="setup">Setup</h3>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">auglichem.molecule</span> <span class="kn">import</span> <span class="n">RandomAtomMask</span><span class="p">,</span> <span class="n">RandomBondDelete</span><span class="p">,</span> <span class="n">MotifRemoval</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">auglichem.molecule</span> <span class="kn">import</span> <span class="n">Compose</span><span class="p">,</span> <span class="n">RandomAtomMask</span><span class="p">,</span> <span class="n">RandomBondDelete</span><span class="p">,</span> <span class="n">MotifRemoval</span>
 <span class="kn">from</span> <span class="nn">auglichem.molecule.data</span> <span class="kn">import</span> <span class="n">MoleculeDatasetWrapper</span>
 <span class="kn">from</span> <span class="nn">auglichem.molecule.models</span> <span class="kn">import</span> <span class="n">AttentiveFP</span><span class="p">,</span> <span class="n">GCN</span><span class="p">,</span> <span class="n">DeepGCN</span><span class="p">,</span> <span class="n">GINE</span>
 </code></pre></div></div>
@@ -150,16 +150,35 @@ Transformations can be set up as a list or single transformation.
 When using a list, each molecule is transformed by all transformations passed in.</p>
 
 <h3 id="creating-augmentations">Creating Augmentations</h3>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">transforms</span> <span class="o">=</span> <span class="n">Compose</span><span class="p">([</span>
       <span class="n">RandomAtomMask</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">]),</span>
       <span class="n">RandomBondDelete</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]),</span>
       <span class="n">MotifRemoval</span><span class="p">(</span><span class="mf">0.6</span><span class="p">)</span>
-<span class="p">]</span>
+<span class="p">])</span>
 </code></pre></div></div>
-<p>RandomAtomMask and RandomBondDelete take in either a list of two number, or a single number, which represents the fraction of atoms to mask and bonds to delete, respectively.
-When a list is passed in, a number is sampled uniformly between the two values for each molecule and used for the masking/deletion fraction.
-MotifRemoval is deterministic, and uses a similarity score between motifs and the original molecule.
-Motifs that are above the similarity score threshold, the passed in parameter, are retained for the augmented molecule data.</p>
+<p><code class="language-plaintext highlighter-rouge">RandomAtomMask</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">p</code> (float, list of floats, default=0.5): Probability of each atom being masked in the molecule. Masks at least one atom. If list, a value is randomly sampled uniformly between the passed in bounds for each molecule.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">RandomBondDelete</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">p</code> (float, list of floats, default=0.5): Probability of each bond being deleted in the molecule. If list, a value is randomly sampled uniformly between the passed in bounds for each molecule.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">MotifRemoval</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">similarity_threshold</code>: Threshold to retain motifs in augmented structure.</li>
+</ul>
+
+<p>The <code class="language-plaintext highlighter-rouge">Compose</code> object is used to apply multiple transformations at once.
+It takes in transformations and applies them one at a time when called.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Compose</code> arguments:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">transforms</code> (list of transforms): A list of transforms to be applied.</li>
+  <li><code class="language-plaintext highlighter-rouge">p</code> (float, optional, default=1): The probability of each transformation being applied.</li>
+</ul>
 
 <h3 id="data-loading">Data Loading</h3>
 <p>After initializing our transformations, we are ready to initialize our data set.

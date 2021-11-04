@@ -8,4 +8,3 @@ from auglichem.crystal._transforms import (
         PrimitiveCellTransformation,
         SwapAxesTransformation,
 )
-from auglichem.crystal._compositions import Compose, OneOf

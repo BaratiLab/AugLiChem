@@ -21,7 +21,6 @@ from auglichem.crystal._transforms import (
         PrimitiveCellTransformation,
         SwapAxesTransformation
 )
-from auglichem.crystal._compositions import Compose, OneOf
 from auglichem.crystal.data import CrystalDataset, CrystalDatasetWrapper
 from auglichem.crystal.models import GINet, SchNet
 from auglichem.crystal.models import CrystalGraphConvNet as CGCNN
@@ -345,7 +344,6 @@ def test_swap_axes():
 
 #if __name__ == '__main__':
     #test_data_download()
-    #test_composition()
     #test_k_fold()
     #test_rotation()
     #test_perturb_structure()
