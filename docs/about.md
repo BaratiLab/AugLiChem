@@ -8,8 +8,9 @@ Models and data wrappers are built with PyTorch and take advantage of CPU and GP
 
 ## Data Pipeline
 
-A lot goes on under the hood in AugLiChem
-Augmented data is only used in the training set.
+AugLiChem's data and augmentation pipelines handle the work necessary to make machine learning easier.
+These pipelines are outlined below.
+It is important to note, augmented data is only used in the training sets.
 
 ### Data Loading
 
