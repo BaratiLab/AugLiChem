@@ -1,10 +1,11 @@
 <div class="site-sidebar">
 
     <a class="sidebar-title" href="{{ "/" | relative_url }}">
-    <img src="https://github.com/BaratiLab/AugLiChem/blob/main/docs/images/logo.png" alt="drawing" width="20"/>
+	    <!--<img src="https://github.com/BaratiLab/AugLiChem/blob/main/docs/images/logo.png" alt="drawing" width="20"/>-->
+    <img src="./images/logo.png" alt="drawing" width="20"/>
 	    {{ site.title | escape }}
-
-    <img src="https://github.com/BaratiLab/AugLiChem/blob/main/docs/images/Project.png" alt="drawing" width="20"/>
+	    <!--<img src="https://github.com/BaratiLab/AugLiChem/blob/main/docs/images/Project.png" alt="drawing" width="20"/>-->
+    <img src="./images/Project.png" alt="drawing" width="20"/>
     </a>
 
     {% assign default_paths = site.pages | map: "path" %}
@@ -22,9 +23,11 @@
         </span>
       </label>
 
+      <!--
       <form class="trigger" method="get" action="{{ site.baseurl }}./search.html">
         <input type="text" name="q" placeholder="Search blog">
       </form>
+      -->
 
       <ul id="page-list" class="trigger sidebar-list">
         {% for path in page_paths %}

@@ -260,16 +260,16 @@ from sklearn.metrics import roc_auc_score
 with torch.no_grad():
     model.eval()
         
-   all_preds = []
-    all_labels = []
+   all_preds = torch.Tensor()
+    all_labels = torch.Tensor()
     for data in test_loader:
         _, pred = model(data)
 
         # Hold on to all predictions and labels
-        all_preds.extend(pred[:,1])
-        all_labels.extend(data.y)
+        all_preds = torch.cat([all_preds, pred[:,1]])
+        all_labels = torch.cat([all_labels, data.y])
     
-    metric = roc_auc_score(data.y.cpu(), pred.cpu().detach()[:,1])
+    metric = roc_auc_score(all_labels.cpu(), all_preds.cpu().detach()[:,1])
     print("TEST ROC: {1:.3f}".format(metric))
 ```
 
