@@ -31,14 +31,9 @@ After activating your conda environment, `pytorch` can be installed easily and i
 `torch_geometric` needs to be installed with `conda install pyg -c pyg -c conda-forge`.
 
 
-After pytorch, torch-sparse and torch-scatter need to be installed according to your hardware, with guide here: [torch-sparse](https://github.com/rusty1s/pytorch_sparse).
-
-
 Once you have `pytorch` and `torch_geometric` installed, installing AugLiChem can be done using PyPI:
 
 `pip install auglichem`
-
-`conda install auglichem`
 
 
 ### MacOS ARM64 Architecture
