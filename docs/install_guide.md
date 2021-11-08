@@ -70,7 +70,6 @@ From here, individual packages can be installed:
 
 Before installing the package, you must go into `setup.py` in the main directory and comment out `rdkit-pypi` and `tensorboard` from the `install_requires` list since they are already installed.
 Not commenting these packages out will result in an error during installation.
-It is not supported through pip this way, and since it is already installed, it will throw an error.
 
 Finally, run: 
 
