@@ -248,7 +248,7 @@ class MotifRemoval(object):
 
 
     #def apply_transform(self, mol: rdkit.Chem.rdchem.Mol) -> List[rdkit.Chem.rdchem.Mol]:
-    def apply_transform(self, data: PyG_Data) -> PyG_Data:
+    def apply_transform(self, data: PyG_Data, seed=None) -> PyG_Data:
         """
         Transform that randomly remove a motif decomposed via BRICS
         @param mol: rdkit.Chem.rdchem.Mol to be augmented
@@ -263,17 +263,20 @@ class MotifRemoval(object):
         for r in res:
             mol_aug = Chem.MolFromSmiles(r)
             fp_aug = Chem.RDKFingerprint(mol_aug)
+            #print(self.similarity_threshold)
+            #print(DataStructs.FingerprintSimilarity(fp, fp_aug) > self.similarity_threshold)
             if DataStructs.FingerprintSimilarity(fp, fp_aug) > self.similarity_threshold:
-                aug_mols.append(r)
+                aug_mols.append(mol_aug)
 
         # Get data x and y
         x = self._get_data_x(mol)
 
         # Get edge index and attributes
         edge_index, edge_attr = self._get_edge_index_and_attr(mol)
-        return PyG_Data(x=x, y=data.y, edge_index=edge_index, edge_attr=edge_attr)
+        return PyG_Data(x=x, y=data.y, edge_index=edge_index, edge_attr=edge_attr,
+                        smiles=data.smiles)
 
 
-    def __call__(self, data):
-        return self.apply_transform(data)
+    def __call__(self, data, seed=None):
+        return self.apply_transform(data, seed)
 
