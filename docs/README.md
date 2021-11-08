@@ -16,6 +16,10 @@ For crystalline systems, five augmentations are supported: random perturbation, 
 
 ## Authors
 
+Yuyang Wang\*, Rishikesh Magar\*, Cooper Lorsung\*, Hariharan Ramasubramanian\*, Chen Liang\*, Peiyuan Li\*, Amir Barati Farimani\*
+
+^1Department of Mechanical Engineering, Carnegie Mellon University, Pittsburgh, PA 15213
+
 ## Paper
 
 Our paper can be found at [PAPER URL]
