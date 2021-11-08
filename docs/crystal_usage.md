@@ -318,9 +318,6 @@ with warnings.catch_warnings():
             targets = torch.cat((targets, data.y.cpu()))
 
         mae = mean_absolute_error(preds, targets)   
-    
-    set_str = "VALIDATION" if(validation) else "TEST"
-    print("{0} MAE: {1:.3f}".format(set_str, mae))
 ```
 
 ### K-Fold Cross Validation
@@ -385,8 +382,6 @@ with warnings.catch_warnings():
             targets = torch.cat((targets, data.y.cpu()))
 
         mae = mean_absolute_error(preds, targets)   
-    
-    set_str = "VALIDATION" if(validation) else "TEST"
 ```
 
 Obtaining the next fold is as easy as splitting the data again, with a different fold number passed in:
@@ -453,8 +448,6 @@ with warnings.catch_warnings():
             targets = torch.cat((targets, data.y.cpu()))
             
         mae = mean_absolute_error(preds, targets)
-        
-    set_str = "VALIDATION" if(validation) else "TEST"
 ``` 
 
 ### Crystal Graph Convolutional Network
@@ -537,8 +530,6 @@ with torch.no_grad():
         targets = torch.cat((targets, target))
         
     mae = mean_absolute_error(preds, targets)   
-set_str = "VALIDATION" if(validation) else "TEST"
-print("TEST MAE: {0:.3f}".format(mae))
 ```
 
 ### Crystal Graph Convolutional Network with CUDA
@@ -595,6 +586,4 @@ with torch.no_grad():
         targets = torch.cat((targets, target))
     
     mae = mean_absolute_error(preds, targets)   
-set_str = "VALIDATION" if(validation) else "TEST"
-print("TEST MAE: {0:.3f}".format(mae))
 ```

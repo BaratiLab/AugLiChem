@@ -1,14 +1,14 @@
 title: AugLiChem
 subtitle: Augmentation Library for Chemical Systems
 author: BaratiLab
-email: your-email@domain.com
+email: clorsung@andrew.cmu.edu
 description: > # this means to ignore newlines until "twitter_username:"
   AugLiChem supports data augmentation for organic and inorganic systems. Pre-defined
   augmentations, built-in data downloading, automatic data cleaning, and pre-implemented models
   make AugLiChem easy to use.
 # social links
 twitter_username: AmirBaratiF
-github_username:  BaratiLab
+github_username:  BaratiLab/AugLiChem
 # dribbble_username: jekyll
 # facebook_username: jekyll
 # flickr_username: jekyll

@@ -8,11 +8,11 @@ setuptools.setup(
   packages=setuptools.find_packages(), 
   version = '0.1.0',
   license = 'MIT',
-  description = 'Data augmentation of molecules and crystals.e',
+  description = 'Data augmentation of molecules and crystals.',
   long_description = long_description,
   long_description_content_type = "text/markdown",
-  author = '',
-  author_email = '',
+  author = 'Yuyang Wange, Rishikesh Magar, Cooper Lorsung, Hariharan Ramasubramanian, Chen Liang, Peiyuan Li, Amir Barati Farimani',
+  author_email = 'clorsung@andrew.cmu.edu',
   url = 'https://github.com/BaratiLab/AugLiChem',
   classifiers = [
     'Intended Audience :: Developers',
@@ -27,12 +27,13 @@ setuptools.setup(
                       'sklearn',
                       'pandas>=1.3.1',
                       'matplotlib>=3.4.2',
-                      'tensorboard>=2.4.1',
                       'pyyaml>=5.4.1',
                       'tqdm',
-
                       'ase>=3.22.0',
                       'pymatgen>=2022.0.11',
+                      'rdflib',
+
                       'rdkit-pypi',
+                      'tensorboard>=2.4.1',
                      ],
 )

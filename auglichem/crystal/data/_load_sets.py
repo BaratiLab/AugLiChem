@@ -150,7 +150,7 @@ def _load_data(dataset, data_path='./data_download'):
     if(dataset == 'lanthanides'):
         task = 'regression'
         target = ["formation_energy"] #TODO: Need to verify
-        data_id = '1UJtiWE247oKmG_wy0WvwxFQ8rQxKAY2W'
+        data_id = "1AB0XkOUdmOkxfKKjW_XkAxxGhAuA4F5k"
         csv_file_path = download_url(data_id, data_path, "/lanths.zip")
         csv_file_path = data_path + "/lanths/id_prop.csv"
         embedding_path = data_path + "/lanths/atom_init.json"
@@ -158,7 +158,7 @@ def _load_data(dataset, data_path='./data_download'):
     elif(dataset == 'band_gap'):
         task = 'regression'
         target = ["band_gap"]
-        data_id = "11Ybj_JervbFhA14SJ6xcoBvapJ9tySZq"
+        data_id = "1pr8yxK3-BdfQwiVG_V8s_eCITY2l_ynC"
         csv_file_path = download_url(data_id, data_path, "/band.zip")
         csv_file_path = data_path + "/band/id_prop.csv"
         embedding_path = data_path + "/band/atom_init.json"
@@ -166,7 +166,7 @@ def _load_data(dataset, data_path='./data_download'):
     elif(dataset == 'perovskites'):
         task = 'regression'
         target = ["energy"] #TODO: Need to verify
-        data_id = "1HBN_JNaxHp0x1sB24llfYxEzd1P0T2fE"
+        data_id = "1y-SAMNBHrE9GUCuZofDuvLXc3MXGF7dG"
         csv_file_path = download_url(data_id, data_path, "/abx3_cifs.zip")
         csv_file_path = data_path + "/abx3_cifs/id_prop.csv"
         embedding_path = data_path + "/abx3_cifs/atom_init.json"
@@ -174,7 +174,7 @@ def _load_data(dataset, data_path='./data_download'):
     elif(dataset == 'fermi_energy'):
         task = 'regression'
         target = ["fermi_energy"]
-        data_id = '1gdRhYVLItVKY3OGlhKFFjYntK3p9BLD1'
+        data_id = "1m5I2MSfoT9WOlua4H4ZBYQS3dEzpmYid"
         csv_file_path = download_url(data_id, data_path, "/fermi.zip")
         csv_file_path = data_path + "/fermi/id_prop.csv"
         embedding_path = data_path + "/fermi/atom_init.json"
@@ -182,7 +182,7 @@ def _load_data(dataset, data_path='./data_download'):
     elif(dataset == 'formation_energy'):
         task = 'regression'
         target = ["formation_energy"]
-        data_id = "1Xcjfct-J4YBEGFSCR9lhAdLaEzHRJxgU"
+        data_id = "1NNmald3DfhHUr2gzN4V1ExsTp2cuYgvx"
         csv_file_path = download_url(data_id, data_path, "/FE.zip")
         csv_file_path = data_path + "/FE/id_prop.csv"
         embedding_path = data_path + "/FE/atom_init.json"
