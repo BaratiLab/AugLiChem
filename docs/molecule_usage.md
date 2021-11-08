@@ -390,7 +390,6 @@ Which we also do for evaluation:
 
 ```python
     task = test_loader.dataset.task
-    set_str = "VALIDATION" if validation else "TEST"
     with torch.no_grad():
         model.eval()
         
