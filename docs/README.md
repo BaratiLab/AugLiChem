@@ -1,7 +1,7 @@
 <!-- <img src="./images/logo.png" alt="drawing" width="100"/> -->
 
 Welcome to AugLiChem!
-The augmentation library for chemical systems.
+The augmentation library for chemical structures.
 This package supports augmentation for both crystaline and molecular systems, as well as provides automatic downloading for our benchmark datasets, and easy to use model implementations.
 
 AugLiChem supports three augmentations for molecular compounds: random atom masking, random bond deletion, and substructure removal.
