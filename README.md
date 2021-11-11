@@ -76,7 +76,6 @@ From here, individual packages can be installed:
 
 Before installing the package, you must go into `setup.py` in the main directory and comment out     `rdkit-pypi` and `tensorboard` from the `install_requires` list since they are already installed.
 Not commenting these packages out will result in an error during installation.
-It is not supported through pip this way, and since it is already installed, it will throw an err    or.
 
 Finally, run:
 
@@ -89,11 +88,17 @@ After installing the package as described above, the example notebooks can be do
 
 ## Authors
 
+Yuyang Wang\*, Rishikesh Magar\*, Cooper Lorsung\*, Hariharan Ramasubramanian\*, Chen Liang\*, Peiyuan Li\*, Amir Barati Farimani\*
+
+\*Department of Mechanical Engineering, Carnegie Mellon University, Pittsburgh, PA 15213
+
 ## Paper
 
 Our paper can be found at [PAPER URL]
 
 ## Citation
+
+Our work can be cited using BibTex:
 
 (Once on ArXiv add BibTex citation)
 

@@ -26,9 +26,6 @@ After activating your conda environment, `pytorch` can be installed easily and i
 `torch_geometric` needs to be installed with `conda install pyg -c pyg -c conda-forge`.
 
 
-After pytorch, torch-sparse and torch-scatter need to be installed according to your hardware, with guide here: [torch-sparse](https://github.com/rusty1s/pytorch_sparse).
-
-
 Once you have `pytorch` and `torch_geometric` installed, installing AugLiChem can be done using PyPI:
 
 `pip install auglichem`
@@ -61,7 +58,6 @@ From here, individual packages can be installed:
 
 `conda install scipy`
 
-
 `conda install cython`
 
 `conda install scikit-learn`
@@ -74,7 +70,6 @@ From here, individual packages can be installed:
 
 Before installing the package, you must go into `setup.py` in the main directory and comment out `rdkit-pypi` and `tensorboard` from the `install_requires` list since they are already installed.
 Not commenting these packages out will result in an error during installation.
-It is not supported through pip this way, and since it is already installed, it will throw an error.
 
 Finally, run: 
 

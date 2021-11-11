@@ -86,6 +86,9 @@ class RandomAtomMask(BaseTransform):
         
         return aug_mol_graph
 
+    def __str__(self):
+        return "RandomAtomMask(p = {})".format(self.prob)
+
 
 class RandomBondDelete(BaseTransform):
     def __init__(self, p: float = 1.0):
@@ -119,143 +122,28 @@ class RandomBondDelete(BaseTransform):
         
         return aug_mol_graph
 
+    def __str__(self):
+        return "RandomBondDelete(p = {})".format(self.prob)
+
 
 class MotifRemoval(object):
     def __init__(self, similarity_threshold=0.6):
         super().__init__()
         self.similarity_threshold = similarity_threshold
-        self.allowable_features = {
-            'possible_atomic_num_list' : list(range(1, 119)),
-            'possible_formal_charge_list' : [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
-            'possible_chirality_list' : [
-                Chem.rdchem.ChiralType.CHI_UNSPECIFIED,
-                Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW,
-                Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW,
-                Chem.rdchem.ChiralType.CHI_OTHER
-            ],
-            'possible_hybridization_list' : [
-                Chem.rdchem.HybridizationType.S,
-                Chem.rdchem.HybridizationType.SP, Chem.rdchem.HybridizationType.SP2,
-                Chem.rdchem.HybridizationType.SP3, Chem.rdchem.HybridizationType.SP3D,
-                Chem.rdchem.HybridizationType.SP3D2, Chem.rdchem.HybridizationType.UNSPECIFIED
-            ],
-            'possible_numH_list' : [0, 1, 2, 3, 4, 5, 6, 7, 8],
-            'possible_implicit_valence_list' : [0, 1, 2, 3, 4, 5, 6],
-            'possible_degree_list' : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            'possible_bonds' : [
-                Chem.rdchem.BondType.SINGLE,
-                Chem.rdchem.BondType.DOUBLE,
-                Chem.rdchem.BondType.TRIPLE,
-                Chem.rdchem.BondType.AROMATIC
-            ],
-            'possible_bond_dirs' : [ # only for double bond stereo information
-                Chem.rdchem.BondDir.NONE,
-                Chem.rdchem.BondDir.ENDUPRIGHT,
-                Chem.rdchem.BondDir.ENDDOWNRIGHT
-            ]
-        }
-    def _get_data_x(self, mol):
-        '''
-            Get the transformed data features.
-
-            Inputs:
-            -----------------------------------
-            mol ( object): Current molecule
-
-            Outputs:
-            -----------------------------------
-            x (torch.Tensor of longs):
-        '''
-
-        # Set up data arrays
-        type_idx, chirality_idx, atomic_number = [], [], []
-
-        # Gather atom data
-        for atom in mol.GetAtoms():
-            type_idx.append(ATOM_LIST.index(atom.GetAtomicNum()))
-            chirality_idx.append(CHIRALITY_LIST.index(atom.GetChiralTag()))
-            atomic_number.append(atom.GetAtomicNum())
-
-        # Concatenate atom type with chirality index
-        x1 = torch.tensor(type_idx, dtype=torch.long).view(-1,1)
-        x2 = torch.tensor(chirality_idx, dtype=torch.long).view(-1,1)
-        x = torch.cat([x1, x2], dim=-1)
-
-        return x
-
-
-    def _get_data_y(self, index):
-        '''
-            Get the transformed data label.
-
-            Inputs:
-            -----------------------------------
-            index (int): Index for current molecule
-
-            Outputs:
-            -----------------------------------
-            y (torch.Tensor, long if classification, float if regression): Data label
-        '''
-
-        if self.task == 'classification':
-            y = torch.tensor(self.class_labels[index], dtype=torch.long).view(1,-1)
-        elif self.task == 'regression':
-            y = torch.tensor(self.class_labels[index], dtype=torch.float).view(1,-1)
-
-        return y
-
-
-    def _get_edge_index_and_attr(self, mol):
-        '''
-            Create the edge index and attributes
-
-            Inputs:
-            -----------------------------------
-            mol ():
-
-            Outputs:
-            -----------------------------------
-            edge_index ():
-            edge_attr ():
-        '''
-
-        # Set up data collection lists
-        row, col, edge_feat = [], [], []
-        for bond in mol.GetBonds():
-
-            # Get the beginning and end atom indices
-            start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
-
-            # Store bond atoms
-            row += [start, end]
-            col += [end, start]
-
-            # Store edge featuers
-            edge_feat.append([
-                BOND_LIST.index(bond.GetBondType()),
-                BONDDIR_LIST.index(bond.GetBondDir())
-            ])
-            edge_feat.append([
-                BOND_LIST.index(bond.GetBondType()),
-                BONDDIR_LIST.index(bond.GetBondDir())
-            ])
-
-        # Create edge index and attributes
-        edge_index = torch.tensor([row, col], dtype=torch.long)
-        edge_attr = torch.tensor(np.array(edge_feat), dtype=torch.long)
-
-        return edge_index, edge_attr
 
 
     #def apply_transform(self, mol: rdkit.Chem.rdchem.Mol) -> List[rdkit.Chem.rdchem.Mol]:
-    def apply_transform(self, data: PyG_Data) -> PyG_Data:
+    def apply_transform(self, data, seed=None) -> PyG_Data:
         """
         Transform that randomly remove a motif decomposed via BRICS
         @param mol: rdkit.Chem.rdchem.Mol to be augmented
         @returns: list of augmented rdkit.Chem.rdchem.Mol
         """
 
-        mol = Chem.MolFromSmiles(data.smiles)
+        if(isinstance(data, PyG_Data)):
+            mol = Chem.MolFromSmiles(data.smiles)
+        elif(isinstance(data, str)):
+            mol = Chem.MolFromSmiles(data)
         aug_mols = []
         aug_mols.append(mol)
         fp = Chem.RDKFingerprint(mol)
@@ -264,16 +152,14 @@ class MotifRemoval(object):
             mol_aug = Chem.MolFromSmiles(r)
             fp_aug = Chem.RDKFingerprint(mol_aug)
             if DataStructs.FingerprintSimilarity(fp, fp_aug) > self.similarity_threshold:
-                aug_mols.append(r)
+                aug_mols.append(mol_aug)
 
-        # Get data x and y
-        x = self._get_data_x(mol)
-
-        # Get edge index and attributes
-        edge_index, edge_attr = self._get_edge_index_and_attr(mol)
-        return PyG_Data(x=x, y=data.y, edge_index=edge_index, edge_attr=edge_attr)
+        return aug_mols
 
 
-    def __call__(self, data):
-        return self.apply_transform(data)
+    def __call__(self, data, seed=None):
+        return self.apply_transform(data, seed)
+
+    def __str__(self):
+        return "MotifRemoval(similarity_threshold = {})".format(self.similarity_threshold)
 

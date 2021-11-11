@@ -51,6 +51,8 @@ transforms = Compose([
 `MotifRemoval` arguments:
 - `similarity_threshold`: Threshold to retain motifs in augmented structure.
 
+Note: MotifRemoval retains a copy of each motif while training. That is, the original data, and each motif is used in training, along with the data and motifs augmented by any additional transformations.
+
 The `Compose` object is used to apply multiple transformations at once.
 It takes in transformations and applies them one at a time when called.
 
