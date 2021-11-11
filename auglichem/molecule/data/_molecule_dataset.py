@@ -6,6 +6,7 @@ import numpy as np
 from copy import deepcopy
 from operator import itemgetter
 import warnings
+from tqdm import tqdm
 
 import torch
 import torch.nn.functional as F
@@ -25,7 +26,7 @@ from auglichem.utils import (
         random_split,
         scaffold_split
 )
-from auglichem.molecule import RandomAtomMask, RandomBondDelete
+from auglichem.molecule import RandomAtomMask, RandomBondDelete, MotifRemoval, Compose
 from ._load_sets import read_smiles
 
 
@@ -35,7 +36,7 @@ class MoleculeDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, smiles_data=None, labels=None,
                  task=None, test_mode=False, aug_time=0, atom_mask_ratio=[0, 0.25],
                  bond_delete_ratio=[0, 0.25], target=None, class_labels=None, seed=None,
-                 augment_original=False, **kwargs):
+                 augment_original=False, _training_set=False, _train_warn=True, **kwargs):
         '''
             Initialize Molecular Data set object. This object tracks data, labels,
             task, test, and augmentation
@@ -64,6 +65,12 @@ class MoleculeDataset(Dataset):
         # Store class attributes
         self.dataset = dataset
         self.data_path = data_path
+
+        # Handle incorrectly passed in transformations
+        if(isinstance(transform, list)):
+            transform = Compose(transform)
+        elif(not(isinstance(transform, Compose))):
+            transform = Compose([transform])
         self.transform = transform
 
         if(smiles_data is None):
@@ -84,7 +91,6 @@ class MoleculeDataset(Dataset):
             self.aug_time = 0
 
         assert type(self.aug_time) == int
-        #assert self.aug_time >= 1
 
         # For reproducibility
         self.seed = seed
@@ -113,6 +119,45 @@ class MoleculeDataset(Dataset):
             warnings.warn("Augmenting original dataset may lead to unexpected results.",
                           RuntimeWarning, stacklevel=2)
 
+        self._training_set = _training_set
+        self._train_warn = _train_warn
+        self._handle_motifs()
+
+
+    def _handle_motifs(self):
+        # MotifRemoval adds multiple new SMILES strings to our data, and must be done
+        # upon training set initialization
+        if(self._training_set):
+            if(self._train_warn): # Catches if not set through get_data_loaders()
+                raise ValueError(
+                    "_training_set is for internal use only. " + \
+                    "Manually setting _training_set=True is not supported."
+                )
+
+            transform = []
+            for t in self.transform.transforms:
+                if(isinstance(t, MotifRemoval)):
+                    print("Gathering Motifs...")
+                    new_smiles = []
+                    new_labels = []
+
+                    # Match label to each motif
+                    for smiles, labels in tqdm(zip(self.smiles_data, self.class_labels)):
+                        aug_mols = t(smiles)
+                        new_smiles.append(smiles)
+                        new_labels.append(labels)
+                        for am in aug_mols:
+                            new_smiles.append(Chem.MolToSmiles(am))
+                            new_labels.append(labels)
+
+                    self.smiles_data = np.array(new_smiles)
+                    self.class_labels = np.array(new_labels)
+                else:
+                    transform.append(t)
+            self.transform = Compose(transform)
+        else:
+            pass
+
 
     def _get_data_x(self, mol):
         '''
@@ -132,9 +177,12 @@ class MoleculeDataset(Dataset):
 
         # Gather atom data
         for atom in mol.GetAtoms():
-            type_idx.append(ATOM_LIST.index(atom.GetAtomicNum()))
-            chirality_idx.append(CHIRALITY_LIST.index(atom.GetChiralTag()))
-            atomic_number.append(atom.GetAtomicNum())
+            try:
+                type_idx.append(ATOM_LIST.index(atom.GetAtomicNum()))
+                chirality_idx.append(CHIRALITY_LIST.index(atom.GetChiralTag()))
+                atomic_number.append(atom.GetAtomicNum())
+            except ValueError: # Skip asterisk in motif
+                pass
 
         # Concatenate atom type with chirality index
         x1 = torch.tensor(type_idx, dtype=torch.long).view(-1,1)
@@ -402,7 +450,7 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         train_set = MoleculeDataset(self.dataset, transform=self.transform,
                             smiles_data=self.smiles_data[good_idxs][self.train_idx],
                             class_labels=labels[good_idxs][self.train_idx],
-                            test_mode=False,
+                            test_mode=False, _training_set=True, _train_warn=False,
                             aug_time=self.aug_time, task=self.task, target=self.target)
         valid_set = MoleculeDataset(self.dataset, transform=self.transform,
                             smiles_data=self.smiles_data[good_idxs][self.valid_idx],

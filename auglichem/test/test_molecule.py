@@ -4,6 +4,7 @@ sys.path.append(sys.path[0][:-14])
 import shutil
 import numpy as np
 import warnings
+from tqdm import tqdm
 
 import torch
 from torch_geometric.data import Data as PyG_Data
@@ -88,18 +89,6 @@ def test_atom_mask_mol():
     # Mask every atom
     atom_masked = RandomAtomMask(p=1)(data.__getitem__(0), seed=0)
     assert all(atom_masked.x[:,0].numpy() == [119]*5)
-
-
-
-def test_motif_removal():
-    print("MOTIF REMOVAL")
-    # Dummy data set
-    data = MoleculeDataset("", smiles_data=["C"], labels={'target': [1]}, task='classification')
-    data.target = "target"
-
-    mol = MotifRemoval()(data.__getitem__(0))
-    pass
-
 
 
 def test_bond_delete():
@@ -269,14 +258,48 @@ def test_consistent_augment():
     shutil.rmtree("./data_download")
 
 
+def test_all_augment():
+    aug_time = 1
+    transform = Compose([
+        RandomAtomMask(1.0),
+        RandomBondDelete(1.0),
+        MotifRemoval(similarity_threshold=0.9)
+    ])
+    data = MoleculeDatasetWrapper("ClinTox", transform=transform, batch_size=1)
+    train, valid, test = data.get_data_loaders("all")
+
+    # Checks to make sure all original data is found in loaders
+    for d in data:
+        in_train = d.smiles in train.dataset.smiles_data
+        in_valid = d.smiles in valid.dataset.smiles_data
+        in_test = d.smiles in test.dataset.smiles_data
+        assert in_train or in_valid or in_test
+        assert (int(in_train) + int(in_valid) + int(in_test)) == 1
+
+    transform = Compose([
+        RandomAtomMask(1.0),
+        RandomBondDelete(1.0),
+        MotifRemoval(similarity_threshold=0.1)
+    ])
+    data = MoleculeDatasetWrapper("ClinTox", transform=transform, batch_size=1)
+    train, valid, test = data.get_data_loaders()
+    for d in data:
+        in_train = d.smiles in train.dataset.smiles_data
+        in_valid = d.smiles in valid.dataset.smiles_data
+        in_test = d.smiles in test.dataset.smiles_data
+        assert in_train or in_valid or in_test
+        assert (int(in_train) + int(in_valid) + int(in_test)) == 1
+
+
+
 #if __name__ == '__main__':
     #test_smiles2graph()
     #test_atom_mask()
     #test_bond_delete()
     #test_atom_mask_mol()
-    #test_motif_removal()
     #test_bond_delete_mol()
     #test_molecule_data()
     #test_composition()
     #test_loading_multitask()
     #test_consistent_augment()
+    #test_all_augment()
