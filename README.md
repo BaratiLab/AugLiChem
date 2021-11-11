@@ -88,11 +88,17 @@ After installing the package as described above, the example notebooks can be do
 
 ## Authors
 
+Yuyang Wang\*, Rishikesh Magar\*, Cooper Lorsung\*, Hariharan Ramasubramanian\*, Chen Liang\*, Peiyuan Li\*, Amir Barati Farimani\*
+
+\*Department of Mechanical Engineering, Carnegie Mellon University, Pittsburgh, PA 15213
+
 ## Paper
 
 Our paper can be found at [PAPER URL]
 
 ## Citation
+
+Our work can be cited using BibTex:
 
 (Once on ArXiv add BibTex citation)
 
