@@ -88,6 +88,8 @@ Motif removal is different from the other augmentations in that it is determinis
 A similarity score is calculated between motifs and the molecule, where motifs above the threshold are retained.
 This threshold can be set by passing in an argument.
 
+Note: MotifRemoval retains a copy of each motif while training. That is, the original data, and each motif is used in training, along with the data and motifs augmented by any additional transformations.
+
 ```python
 from auglichem.molecule import MotifRemoval
 transform = MotifRemoval(0.6)
