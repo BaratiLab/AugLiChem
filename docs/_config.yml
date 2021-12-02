@@ -50,6 +50,8 @@ header_pages:
 # Build settings
 markdown: kramdown
 remote_theme: pawamoy/jekyll-readthedocs
+plugins:
+  - jekyll-remote-theme
 exclude:
   - Gemfile
   - Gemfile.lock
