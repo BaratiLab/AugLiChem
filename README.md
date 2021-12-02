@@ -113,4 +113,5 @@ If you use AugLiChem in your work, please cite:
 ```
 
 ## License
+AugLiChem is MIT licensed, as found in the [LICENSE](https://github.com/BaratiLab/AugLiChem/blob/main/LICENSE) file. Please note that some of the dependencies AugLiChem uses may be licensed under different terms.
 
