@@ -95,13 +95,22 @@ Rishikesh Magar\*, Yuyang Wang\*, Cooper Lorsung\*, Hariharan Ramasubramanian, C
 
 ## Paper
 
-Our paper can be found at [PAPER URL]
+Our paper can be found [here](https://arxiv.org/abs/2111.15112)
 
 ## Citation
 
-Our work can be cited using BibTex:
+If you use AugLiChem in your work, please cite:
 
-(Once on ArXiv add BibTex citation)
+```
+@misc{magar2021auglichem,
+      title={AugLiChem: Data Augmentation Library ofChemical Structures for Machine Learning}, 
+      author={Rishikesh Magar and Yuyang Wang and Cooper Lorsung and Chen Liang and Hariharan Ramasubramanian and Peiyuan Li and Amir Barati Farimani},
+      year={2021},
+      eprint={2111.15112},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
 
 ## License
 
