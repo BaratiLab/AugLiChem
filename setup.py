@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
   name = 'auglichem',
-  packages=setuptools.find_packages(), 
+  packages=setuptools.find_packages(exclude=("docs",)), 
   version = '0.1.0',
   license = 'MIT',
   description = 'Data augmentation of molecules and crystals.',
@@ -14,7 +14,6 @@ setuptools.setup(
   author = 'Yuyang Wange, Rishikesh Magar, Cooper Lorsung, Hariharan Ramasubramanian, Chen Liang, Peiyuan Li, Amir Barati Farimani',
   author_email = 'clorsung@andrew.cmu.edu',
   url = 'https://github.com/BaratiLab/AugLiChem',
-  packages=find_packages(exclude=("docs",)),
   classifiers = [
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',
