@@ -356,8 +356,7 @@ class MoleculeDataset(Dataset):
 
 class MoleculeDatasetWrapper(MoleculeDataset):
     def __init__(self, dataset, transform=None, split="scaffold", batch_size=64, num_workers=0,
-                 valid_size=0.1, test_size=0.1, aug_time=0, data_path=None, target=None,
-                 seed=None):
+                 valid_size=0.1, test_size=0.1, aug_time=0, data_path=None, seed=None):
         '''
             Input:
             ---
@@ -371,10 +370,9 @@ class MoleculeDatasetWrapper(MoleculeDataset):
             num_workers (int, optional default=0): Number of workers used in loading data
             valid_size (float in [0,1], optional default=0.1): 
             test_size (float in [0,1],  optional default=0.1): 
-            aug_time (int, optional default=1):
+            aug_time (int, optional default=0): Number of times to call each augmentation
             data_path (str, optional default=None): specify path to save/lookup data. Default
                         creates `data_download` directory and stores data there
-            target (str, optional, default=None): Target variable
             seed (int, optional, default=None): Random seed to use for reproducibility
 
 
@@ -400,9 +398,10 @@ class MoleculeDatasetWrapper(MoleculeDataset):
 
             Inputs:
             -------
-            target (str, optional): Target name to get data loaders for. If None, returns the
-                                  loaders for the first target. If 'all' returns data for
-                                  all targets at once, ideal for multitarget trainimg.
+            target (str, list of str, optional): Target name to get data loaders for. If None,
+                                       returns the loaders for the first target. If 'all'
+                                       returns data for all targets at once, ideal for
+                                       multitarget trainimg.
 
             Outputs:
             --------
