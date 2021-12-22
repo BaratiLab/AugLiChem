@@ -3,8 +3,6 @@ layout: page
 title: Crystal Usage
 ---
 
-## Crystal Usage
-
 The first step is to import relevant modules.
 Auglichem is largely self-contained, and so we import transforamtions, data wrapper, and models.
 
