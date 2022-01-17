@@ -76,17 +76,19 @@ class RotationTransformation(AbstractTransformation):
     The RotationTransformation applies a rotation to a structure.
     """
 
-    def __init__(self, axis=None, angle=None):
+    def __init__(self, axis=None, angle=None, perturb=None):
         """
         Args:
             axis (3x1 array): Axis of rotation, e.g., [1, 0, 0]
             angle (float): Angle to rotate
+            perturb (PerturbStructureTransformation): pre-rotation perturbation
         """
         self.axis = axis
         self.angle = angle
+        self.perturb = perturb
 
-    def apply_transformation(self, structure, axis=None, angle=None, angle_in_radians=False,
-                             seed=None):
+    def apply_transformation(self, structure, axis=None, angle=None, perturb=None,
+                             angle_in_radians=False, seed=None):
         """
         Apply the transformation.
         Args:
@@ -94,10 +96,19 @@ class RotationTransformation(AbstractTransformation):
         Returns:
             Rotated Structure.
         """
+        # Set random seed
+        if(seed is not None):
+            np.random.seed(seed)
+
+        # Read in new parameters
         if(axis is not None):
             self.axis = axis
         if(angle is not None):
             self.angle = angle
+
+        # Randomly generate an angle
+        if(self.angle is None):
+            self.angle = np.random.choice(360, 1, replace=False)
 
         self.angle_in_radians = angle_in_radians
         self._symmop = SymmOp.from_axis_angle_and_translation(self.axis, self.angle, self.angle_in_radians)
@@ -433,12 +444,25 @@ class TranslateSitesTransformation(AbstractTransformation):
         Return:
             Returns a copy of structure with sites translated.
         """
+        # Set seed
+        if(seed is not None):
+            np.random.seed(seed)
+
+        # Hold on to passed-in values
         if(indices_to_move is not None):
             self.indices_to_move = indices_to_move
         if(translation_vector is not None):
             self.translation_vector = np.array(translation_vector)
         if(vector_in_frac_coords is not None):
             self.vector_in_frac_coords = vector_in_frac_coords
+
+        # Randomly select translation indices if not provided
+        if(self.indices_to_move is None):
+             num_sites = crystal.num_sites
+             mask_num = max((1, int(np.floor(0.25*num_sites))))
+             self.indices_to_move = np.random.choice(num_sites, mask_num, replace=False)
+        if(self.translation_vector is None):
+            self.translation_vector = np.random.rand(len(indices_trans),3)
 
         s = structure.copy()
         if self.translation_vector.shape == (len(self.indices_to_move), 3):
