@@ -106,6 +106,12 @@ class RotationTransformation(AbstractTransformation):
         if(angle is not None):
             self.angle = angle
 
+        # Apply perturbation if passed in
+        if(perturb is not None):
+            self.perturb = perturb
+        if(self.perturb is not None):
+            structure = self.perturb.apply_transformation(structure)
+
         # Randomly generate an angle
         if(self.angle is None):
             self.angle = np.random.choice(360, 1, replace=False)
@@ -444,25 +450,12 @@ class TranslateSitesTransformation(AbstractTransformation):
         Return:
             Returns a copy of structure with sites translated.
         """
-        # Set seed
-        if(seed is not None):
-            np.random.seed(seed)
-
-        # Hold on to passed-in values
         if(indices_to_move is not None):
             self.indices_to_move = indices_to_move
         if(translation_vector is not None):
             self.translation_vector = np.array(translation_vector)
         if(vector_in_frac_coords is not None):
             self.vector_in_frac_coords = vector_in_frac_coords
-
-        # Randomly select translation indices if not provided
-        if(self.indices_to_move is None):
-             num_sites = crystal.num_sites
-             mask_num = max((1, int(np.floor(0.25*num_sites))))
-             self.indices_to_move = np.random.choice(num_sites, mask_num, replace=False)
-        if(self.translation_vector is None):
-            self.translation_vector = np.random.rand(len(indices_trans),3)
 
         s = structure.copy()
         if self.translation_vector.shape == (len(self.indices_to_move), 3):
@@ -528,6 +521,7 @@ class CubicSupercellTransformation(AbstractTransformation):
         max_atoms: Optional[int] = None,
         min_length: float = 15.0,
         force_diagonal: bool = False,
+        perturb=None
     ):
         """
         Args:
@@ -536,6 +530,7 @@ class CubicSupercellTransformation(AbstractTransformation):
             min_length: Minimum length of the smallest supercell lattice vector.
             force_diagonal: If True, return a transformation with a diagonal
                 transformation matrix.
+            perturb (PerturbStructureTransformation): pre-rotation perturbation
         """
         self.min_atoms = min_atoms if min_atoms else -np.Inf
         self.max_atoms = max_atoms if max_atoms else np.Inf
@@ -543,7 +538,7 @@ class CubicSupercellTransformation(AbstractTransformation):
         self.force_diagonal = force_diagonal
         self.transformation_matrix = None
 
-    def apply_transformation(self, structure: Structure, seed=None) -> Structure:
+    def apply_transformation(self, structure: Structure, seed=None, perturb=None) -> Structure:
         """
         The algorithm solves for a transformation matrix that makes the
         supercell cubic. The matrix must have integer entries, so entries are
@@ -560,6 +555,12 @@ class CubicSupercellTransformation(AbstractTransformation):
         """
 
         lat_vecs = structure.lattice.matrix
+
+        # Apply perturbation
+        if(perturb is not None):
+            self.perturb = perturb
+        if(self.perturb is not None):
+            structure = self.perturb.apply_transformation(structure)
 
         # boolean for if a sufficiently large supercell has been created
         sc_not_found = True
