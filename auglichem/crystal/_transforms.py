@@ -421,7 +421,7 @@ class TranslateSitesTransformation(AbstractTransformation):
     This class translates a set of sites by a certain vector.
     """
 
-    def __init__(self, indices_to_move, translation_vector, vector_in_frac_coords=True):
+    def __init__(self, indices_to_move=None, translation_vector=None, vector_in_frac_coords=True):
         """
         Args:
             indices_to_move: The indices of the sites to move
@@ -450,22 +450,34 @@ class TranslateSitesTransformation(AbstractTransformation):
         Return:
             Returns a copy of structure with sites translated.
         """
+        if(seed is not None):
+            np.random.seed(seed)
+
         if(indices_to_move is not None):
-            self.indices_to_move = indices_to_move
+            indices_to_move = self.indices_to_move
         if(translation_vector is not None):
-            self.translation_vector = np.array(translation_vector)
+            translation_vector = np.array(self.translation_vector)
         if(vector_in_frac_coords is not None):
-            self.vector_in_frac_coords = vector_in_frac_coords
+            vector_in_frac_coords = self.vector_in_frac_coords
+
+        # Get indices to move
+        if(indices_to_move is None):
+            num_sites = structure.num_sites
+            mask_num = max((1, int(np.floor(0.25*num_sites))))
+            indices_to_move = np.random.choice(num_sites, mask_num, replace=False)
+
+        if(translation_vector is None):
+            translation_vector = np.random.rand(len(indices_to_move),3)
 
         s = structure.copy()
-        if self.translation_vector.shape == (len(self.indices_to_move), 3):
-            for i, idx in enumerate(self.indices_to_move):
-                s.translate_sites(idx, self.translation_vector[i], self.vector_in_frac_coords)
+        if translation_vector.shape == (len(indices_to_move), 3):
+            for i, idx in enumerate(indices_to_move):
+                s.translate_sites(idx, translation_vector[i], vector_in_frac_coords)
         else:
             s.translate_sites(
-                self.indices_to_move,
-                self.translation_vector,
-                self.vector_in_frac_coords,
+                indices_to_move,
+                translation_vector,
+                vector_in_frac_coords,
             )
         return s
 
@@ -537,6 +549,7 @@ class CubicSupercellTransformation(AbstractTransformation):
         self.min_length = min_length
         self.force_diagonal = force_diagonal
         self.transformation_matrix = None
+        self.perturb = perturb
 
     def apply_transformation(self, structure: Structure, seed=None, perturb=None) -> Structure:
         """
@@ -579,6 +592,9 @@ class CubicSupercellTransformation(AbstractTransformation):
 
             # round the entries of T and force T to be nonsingular
             self.transformation_matrix = _round_and_make_arr_singular(self.transformation_matrix)  # type: ignore
+            if(np.isclose(np.linalg.det(self.transformation_matrix),0)):
+                # This fixes the singular matrix issue by simply adding the identity matrix
+                self.transformation_matrix += np.eye(3, dtype=int)
 
             proposed_sc_lat_vecs = self.transformation_matrix @ lat_vecs  # type: ignore
 
