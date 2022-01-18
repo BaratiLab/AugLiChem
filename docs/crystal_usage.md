@@ -52,8 +52,9 @@ transforms = [
 `RotationTransformation` arguments:
 - `axis` (list or np.array of ints with shape=(3,1)): Axis of rotation, e.g., [1, 0, 0]
 - `angle` (float): Angle to rotate in degrees
+- `perturb` (PerturbStructureTransformation): Perturbation to be applied before rotation
 
-`SwapAxesTransformation` arugments:
+`SwapAxesTransformation` arguments:
 - None. Axes are randomly selected and swapped.
 
 `TranslateSitesTransformation` arguments:
@@ -63,6 +64,13 @@ transforms = [
 
 `SupercellTransformation` arguments:
 - `scaling_matrix` (list or np.array of ints with shape=(3,3), default=identity matrix): A matrix of transforming the lattice vectors. Defaults to the identity matrix. Has to be all integers. e.g., [[2,1,0],[0,3,0],[0,0,1]] generates a new structure with lattice vectors a" = 2a + b, b" = 3b, c" = c where a, b, and c are the lattice vectors of the original structure.
+
+`CubicSupercellTransformation` argument:
+- `max_atoms`: Maximum number of atoms allowed in the supercell.
+- `min_atoms`: Minimum number of atoms allowed in the supercell.
+- `min_length`: Minimum length of the smallest supercell lattice vector.
+- `force_diagonal`: If True, return a transformation with a diagonal transformation matrix.
+- `perturb` (PerturbStructureTransformation): pre-rotation perturbation
 
 ### Data Loading 
 
