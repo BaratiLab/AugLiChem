@@ -190,6 +190,16 @@ def test_rotation():
     assert np.allclose(struct.lattice.matrix[1], -struct2.lattice.matrix[1], atol=1e-8)
     assert np.allclose(struct.lattice.matrix[2], -struct2.lattice.matrix[2], atol=1e-8)
 
+    perturb1 = PerturbStructureTransformation(distance=0, min_distance=0)
+    transform = RotationTransformation([1,0,0], 180, perturb=perturb1)
+    struct3 = transform.apply_transformation(struct)
+    assert np.allclose(struct2.lattice.matrix[2], struct3.lattice.matrix[2], atol=1e-8)
+
+    perturb2 = PerturbStructureTransformation(distance=0.5, min_distance=0.1)
+    transform = RotationTransformation([1,0,0], 180, perturb=perturb2)
+    struct4 = transform.apply_transformation(struct)
+    assert not(struct3.sites == struct4.sites)
+
 
 def test_perturb_structure():
 
@@ -286,20 +296,32 @@ def test_translate():
     assert np.allclose(struct3.sites[0].coords, [coord1,0,0], atol=1e-8)
 
 
-#def test_cubic_supercell():
-#    transform = CubicSupercellTransformation()
-#
-#    coords = [[0, 0, 0], [0.75,0.5,0.75]]
-#    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
-#                                  beta=90, gamma=60)
-#    struct = Structure(lattice, ["Si", "Si"], coords)
-#    
-#    print(struct)
-#    struct1 = transform.apply_transformation(struct)
-#    print(struct)
-#    pass
-#
-#
+def test_cubic_supercell():
+
+    coords = [[0, 0, 0], [0.75,0.75,0.75]]
+    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=90,
+                                  beta=90, gamma=90)
+    struct = Structure(lattice, ["Si", "Si"], coords)
+    
+    for i in range(1, 15):
+        transform = CubicSupercellTransformation(min_length=i)
+        struct1 = transform.apply_transformation(struct)
+        assert all(float(i)//np.array(struct.lattice.abc)+1 == \
+                   np.diag(transform.transformation_matrix))
+
+    # Adding useless perturbation changes nothing
+    perturb1 = PerturbStructureTransformation(distance=0, min_distance=0)
+    transform = CubicSupercellTransformation(perturb=perturb1)
+    struct2 = transform.apply_transformation(struct)
+    assert struct1.sites == struct2.sites
+
+    # Adding perturbation changes things
+    perturb2 = PerturbStructureTransformation(distance=0.5, min_distance=0.1)
+    transform = CubicSupercellTransformation(perturb=perturb2)
+    struct3 = transform.apply_transformation(struct)
+    assert struct3.sites != struct2.sites
+
+
 #def test_primitive():
 #    transform = PrimitiveCellTransformation()
 #
@@ -350,6 +372,6 @@ def test_swap_axes():
     ##test_remove_sites()
     #test_supercell()
     #test_translate()
-    ##test_cubic_supercell()
+    #test_cubic_supercell()
     ##test_primitive()
     #test_swap_axes()

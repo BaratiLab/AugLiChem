@@ -355,9 +355,6 @@ def _round_and_make_arr_singular(arr: np.ndarray) -> np.ndarray:
     return arr_rounded.astype(int)
 
 class SupercellTransformation(AbstractTransformation):
-    """
-    The RotationTransformation applies a rotation to a structure.
-    """
 
     def __init__(self, scaling_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1))):
         """
@@ -453,11 +450,11 @@ class TranslateSitesTransformation(AbstractTransformation):
         if(seed is not None):
             np.random.seed(seed)
 
-        if(indices_to_move is not None):
+        if(indices_to_move is None):
             indices_to_move = self.indices_to_move
-        if(translation_vector is not None):
+        if(translation_vector is None):
             translation_vector = np.array(self.translation_vector)
-        if(vector_in_frac_coords is not None):
+        if(vector_in_frac_coords is None):
             vector_in_frac_coords = self.vector_in_frac_coords
 
         # Get indices to move
