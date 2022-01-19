@@ -3,7 +3,7 @@ layout: page
 title: Installation
 ---
 
-Welcome to the installation guide. First off, AugLiChem is a `python3.8+` package.
+Welcome to the installation guide. First off, AugLiChem is a `python3.8+` package and requires `pytorch>=1.10.0`.
 Guides for installation in Linux (Ubuntu) and MacOS ARM64 (M1 chip) architecture are given.
 Installation for Linux is straightforward, but for MacOS ARM64, installation is more involved due to dependencies not yet being supported for the architecture.
 

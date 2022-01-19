@@ -76,17 +76,19 @@ class RotationTransformation(AbstractTransformation):
     The RotationTransformation applies a rotation to a structure.
     """
 
-    def __init__(self, axis=None, angle=None):
+    def __init__(self, axis=None, angle=None, perturb=None):
         """
         Args:
             axis (3x1 array): Axis of rotation, e.g., [1, 0, 0]
             angle (float): Angle to rotate
+            perturb (PerturbStructureTransformation): pre-rotation perturbation
         """
         self.axis = axis
         self.angle = angle
+        self.perturb = perturb
 
-    def apply_transformation(self, structure, axis=None, angle=None, angle_in_radians=False,
-                             seed=None):
+    def apply_transformation(self, structure, axis=None, angle=None, perturb=None,
+                             angle_in_radians=False, seed=None):
         """
         Apply the transformation.
         Args:
@@ -94,10 +96,25 @@ class RotationTransformation(AbstractTransformation):
         Returns:
             Rotated Structure.
         """
+        # Set random seed
+        if(seed is not None):
+            np.random.seed(seed)
+
+        # Read in new parameters
         if(axis is not None):
             self.axis = axis
         if(angle is not None):
             self.angle = angle
+
+        # Apply perturbation if passed in
+        if(perturb is not None):
+            self.perturb = perturb
+        if(self.perturb is not None):
+            structure = self.perturb.apply_transformation(structure)
+
+        # Randomly generate an angle
+        if(self.angle is None):
+            self.angle = np.random.choice(360, 1, replace=False)
 
         self.angle_in_radians = angle_in_radians
         self._symmop = SymmOp.from_axis_angle_and_translation(self.axis, self.angle, self.angle_in_radians)
@@ -338,9 +355,6 @@ def _round_and_make_arr_singular(arr: np.ndarray) -> np.ndarray:
     return arr_rounded.astype(int)
 
 class SupercellTransformation(AbstractTransformation):
-    """
-    The RotationTransformation applies a rotation to a structure.
-    """
 
     def __init__(self, scaling_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1))):
         """
@@ -404,7 +418,7 @@ class TranslateSitesTransformation(AbstractTransformation):
     This class translates a set of sites by a certain vector.
     """
 
-    def __init__(self, indices_to_move, translation_vector, vector_in_frac_coords=True):
+    def __init__(self, indices_to_move=None, translation_vector=None, vector_in_frac_coords=True):
         """
         Args:
             indices_to_move: The indices of the sites to move
@@ -433,22 +447,34 @@ class TranslateSitesTransformation(AbstractTransformation):
         Return:
             Returns a copy of structure with sites translated.
         """
-        if(indices_to_move is not None):
-            self.indices_to_move = indices_to_move
-        if(translation_vector is not None):
-            self.translation_vector = np.array(translation_vector)
-        if(vector_in_frac_coords is not None):
-            self.vector_in_frac_coords = vector_in_frac_coords
+        if(seed is not None):
+            np.random.seed(seed)
+
+        if(indices_to_move is None):
+            indices_to_move = self.indices_to_move
+        if(translation_vector is None):
+            translation_vector = np.array(self.translation_vector)
+        if(vector_in_frac_coords is None):
+            vector_in_frac_coords = self.vector_in_frac_coords
+
+        # Get indices to move
+        if(indices_to_move is None):
+            num_sites = structure.num_sites
+            mask_num = max((1, int(np.floor(0.25*num_sites))))
+            indices_to_move = np.random.choice(num_sites, mask_num, replace=False)
+
+        if(translation_vector is None):
+            translation_vector = np.random.rand(len(indices_to_move),3)
 
         s = structure.copy()
-        if self.translation_vector.shape == (len(self.indices_to_move), 3):
-            for i, idx in enumerate(self.indices_to_move):
-                s.translate_sites(idx, self.translation_vector[i], self.vector_in_frac_coords)
+        if translation_vector.shape == (len(indices_to_move), 3):
+            for i, idx in enumerate(indices_to_move):
+                s.translate_sites(idx, translation_vector[i], vector_in_frac_coords)
         else:
             s.translate_sites(
-                self.indices_to_move,
-                self.translation_vector,
-                self.vector_in_frac_coords,
+                indices_to_move,
+                translation_vector,
+                vector_in_frac_coords,
             )
         return s
 
@@ -504,6 +530,7 @@ class CubicSupercellTransformation(AbstractTransformation):
         max_atoms: Optional[int] = None,
         min_length: float = 15.0,
         force_diagonal: bool = False,
+        perturb=None
     ):
         """
         Args:
@@ -512,14 +539,16 @@ class CubicSupercellTransformation(AbstractTransformation):
             min_length: Minimum length of the smallest supercell lattice vector.
             force_diagonal: If True, return a transformation with a diagonal
                 transformation matrix.
+            perturb (PerturbStructureTransformation): pre-rotation perturbation
         """
         self.min_atoms = min_atoms if min_atoms else -np.Inf
         self.max_atoms = max_atoms if max_atoms else np.Inf
         self.min_length = min_length
         self.force_diagonal = force_diagonal
         self.transformation_matrix = None
+        self.perturb = perturb
 
-    def apply_transformation(self, structure: Structure, seed=None) -> Structure:
+    def apply_transformation(self, structure: Structure, seed=None, perturb=None) -> Structure:
         """
         The algorithm solves for a transformation matrix that makes the
         supercell cubic. The matrix must have integer entries, so entries are
@@ -536,6 +565,12 @@ class CubicSupercellTransformation(AbstractTransformation):
         """
 
         lat_vecs = structure.lattice.matrix
+
+        # Apply perturbation
+        if(perturb is not None):
+            self.perturb = perturb
+        if(self.perturb is not None):
+            structure = self.perturb.apply_transformation(structure)
 
         # boolean for if a sufficiently large supercell has been created
         sc_not_found = True
@@ -554,6 +589,9 @@ class CubicSupercellTransformation(AbstractTransformation):
 
             # round the entries of T and force T to be nonsingular
             self.transformation_matrix = _round_and_make_arr_singular(self.transformation_matrix)  # type: ignore
+            if(np.isclose(np.linalg.det(self.transformation_matrix),0)):
+                # This fixes the singular matrix issue by simply adding the identity matrix
+                self.transformation_matrix += np.eye(3, dtype=int)
 
             proposed_sc_lat_vecs = self.transformation_matrix @ lat_vecs  # type: ignore
 

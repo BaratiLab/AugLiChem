@@ -10,7 +10,7 @@ In depth documentation about how to use AugLiChem, make use of transformations, 
 
 ## Installation
 
-AugLiChem is a `python3.8+` package.
+AugLiChem is a `python3.8+` package and requires `pytorch>=1.10.0`.
 
 ### Linux
 
