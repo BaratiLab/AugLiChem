@@ -593,7 +593,7 @@ class CrystalDatasetWrapper(CrystalDataset):
             raise ValueError("Please select scaffold or random split")
 
 
-    def get_data_loaders(self, target=None, transform=None, fold=None):
+    def get_data_loaders(self, target=None, transform=[], fold=None):
         '''
             This function splits the data into train, validation, and test data loaders for
             ease of use in model training
@@ -603,7 +603,7 @@ class CrystalDatasetWrapper(CrystalDataset):
             target (str, optional, default=None): The target label for training. Currently all
                                         crystal datasets are single-target, and so this parameter
                                         is truly optional.
-            transform (AbstractTransformation, optional, default=None): The data transformation
+            transform (AbstractTransformation, optional, default=[]): The data transformation
                                         we will use for data augmentation.
             fold (int, optiona, default=None): Which of k folds to use for training. Will
                                         throw an error if specified and k-fold CV is not
