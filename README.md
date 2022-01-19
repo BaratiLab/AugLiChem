@@ -25,6 +25,7 @@ Then activating the new environment with
 `conda activate auglichem`
 
 AugLiChem is built primarily with `pytorch` and that should be installed independently according to your system specifications.
+`pytorch>=1.10.0` is required.
 After activating your conda environment, `pytorch` can be installed easily and instructions are found [here](https://pytorch.org/).
 
 
