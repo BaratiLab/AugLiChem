@@ -32,7 +32,7 @@ setuptools.setup(
                       'ase>=3.22.0',
                       'pymatgen>=2022.0.11',
                       'rdflib',
-                      'pytorch>=1.10',
+                      'torch>=1.10',
 
                       'rdkit-pypi',
                       'tensorboard>=2.4.1',
