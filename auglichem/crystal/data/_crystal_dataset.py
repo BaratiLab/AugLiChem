@@ -191,7 +191,7 @@ class CrystalDataset(Dataset):
         self.max_num_nbr, self.radius = max_num_nbr, radius
 
         assert os.path.exists(self.data_path), 'root_dir does not exist!'
-        assert os.path.exists(self.id_prop_file), 'id_prop_augment.csv does not exist!'.format(fold)
+        assert os.path.exists(self.id_prop_file), 'id_prop_augment.csv does not exist!'
         
         if(id_prop_augment is None):
             with open(self.id_prop_file) as f:
@@ -401,7 +401,7 @@ class CrystalDataset(Dataset):
             if(self.transform is None):
                 raise ValueError("Transformations need to be specified.")
             for t in self.transform:
-                crystal = t.apply_transfromation(crystal)
+                crystal = t.apply_transformation(crystal)
 
         atom_fea = np.vstack([self.ari.get_atom_feat(crystal[i].specie.number)
                               for i in range(len(crystal))])

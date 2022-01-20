@@ -76,16 +76,18 @@ class RotationTransformation(AbstractTransformation):
     The RotationTransformation applies a rotation to a structure.
     """
 
-    def __init__(self, axis=None, angle=None, perturb=None):
+    def __init__(self, axis=None, angle=None, perturb=None, angle_in_radians=False):
         """
         Args:
             axis (3x1 array): Axis of rotation, e.g., [1, 0, 0]
             angle (float): Angle to rotate
             perturb (PerturbStructureTransformation): pre-rotation perturbation
+            angle_in_radians (boolean): Flag for angle in radians instead of degrees
         """
         self.axis = axis
         self.angle = angle
         self.perturb = perturb
+        self.angle_in_radians=False
 
     def apply_transformation(self, structure, axis=None, angle=None, perturb=None,
                              angle_in_radians=False, seed=None):
@@ -453,7 +455,9 @@ class TranslateSitesTransformation(AbstractTransformation):
         if(indices_to_move is None):
             indices_to_move = self.indices_to_move
         if(translation_vector is None):
-            translation_vector = np.array(self.translation_vector)
+            translation_vector = self.translation_vector
+        else:
+            translation_vector = np.array(translation_vector)
         if(vector_in_frac_coords is None):
             vector_in_frac_coords = self.vector_in_frac_coords
 
@@ -463,7 +467,7 @@ class TranslateSitesTransformation(AbstractTransformation):
             mask_num = max((1, int(np.floor(0.25*num_sites))))
             indices_to_move = np.random.choice(num_sites, mask_num, replace=False)
 
-        if(translation_vector is None):
+        if(translation_vector == None):
             translation_vector = np.random.rand(len(indices_to_move),3)
 
         s = structure.copy()
