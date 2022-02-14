@@ -467,7 +467,7 @@ class TranslateSitesTransformation(AbstractTransformation):
             mask_num = max((1, int(np.floor(0.25*num_sites))))
             indices_to_move = np.random.choice(num_sites, mask_num, replace=False)
 
-        if(translation_vector == None):
+        if((translation_vector == None).all()):
             translation_vector = np.random.rand(len(indices_to_move),3)
 
         s = structure.copy()
