@@ -1,6 +1,8 @@
 # AugLiChem
+</
 [![Build Status](https://travis-ci.com/BaratiLab/AugLiChem.svg?token=JCkBR1Zx861ey4B3mNiz&branch=main)](https://travis-ci.com/BaratiLab/AugLiChem)
 [![codecov](https://codecov.io/gh/BaratiLab/AugLiChem/branch/main/graph/badge.svg?token=p5hPdWXEW1)](https://codecov.io/gh/BaratiLab/AugLiChem)
+/>
 
 Welcome to AugLiChem!
 The augmentation library for chemical systems.
@@ -10,7 +12,7 @@ In depth documentation about how to use AugLiChem, make use of transformations, 
 
 ## Installation
 
-AugLiChem is a `python3.8+` package and requires `pytorch>=1.10.0`.
+AugLiChem is a `python3.8+` package.
 
 ### Linux
 

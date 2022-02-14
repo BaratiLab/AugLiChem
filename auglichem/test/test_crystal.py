@@ -295,6 +295,10 @@ def test_translate():
     coord1 = struct.lattice.abc[0] * 0.2
     assert np.allclose(struct3.sites[0].coords, [coord1,0,0], atol=1e-8)
 
+    transform = TranslateSitesTransformation()
+    struct4 = transform.apply_transformation(struct)
+    print(struct4)
+
 
 def test_cubic_supercell():
 
