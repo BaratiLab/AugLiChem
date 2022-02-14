@@ -133,7 +133,7 @@ transform = TranslateSitesTransformation(
 
 ### Supercell
 
-![supercell](images/NaCl_super.png)
+![supercell](images/Nacl_super.png)
 
 The supercell transformation produces a supercell of the crystalline system.The distinct feature of the supercell of the crystal is that after transformationthe supercell represents the same crystal with a larger volume. There exists alinear mapping between the basis vectors of crystal and the basis vectors ofthe supercell.
 This transformation can be imported and initilized as follows, where `scaling_matrix` is a 3x3 matrix that repeats the unit cell to create the supercell:
