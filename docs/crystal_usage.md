@@ -149,7 +149,8 @@ as well as the updated data path:
 train_loader, valid_loader, test_loader = dataset.get_data_loaders(
                                                      target=None,
                                                      transform=transforms,
-                                                     fold=None
+                                                     fold=None,
+                                                     remove_bad_cifs=False
 )
 ```
 
@@ -163,6 +164,10 @@ train_loader, valid_loader, test_loader = dataset.get_data_loaders(
                             throw an error if specified and k-fold CV is not
                             done in the class instantiaion. This overrides
                             valid_size and test_size
+- `remove_bad_cifs` (bool, optional, default=False): Remove cif files which throw
+                            an error while loading in pymatgen. This occurs when
+                            the augmentation creates an unphysical crystal. This
+                            tends to affect a very small number of cifs.
 
 Returns:                           
 - `train/valid/test_loader` (DataLoader): Data loaders containing the train, validation
