@@ -366,6 +366,32 @@ def test_swap_axes():
     assert np.isclose(coords[0], coords5[1], atol=1e-8)
     assert np.isclose(coords[1], coords5[0], atol=1e-8)
     assert np.isclose(coords[2], coords5[2], atol=1e-8)
+
+
+def test_problem_cif_removal():
+    # This is known to have 2 bad cifs
+    dataset = CrystalDatasetWrapper("band_gap", batch_size=128, kfolds=20, seed=1)
+    transform = [SwapAxesTransformation()]
+    train, val, test = dataset.get_data_loaders(transform=transform,
+                                                fold=0, remove_bad_cifs=True)
+
+    # Without removing bad cifs, this throws an error
+    for t in tqdm(train):
+        pass
+    shutil.rmtree(dataset.data_path)
+    assert True
+    
+
+    # This is known to have 1 bad cif
+    dataset = CrystalDatasetWrapper("band_gap", batch_size=128, seed=1)
+    transform = [SwapAxesTransformation()]
+    train, val, test = dataset.get_data_loaders(transform=transform, remove_bad_cifs=True)
+
+    # Without removing bad cifs, this throws an error
+    for t in tqdm(train):
+        pass
+    shutil.rmtree(dataset.data_path)
+    assert True
     
 
 #if __name__ == '__main__':
@@ -379,3 +405,4 @@ def test_swap_axes():
     #test_cubic_supercell()
     ##test_primitive()
     #test_swap_axes()
+    #test_problem_cif_removal()

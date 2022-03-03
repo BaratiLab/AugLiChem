@@ -593,7 +593,44 @@ class CrystalDatasetWrapper(CrystalDataset):
             raise ValueError("Please select scaffold or random split")
 
 
-    def get_data_loaders(self, target=None, transform=[], fold=None):
+    def _remove_bad_cifs(self, train_set, transform):
+        '''
+            The SwapAxesTranformation sometimes creates a cif that is not a valid crystal.
+            This function loops over all items in the training set and removes the cif files
+            that throw an error when the called.
+        '''
+        print("Removing bad cifs. This may take a few minutes...")
+        temp_id_prop_augment = []
+        bad_idxs = []
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+            for i in tqdm(range(len(train_set))):
+                try:
+                    _ = train_set.__getitem__(i)
+                    temp_id_prop_augment.append(train_set.id_prop_augment[i])
+                except ValueError:
+                    os.remove(train_set.data_path + "/" + 
+                              train_set.id_prop_augment[i][0]+".cif")
+                    bad_idxs.append(i)
+
+
+        # Check to make sure bad cifs have been removed
+        train_set = CrystalDataset(train_set.dataset,
+                             train_set.data_path,
+                             train_set.transform,
+                             temp_id_prop_augment,
+                             atom_init_file=train_set.atom_init_file,
+                             id_prop_file=train_set.id_prop_file,
+                             ari=train_set.ari, cgcnn=self.cgcnn)
+
+        print("BAD CIFS: {}".format(bad_idxs))
+        print("Done removing bad cifs.")
+        return train_set
+
+                    
+
+
+    def get_data_loaders(self, target=None, transform=[], fold=None, remove_bad_cifs=False):
         '''
             This function splits the data into train, validation, and test data loaders for
             ease of use in model training
@@ -609,6 +646,11 @@ class CrystalDatasetWrapper(CrystalDataset):
                                         throw an error if specified and k-fold CV is not
                                         done in the class instantiaion. This overrides
                                         valid_size and test_size
+            remove_bad_cifs (bool, optional, default=False): Remove cif files which throw
+                                        an error while loading in pymatgen. This occurs when
+                                        the augmentation creates an unphysical crystal. This
+                                        tends to affect a very small number of cifs.
+
 
             outputs:
             -------------------------
@@ -618,7 +660,6 @@ class CrystalDatasetWrapper(CrystalDataset):
         '''
         train_idx, valid_idx, test_idx = self._get_split_idxs(target, transform, fold)
 
-            
         # Get train loader
         if(self._k_fold_cv): # Need to add in augmented cif files to id_prop_augment
             transform = [transform] if(not isinstance(transform, list)) else transform
@@ -629,16 +670,20 @@ class CrystalDatasetWrapper(CrystalDataset):
             train_id_prop_augment = self.id_prop_augment[train_idx]
             valid_id_prop_augment = self.id_prop_augment[valid_idx]
             test_id_prop_augment = self.id_prop_augment[test_idx]
+
         train_set = CrystalDataset(self.dataset, self.data_path, self.transform,
                              train_id_prop_augment,
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
                              ari=self.ari, cgcnn=self.cgcnn)
         train_set._k_fold_cv = self._k_fold_cv
 
-
         # Augment only training data
         if(transform and not self._k_fold_cv):
             train_set.data_augmentation(transform)
+
+        # Optionally remove bad cifs
+        if(remove_bad_cifs):
+            train_set = self._remove_bad_cifs(train_set, transform)
 
         # torch_geometric does not require collate_fn, CGCNN requires torch Dataset/Loader
         if(not(self._cgcnn)):
@@ -676,5 +721,7 @@ class CrystalDatasetWrapper(CrystalDataset):
         test_loader = DataLoader(test_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, shuffle=True)
+
+            
         return train_loader, valid_loader, test_loader
     
