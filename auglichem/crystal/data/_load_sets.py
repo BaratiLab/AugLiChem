@@ -187,8 +187,32 @@ def _load_data(dataset, data_path='./data_download'):
         csv_file_path = data_path + "/FE/id_prop.csv"
         embedding_path = data_path + "/FE/atom_init.json"
         data_path += "/FE"
+    elif(dataset == "GVRH"):
+        task = 'regression'
+        target = ["gvrh"]
+        data_id = "1oW2vw6WFV2kwTNv6JTZjlAQiucIVtgTn"
+        csv_file_path = download_url(data_id, data_path, "/GVRH.zip")
+        csv_file_path = data_path + "/GVRH/id_prop.csv"
+        embedding_path = data_path + "/GVRH/atom_init.json"
+        data_path += "/GVRH"
+    elif(dataset == "HOIP"):
+        task = 'regression'
+        target = ["gvrh"]
+        data_id = "1hQehDWxaBO5K74aOg5O1RDVwIjmeQLvo"
+        csv_file_path = download_url(data_id, data_path, "/HOIP.zip")
+        csv_file_path = data_path + "/HOIP/id_prop.csv"
+        embedding_path = data_path + "/HOIP/atom_init.json"
+        data_path += "/HOIP"
+    elif(dataset == "Is_Metal"):
+        task = 'regression'
+        target = ["is_metal"]
+        data_id = "1tVcBjShO7KH1Sf84us42jDgPt44MXGAV"
+        csv_file_path = download_url(data_id, data_path, "/is_metal.zip")
+        csv_file_path = data_path + "/is_metal/id_prop.csv"
+        embedding_path = data_path + "/is_metal/atom_init.json"
+        data_path += "/is_metal"
     else:
-        raise ValueError("Please select one of the following datasets: lanthanides, band_gap, perovskites, fermi_energy, formation_energy")
+        raise ValueError("Please select one of the following datasets: lanthanides, band_gap, perovskites, fermi_energy, formation_energy, GVRH, HOIP, Is_Metal")
         
 
     return data_path, embedding_path, csv_file_path, target, task
