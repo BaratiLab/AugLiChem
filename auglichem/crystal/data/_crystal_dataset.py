@@ -347,6 +347,19 @@ class CrystalDataset(Dataset):
         return np.array(updated_train_idx)
 
 
+    def _check_repeats(self, idx1, idx2):
+        for v in idx1:
+            try:
+                assert not(v[0] in idx2[:,0]) # Only checking if cif file id is repeated
+            except AssertionError:
+                print("ERROR IN TRAIN/TEST/VALIDATION SPLIT")
+                print(len(idx1[:,0]))
+                print(len(idx2[:,0]))
+                print(v[0], v[0] in idx2[:,0], np.argwhere(idx2[:,0] == v[0])[0][0])
+                print(idx2[:,0][np.argwhere(idx2[:,0]==v[0])[0][0]])
+                raise
+
+
     def _k_fold_cross_validation(self):
         '''
             k-fold CV data splitting function. Uses class attributes to split into k folds.
@@ -370,6 +383,8 @@ class CrystalDataset(Dataset):
             # Get train and validation sets
             test_set = np.array(self.id_prop_augment)[test_idxs]
             train_set = np.array(self.id_prop_augment)[idxs]
+
+            self._check_repeats(test_set, train_set)
 
             # Save files
             np.savetxt(self.data_path + "/id_prop_test_{}.csv".format(i), test_set.astype(str),
@@ -530,7 +545,7 @@ class CrystalDatasetWrapper(CrystalDataset):
         '''
         idxs = []
         for i in cif_idxs:
-            idxs.append(self.id_prop_augment[np.argwhere(self.id_prop_augment == \
+            idxs.append(self.id_prop_augment[np.argwhere(self.id_prop_augment[:,0] == \
                                                          str(int(i[0])))[0][0]])
         return np.array(idxs)
 
@@ -565,6 +580,7 @@ class CrystalDatasetWrapper(CrystalDataset):
             # Get train set
             train_cif_idx = np.loadtxt(self.data_path + "/id_prop_train_{}.csv".format(fold),
                                    delimiter=',')
+            
             train_idx = self._match_idx(train_cif_idx)
 
             # Get validation set
@@ -587,6 +603,9 @@ class CrystalDatasetWrapper(CrystalDataset):
             self.data_augmentation(transform)
             self.atom_featurizer = AtomCustomJSONInitializer(os.path.join(self.data_path,
                                    'atom_init.json'))
+            self._check_repeats(train_idx, valid_idx)
+            self._check_repeats(train_idx, test_idx)
+            self._check_repeats(test_idx, valid_idx)
             return train_idx, valid_idx, test_idx
 
         else:

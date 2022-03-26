@@ -212,7 +212,6 @@ def _load_data(dataset, data_path='./data_download'):
         data_id = "1nBP2IoNbb6_w0uhIcV4Qb3QOEWE6hh8r" # is_metal1
         if(not os.path.isdir(data_path + "/is_metal")):
             csv_file_path = download_url(data_id, data_path, "/is_metal1.zip")
-            time.sleep(2)
             data_id = "1ukPj5Zo_Yu6LXTLJinvek7oho4tsXsns" # is_metal2
             csv_file_path = download_url(data_id, data_path, "/is_metal2.zip")
             time.sleep(2)
@@ -227,7 +226,7 @@ def _load_data(dataset, data_path='./data_download'):
             time.sleep(2)
             # Need to combine them here....
             print("Merging directories...")
-            os.makedirs("./is_metal", exist_ok=True)
+            os.makedirs(data_path+"/is_metal", exist_ok=True)
             copy_tree(data_path+"/is_metal1/", data_path+"/is_metal")
             shutil.rmtree(data_path+"/is_metal1")
             copy_tree(data_path+"/is_metal2/", data_path+"/is_metal")
@@ -244,7 +243,7 @@ def _load_data(dataset, data_path='./data_download'):
         embedding_path = data_path + "/is_metal/atom_init.json"
         data_path += "/is_metal"
     else:
-        raise ValueError("Please select one of the following datasets: lanthanides, band_gap, perovskites, fermi_energy, formation_energy, GVRH, HOIP, Is_Metal")
+        raise ValueError("Please select one of the following datasets: lanthanides, band_gap, perovskites, fermi_energy, formation_energy, GVRH, HOIP, is_metal")
         
 
     return data_path, embedding_path, csv_file_path, target, task
