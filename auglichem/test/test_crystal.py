@@ -132,7 +132,7 @@ def _check_completeness(path, fold):
 
 def test_k_fold():
     #assert True
-    dataset = CrystalDatasetWrapper("Is_Metal", kfolds=5,
+    dataset = CrystalDatasetWrapper("lanthanides", kfolds=5,
                                     data_path="./data_download")
     transform = [SupercellTransformation()]
 
@@ -142,8 +142,6 @@ def test_k_fold():
     _check_id_prop_augment(dataset.data_path, transform)
     _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
     _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
-    print(test_loader.dataset.id_prop_augment)
-    print(train_loader.dataset.id_prop_augment)
     _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
     _check_completeness(train_loader.dataset.data_path, 0)
     _check_train_transform(train_loader.dataset.data_path, transform, 0)
@@ -180,7 +178,7 @@ def test_k_fold():
     # Remove directory
     shutil.rmtree(dataset.data_path)
 
-    dataset = CrystalDatasetWrapper("Is_Metal", kfolds=2,
+    dataset = CrystalDatasetWrapper("GVRH", kfolds=2,
                                     data_path="./data_download")
     transform = [SupercellTransformation(), PerturbStructureTransformation()]
 
