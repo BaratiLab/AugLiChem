@@ -37,9 +37,7 @@ def test_data_download():
             "perovskites",
             "formation_energy",
             "fermi_energy",
-            "GVRH",
             "HOIP",
-            #"Is_Metal",
     ]
     dir_names = dict(zip(datasets, [
         "lanths",
@@ -47,9 +45,7 @@ def test_data_download():
         "abx3_cifs",
         "FE",
         "fermi",
-        "GVRH",
         "HOIP",
-        #"Is_Metal_cifs"
     ]))
     for d in datasets:
         dataset = CrystalDatasetWrapper(d, batch_size=1)
@@ -132,7 +128,7 @@ def _check_completeness(path, fold):
 
 def test_k_fold():
     #assert True
-    dataset = CrystalDatasetWrapper("lanthanides", kfolds=5,
+    dataset = CrystalDatasetWrapper("HOIP", kfolds=5,
                                     data_path="./data_download")
     transform = [SupercellTransformation()]
 
@@ -178,7 +174,7 @@ def test_k_fold():
     # Remove directory
     shutil.rmtree(dataset.data_path)
 
-    dataset = CrystalDatasetWrapper("GVRH", kfolds=2,
+    dataset = CrystalDatasetWrapper("lanthanides", kfolds=2,
                                     data_path="./data_download")
     transform = [SupercellTransformation(), PerturbStructureTransformation()]
 
@@ -418,11 +414,31 @@ def test_problem_cif_removal():
         pass
     shutil.rmtree(dataset.data_path)
     assert True
+
+
+#def test_custom_dataset():
+#    dataset = CrystalDatasetWrapper(
+#            "custom", kfolds=5,
+#            data_path="./data_download",
+#            data_src="./omdb_cifs"
+#    )
+#
+#    # Check no repeated indices in train and valid
+#    transform = [SupercellTransformation()]
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+#                                                                        fold=0)
+#    _check_id_prop_augment(dataset.data_path, transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_completeness(train_loader.dataset.data_path, 0)
+#    _check_train_transform(train_loader.dataset.data_path, transform, 0)
+#    assert True
     
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     #test_data_download()
-    test_k_fold()
+    #test_k_fold()
     #test_rotation()
     #test_perturb_structure()
     ##test_remove_sites()
@@ -432,3 +448,4 @@ if __name__ == '__main__':
     ##test_primitive()
     #test_swap_axes()
     #test_problem_cif_removal()
+    #test_custom_dataset()
