@@ -97,12 +97,12 @@ dataset = CrystalDatasetWrapper(
              target=None,
 	     kfolds=0,
              seed=None,
-             cgcnn=False
+             cgcnn=False,
+             data_src=None
 )
 ```
 `CrystalDatasetWrapper` arguments:
-- `dataset` (str): One of the datasets available from MoleculeNet
-               (http://moleculenet.ai/datasets-1)
+- `dataset` (str): One of "lanthanides", "perovskites", "band\_gap", "fermi\_energy", "formation\_energy", "HOIP", or "custom".
 - `transform` (Compose, OneOf, RandomAtomMask, RandomBondDelete object): transormations
                to apply to the data at call time.
 - `split` (str, optional default=scaffold): random or scaffold. The splitting strategy
@@ -117,6 +117,19 @@ dataset = CrystalDatasetWrapper(
 - `kfolds` (int, default=0, folds > 1): Number of folds to use in k-fold cross
                          validation. kfolds > 1 for data to be split
 - `seed` (int, optional, default=None): Random seed to use for reproducibility
+- `cgcnn` (bool, optional, default=False): Set to True if using CGCNN
+- `data_src` (str, default=None): Path to custom data set. Will throw an error if `dataset="custom"` and no path is specified.
+
+Note about custom data sets: directory must be set up as:
+```
+custom_data_set/
+ - 1.cif
+ - 2.cif
+ ...
+ - id_prop.csv
+```
+where `id_prop.csv` contains a list of cif file numbers with their correspondinng property.
+`custom_data_set` is copied to `data_path/`, and the additional necessary file `atom_init.json` is automatically downloaded there.
 
 Using the wrapper class is necessary for easy training in the crystal sets because of the data loader function, which creates pytorch-geometric data loaders that are easy to iterate over.
 Crystal data sets are augmented when getting the data loaders and augmented CIF files are stored next to the originals.

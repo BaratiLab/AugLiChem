@@ -31,8 +31,22 @@ from pymatgen.core import Structure, Lattice, Molecule
 
 
 def test_data_download():
-    datasets = ["lanthanides", "band_gap", "perovskites", "formation_energy", "fermi_energy"]
-    dir_names = dict(zip(datasets, ["lanths","band","abx3_cifs","FE","fermi"]))
+    datasets = [
+            "lanthanides",
+            "band_gap",
+            "perovskites",
+            "formation_energy",
+            "fermi_energy",
+            "HOIP",
+    ]
+    dir_names = dict(zip(datasets, [
+        "lanths",
+        "band",
+        "abx3_cifs",
+        "FE",
+        "fermi",
+        "HOIP",
+    ]))
     for d in datasets:
         dataset = CrystalDatasetWrapper(d, batch_size=1)
         assert os.path.isdir("./data_download/{}".format(dir_names[d]))
@@ -80,7 +94,14 @@ def _check_train_transform(path, transform, fold):
 
 def _check_repeats(idx1, idx2):
     for v in idx1:
-        assert not(v[0] in idx2[:,0]) # Only checking if cif file id is repeated
+        try:
+            assert not(v[0] in idx2[:,0]) # Only checking if cif file id is repeated
+        except AssertionError:
+            print(len(idx1[:,0]))
+            print(len(idx2[:,0]))
+            print(v[0], v[0] in idx2[:,0], np.argwhere(idx2[:,0] == v[0])[0][0])
+            print(idx2[:,0][np.argwhere(idx2[:,0]==v[0])[0][0]])
+            raise
 
 
 def _check_completeness(path, fold):
@@ -99,6 +120,7 @@ def _check_completeness(path, fold):
 
     # Get original ids
     id_prop = np.loadtxt(path + "/id_prop.csv", delimiter=',')
+    id_prop = id_prop[np.argsort(id_prop[:,0])]
     
     # Check they are equal
     assert np.array_equal(reconstructed, id_prop)
@@ -106,7 +128,7 @@ def _check_completeness(path, fold):
 
 def test_k_fold():
     #assert True
-    dataset = CrystalDatasetWrapper("lanthanides", kfolds=5,
+    dataset = CrystalDatasetWrapper("HOIP", kfolds=5,
                                     data_path="./data_download")
     transform = [SupercellTransformation()]
 
@@ -392,6 +414,26 @@ def test_problem_cif_removal():
         pass
     shutil.rmtree(dataset.data_path)
     assert True
+
+
+#def test_custom_dataset():
+#    dataset = CrystalDatasetWrapper(
+#            "custom", kfolds=5,
+#            data_path="./data_download",
+#            data_src="./omdb_cifs"
+#    )
+#
+#    # Check no repeated indices in train and valid
+#    transform = [SupercellTransformation()]
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+#                                                                        fold=0)
+#    _check_id_prop_augment(dataset.data_path, transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_completeness(train_loader.dataset.data_path, 0)
+#    _check_train_transform(train_loader.dataset.data_path, transform, 0)
+#    assert True
     
 
 #if __name__ == '__main__':
@@ -406,3 +448,4 @@ def test_problem_cif_removal():
     ##test_primitive()
     #test_swap_axes()
     #test_problem_cif_removal()
+    #test_custom_dataset()

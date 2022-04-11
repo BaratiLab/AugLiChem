@@ -131,7 +131,7 @@ class CrystalDataset(Dataset):
                  atom_init_file=None, id_prop_file=None, ari=None,
                  radius=8, dmin=0, step=0.2,
                  on_the_fly_augment=False, kfolds=0,
-                 num_neighbors=8, max_num_nbr=12, seed=None, cgcnn=False):
+                 num_neighbors=8, max_num_nbr=12, seed=None, cgcnn=False, data_src=None):
         """
             Inputs:
             -------
@@ -171,17 +171,23 @@ class CrystalDataset(Dataset):
         
         self.dataset = dataset
         self.data_path = data_path
+        self.data_src = data_src
         self.transform = transform
         self._augmented = False # To control runaway augmentation
         self.num_neighbors = num_neighbors
 
         self.seed = seed
 
+        # If using custom dataset, need to source directory
+        if((self.dataset == "custom") and (self.data_src is None)):
+            error_str = "Need data source directory when using custom data set. "
+            error_str += "Use data_src=/path/to/data."
+            raise RuntimeError(error_str)
 
         # After specifying data set
         if(id_prop_augment is None):
             self.id_prop_file, self.atom_init_file, self.ari, self.data_path, \
-            self.target, self.task = read_crystal(dataset, data_path)
+            self.target, self.task = read_crystal(dataset, data_path, self.data_src)
         else:
             self.id_prop_file = id_prop_file
             self.atom_init_file = atom_init_file
@@ -347,6 +353,19 @@ class CrystalDataset(Dataset):
         return np.array(updated_train_idx)
 
 
+    def _check_repeats(self, idx1, idx2):
+        for v in idx1:
+            try:
+                assert not(v[0] in idx2[:,0]) # Only checking if cif file id is repeated
+            except AssertionError:
+                print("ERROR IN TRAIN/TEST/VALIDATION SPLIT")
+                print(len(idx1[:,0]))
+                print(len(idx2[:,0]))
+                print(v[0], v[0] in idx2[:,0], np.argwhere(idx2[:,0] == v[0])[0][0])
+                print(idx2[:,0][np.argwhere(idx2[:,0]==v[0])[0][0]])
+                raise
+
+
     def _k_fold_cross_validation(self):
         '''
             k-fold CV data splitting function. Uses class attributes to split into k folds.
@@ -370,6 +389,8 @@ class CrystalDataset(Dataset):
             # Get train and validation sets
             test_set = np.array(self.id_prop_augment)[test_idxs]
             train_set = np.array(self.id_prop_augment)[idxs]
+
+            self._check_repeats(test_set, train_set)
 
             # Save files
             np.savetxt(self.data_path + "/id_prop_test_{}.csv".format(i), test_set.astype(str),
@@ -513,7 +534,8 @@ class CrystalDatasetWrapper(CrystalDataset):
             -------------------------
             None
         '''
-        super().__init__(dataset, data_path, transform, kfolds=kfolds, seed=seed, cgcnn=cgcnn)
+        super().__init__(dataset, data_path, transform, kfolds=kfolds, seed=seed, cgcnn=cgcnn,
+                         **kwargs)
         self.split = split
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -530,7 +552,7 @@ class CrystalDatasetWrapper(CrystalDataset):
         '''
         idxs = []
         for i in cif_idxs:
-            idxs.append(self.id_prop_augment[np.argwhere(self.id_prop_augment == \
+            idxs.append(self.id_prop_augment[np.argwhere(self.id_prop_augment[:,0] == \
                                                          str(int(i[0])))[0][0]])
         return np.array(idxs)
 
@@ -565,6 +587,7 @@ class CrystalDatasetWrapper(CrystalDataset):
             # Get train set
             train_cif_idx = np.loadtxt(self.data_path + "/id_prop_train_{}.csv".format(fold),
                                    delimiter=',')
+            
             train_idx = self._match_idx(train_cif_idx)
 
             # Get validation set
@@ -587,6 +610,9 @@ class CrystalDatasetWrapper(CrystalDataset):
             self.data_augmentation(transform)
             self.atom_featurizer = AtomCustomJSONInitializer(os.path.join(self.data_path,
                                    'atom_init.json'))
+            self._check_repeats(train_idx, valid_idx)
+            self._check_repeats(train_idx, test_idx)
+            self._check_repeats(test_idx, valid_idx)
             return train_idx, valid_idx, test_idx
 
         else:
@@ -674,7 +700,7 @@ class CrystalDatasetWrapper(CrystalDataset):
         train_set = CrystalDataset(self.dataset, self.data_path, self.transform,
                              train_id_prop_augment,
                              atom_init_file=self.atom_init_file, id_prop_file=self.id_prop_file,
-                             ari=self.ari, cgcnn=self.cgcnn)
+                             ari=self.ari, cgcnn=self.cgcnn, data_src=self.data_src)
         train_set._k_fold_cv = self._k_fold_cv
 
         # Augment only training data
@@ -703,7 +729,7 @@ class CrystalDatasetWrapper(CrystalDataset):
                              id_prop_augment=valid_id_prop_augment,
                              atom_init_file=self.atom_init_file,
                              id_prop_file=self.id_prop_file,
-                             ari=self.ari, cgcnn=self.cgcnn)
+                             ari=self.ari, cgcnn=self.cgcnn, data_src=self.data_src)
         valid_loader = DataLoader(valid_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, shuffle=True)
@@ -717,7 +743,7 @@ class CrystalDatasetWrapper(CrystalDataset):
                              id_prop_augment=test_id_prop_augment,
                              atom_init_file=self.atom_init_file,
                              id_prop_file=self.id_prop_file,
-                             ari=self.ari, cgcnn=self.cgcnn)
+                             ari=self.ari, cgcnn=self.cgcnn, data_src=self.data_src)
         test_loader = DataLoader(test_set, batch_size=self.batch_size,
                                   num_workers=self.num_workers,
                                   collate_fn=self.collate_fn, shuffle=True)
