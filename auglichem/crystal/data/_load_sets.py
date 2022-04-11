@@ -142,7 +142,7 @@ def download_url(url, root, filename=None):
 
     return destination[:-4]
 
-def _load_data(dataset, data_path='./data_download'):
+def _load_data(dataset, data_path='./data_download', data_src=None):
     '''
         Loads dataset, sets task to regression for the downloadable sets, gets the atom
         embedding file, and updates the data path.
@@ -190,14 +190,6 @@ def _load_data(dataset, data_path='./data_download'):
         csv_file_path = data_path + "/FE/id_prop.csv"
         embedding_path = data_path + "/FE/atom_init.json"
         data_path += "/FE"
-    elif(dataset == "GVRH"):
-        task = 'regression'
-        target = ["gvrh"]
-        data_id = "1oW2vw6WFV2kwTNv6JTZjlAQiucIVtgTn"
-        csv_file_path = download_url(data_id, data_path, "/GVRH.zip")
-        csv_file_path = data_path + "/GVRH/id_prop.csv"
-        embedding_path = data_path + "/GVRH/atom_init.json"
-        data_path += "/GVRH"
     elif(dataset == "HOIP"):
         task = 'regression'
         target = ["gvrh"]
@@ -206,42 +198,28 @@ def _load_data(dataset, data_path='./data_download'):
         csv_file_path = data_path + "/HOIP/id_prop.csv"
         embedding_path = data_path + "/HOIP/atom_init.json"
         data_path += "/HOIP"
-    elif(dataset == "is_metal"):
-        task = 'classification'
-        target = ["is_metal"]
-        data_id = "1nBP2IoNbb6_w0uhIcV4Qb3QOEWE6hh8r" # is_metal1
-        if(not os.path.isdir(data_path + "/is_metal")):
-            csv_file_path = download_url(data_id, data_path, "/is_metal1.zip")
-            data_id = "1ukPj5Zo_Yu6LXTLJinvek7oho4tsXsns" # is_metal2
-            csv_file_path = download_url(data_id, data_path, "/is_metal2.zip")
-            time.sleep(2)
-            data_id = "1RlWn3dwVeq2pYOahP_yW_QTWk7Ze3u-i" # is_metal3
-            csv_file_path = download_url(data_id, data_path, "/is_metal3.zip")
-            time.sleep(2)
-            data_id = "1TnqAW2UlVOFPF7n45qyg8EGZYcKfCdhW" # is_metal4
-            csv_file_path = download_url(data_id, data_path, "/is_metal4.zip")
-            time.sleep(2)
-            data_id = "1zK47Pd5AYes_PQHTEzMJBVW7FRyOGinW" # is_metal5
-            csv_file_path = download_url(data_id, data_path, "/is_metal5.zip")
-            time.sleep(2)
-            # Need to combine them here....
-            print("Merging directories...")
-            os.makedirs(data_path+"/is_metal", exist_ok=True)
-            copy_tree(data_path+"/is_metal1/", data_path+"/is_metal")
-            shutil.rmtree(data_path+"/is_metal1")
-            copy_tree(data_path+"/is_metal2/", data_path+"/is_metal")
-            shutil.rmtree(data_path+"/is_metal2")
-            copy_tree(data_path+"/is_metal3/", data_path+"/is_metal")
-            shutil.rmtree(data_path+"/is_metal3")
-            copy_tree(data_path+"/is_metal4/", data_path+"/is_metal")
-            shutil.rmtree(data_path+"/is_metal4")
-            copy_tree(data_path+"/is_metal5/", data_path+"/is_metal")
-            shutil.rmtree(data_path+"/is_metal5")
+    elif(dataset == "custom"):
+        task = 'regression'
+        target = ["target"]
+        data_path += "/" + data_src.split("/")[-1]
+
+        # Check if files are already there
+        if(os.path.isdir(data_path)):
+            print("Data directory found at: {}".format(data_path))
         else:
-            print("Data found at: {}".format(data_path + "/is_metal"))
-        csv_file_path = data_path + "/is_metal/id_prop.csv"
-        embedding_path = data_path + "/is_metal/atom_init.json"
-        data_path += "/is_metal"
+            shutil.copytree(data_src, data_path) # Copy from src
+
+        # Check if atom_init.json has been downloaded
+        if(os.path.exists(data_path+"/atom_init.json")):
+            print("atom_init.json found at: {}".format(data_path))
+        else:
+            # Download atom_init.json
+            data_id = "13vYFP-MIlYAsvuvfdjOpkUn9UAXKFtuB"
+            csv_file_path = download_file_from_google_drive(data_id, data_path+"/atom_init.json")
+
+        # Updated relevant paths
+        csv_file_path = data_path + "/id_prop.csv"
+        embedding_path = data_path + "/atom_init.json"
     else:
         raise ValueError("Please select one of the following datasets: lanthanides, band_gap, perovskites, fermi_energy, formation_energy, GVRH, HOIP, is_metal")
         
@@ -249,7 +227,7 @@ def _load_data(dataset, data_path='./data_download'):
     return data_path, embedding_path, csv_file_path, target, task
 
 
-def read_crystal(dataset, data_path):
+def read_crystal(dataset, data_path, data_src=None):
     """
         Inputs:
         -------
@@ -257,6 +235,7 @@ def read_crystal(dataset, data_path):
                        perovskites, fermi_energy, or formation_energy
         data_path (str): The path to search for data. If the requested data set is not there,
                          the data is downloaded automatically and stored at data_path.
+        data_src (str, default=None): Source directory for using custom data set.
 
         Outputs:
         --------
@@ -276,7 +255,8 @@ def read_crystal(dataset, data_path):
         os.mkdir(data_path)
 
     # Download files if not already there
-    data_path, embedding_path, csv_file_path, target, task = _load_data(dataset, data_path)
+    data_path, embedding_path, csv_file_path, target, task = _load_data(dataset, data_path,
+                                                                        data_src)
     return csv_file_path, \
            embedding_path, \
            AtomCustomJSONInitializer(embedding_path), \
