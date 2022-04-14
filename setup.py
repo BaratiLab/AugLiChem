@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 setuptools.setup(
   name = 'auglichem',
   packages=setuptools.find_packages(exclude=("docs","examples",)), 
-  version = '0.1.8',
+  version = '0.1.7',
   license = 'MIT',
   description = 'Data augmentation of molecules and crystals.',
   long_description = long_description,
