@@ -639,15 +639,15 @@ class CrystalDatasetWrapper(CrystalDataset):
                               train_set.id_prop_augment[i][0]+".cif")
                     bad_idxs.append(i)
 
-
         # Check to make sure bad cifs have been removed
         train_set = CrystalDataset(train_set.dataset,
                              train_set.data_path,
                              train_set.transform,
-                             temp_id_prop_augment,
+                             np.array(temp_id_prop_augment),
                              atom_init_file=train_set.atom_init_file,
                              id_prop_file=train_set.id_prop_file,
-                             ari=train_set.ari, cgcnn=self.cgcnn)
+                             ari=train_set.ari, cgcnn=self.cgcnn,
+                             data_src=self.data_src)
 
         print("BAD CIFS: {}".format(bad_idxs))
         print("Done removing bad cifs.")
