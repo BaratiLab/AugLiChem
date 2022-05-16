@@ -4,6 +4,7 @@ if Gem::Version.new(Bundler::VERSION) < Gem::Version.new('2.2.33')
   abort "Bundler version >= 2.2.33 is required"
 end
 gem "nokogiri", ">= 1.13.4"
+gem "commonmarker", ">= 0.23.4"
 source "https://rubygems.org"
 gem 'github-pages', group: :jekyll_plugins
 
