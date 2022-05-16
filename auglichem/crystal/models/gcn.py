@@ -86,7 +86,7 @@ class GCNConv(MessagePassing):
 
 class GCN(nn.Module):
     def __init__(self, 
-        task='classification', emb_dim=300, 
+        task='regression', emb_dim=300, 
         feat_dim=256, num_layer=5, pool='mean', drop_ratio=0, output_dim=None, **kwargs
     ):
         super(GCN, self).__init__()
