@@ -55,8 +55,6 @@ def test_data_download():
 
 def _check_id_prop_augment(path, transform):
     # Checking if all cifs have been perturbed
-
-    # Get transformation names
     transformation_names = []
     for t in transform:
         if(isinstance(t, SupercellTransformation)):
@@ -72,6 +70,23 @@ def _check_id_prop_augment(path, transform):
         assert os.path.exists(path + "/{}.cif".format(i))
         for t in transformation_names:
             assert os.path.exists(path + "/{}_{}.cif".format(i,t))
+
+
+def _check_id_prop_train_augment(path, ids, transform):
+    # Checking if all cifs have been perturbed
+    transformation_names = []
+    for t in transform:
+        if(isinstance(t, SupercellTransformation)):
+            transformation_names.append("supercell")
+        if(isinstance(t, PerturbStructureTransformation)):
+            transformation_names.append("perturbed")
+
+    # Make sure originals and all transformed cifs exist
+    for i in ids:
+        cif_name = i.split("_")[0]
+        assert os.path.exists(path + "/{}.cif".format(cif_name))
+        for t in transformation_names:
+            assert os.path.exists(path + "/{}_{}.cif".format(cif_name,t))
 
 
 def _check_train_transform(path, transform, fold):
@@ -124,6 +139,24 @@ def _check_completeness(path, fold):
     
     # Check they are equal
     assert np.array_equal(reconstructed, id_prop)
+
+
+
+def test_random_split():
+    print("Checking not k-fold...")
+    dataset = CrystalDatasetWrapper(
+            "lanthanides", 
+            data_path="./data_download",
+    )
+    transform = [PerturbStructureTransformation()]
+    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform)
+    _check_id_prop_train_augment(train_loader.dataset.data_path,
+                                 train_loader.dataset.id_prop_augment[:,0], transform)
+    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+    shutil.rmtree(dataset.data_path)
+    assert True
 
 
 def test_k_fold():
@@ -348,20 +381,6 @@ def test_cubic_supercell():
     assert struct3.sites != struct2.sites
 
 
-#def test_primitive():
-#    transform = PrimitiveCellTransformation()
-#
-#    coords = [[0, 0, 0], [0.75,0.5,0.75]]
-#    lattice = Lattice.from_parameters(a=3.84, b=3.84, c=3.84, alpha=120,
-#                                  beta=90, gamma=60)
-#    struct = Structure(lattice, ["Si", "Si"], coords)
-#    
-#    print(struct)
-#    struct = transform.apply_transformation(struct)
-#    print(struct)
-#    pass
-
-
 def test_swap_axes():
     #TODO: Test consistent augment
     transform = SwapAxesTransformation()
@@ -434,6 +453,106 @@ def test_problem_cif_removal():
 #    _check_completeness(train_loader.dataset.data_path, 0)
 #    _check_train_transform(train_loader.dataset.data_path, transform, 0)
 #    assert True
+#
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+#                                                                        fold=1)
+#    _check_id_prop_augment(dataset.data_path, transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_completeness(train_loader.dataset.data_path, 1)
+#    _check_train_transform(train_loader.dataset.data_path, transform, 1)
+#    assert True
+#
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+#                                                                        fold=2)
+#    _check_id_prop_augment(dataset.data_path, transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_completeness(train_loader.dataset.data_path, 2)
+#    _check_train_transform(train_loader.dataset.data_path, transform, 2)
+#    assert True
+#
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+#                                                                        fold=3)
+#    _check_id_prop_augment(dataset.data_path, transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_completeness(train_loader.dataset.data_path, 3)
+#    _check_train_transform(train_loader.dataset.data_path, transform, 3)
+#    assert True
+#
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+#                                                                        fold=4)
+#    _check_id_prop_augment(dataset.data_path, transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_completeness(train_loader.dataset.data_path, 4)
+#    _check_train_transform(train_loader.dataset.data_path, transform, 4)
+#    assert True
+#    shutil.rmtree(dataset.data_path)
+#
+#    print("Checking not k-fold...")
+#    dataset = CrystalDatasetWrapper(
+#            "custom", 
+#            data_path="./data_download",
+#            data_src="./omdb_cifs"
+#    )
+#    transform = [PerturbStructureTransformation()]
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform)
+#    _check_id_prop_train_augment(train_loader.dataset.data_path,
+#                                 train_loader.dataset.id_prop_augment[:,0], transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    assert True
+#    shutil.rmtree(dataset.data_path)
+#
+#    print("Checking removing bad cifs...")
+#    dataset = CrystalDatasetWrapper(
+#            "custom", kfolds=3,
+#            data_path="./data_download",
+#            data_src="./omdb_cifs"
+#    )
+#
+#    # Check no repeated indices in train and valid
+#    transform = [PerturbStructureTransformation()]
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+#                                                                        fold=0,
+#                                                                        remove_bad_cifs=True)
+#    _check_id_prop_augment(dataset.data_path, transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_completeness(train_loader.dataset.data_path, 0)
+#    _check_train_transform(train_loader.dataset.data_path, transform, 0)
+#    assert True
+#
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+#                                                                        fold=1,
+#                                                                        remove_bad_cifs=True)
+#    _check_id_prop_augment(dataset.data_path, transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_completeness(train_loader.dataset.data_path, 1)
+#    _check_train_transform(train_loader.dataset.data_path, transform, 1)
+#    assert True
+#
+#    train_loader, valid_loader, test_loader  = dataset.get_data_loaders(transform=transform,
+#                                                                        fold=2,
+#                                                                        remove_bad_cifs=True)
+#    _check_id_prop_augment(dataset.data_path, transform)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_repeats(valid_loader.dataset.id_prop_augment, test_loader.dataset.id_prop_augment)
+#    _check_repeats(test_loader.dataset.id_prop_augment, train_loader.dataset.id_prop_augment)
+#    _check_completeness(train_loader.dataset.data_path, 2)
+#    _check_train_transform(train_loader.dataset.data_path, transform, 2)
+#    assert True
+#    shutil.rmtree(dataset.data_path)
     
 
 #if __name__ == '__main__':
@@ -441,11 +560,11 @@ def test_problem_cif_removal():
     #test_k_fold()
     #test_rotation()
     #test_perturb_structure()
-    ##test_remove_sites()
+    #test_remove_sites()
     #test_supercell()
     #test_translate()
     #test_cubic_supercell()
-    ##test_primitive()
     #test_swap_axes()
     #test_problem_cif_removal()
+    #test_random_split()
     #test_custom_dataset()
