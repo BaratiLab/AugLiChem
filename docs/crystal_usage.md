@@ -26,7 +26,7 @@ from auglichem.crystal import (PerturbStructureTransformation,
                                SupercellTransformation,
 )
 from auglichem.crystal.data import CrystalDatasetWrapper
-from auglichem.crystal.models import SchNet, GINet, CrystalGraphConvNet
+from auglichem.crystal.models import SchNet, GINet, CrystalGraphConvNet, GCN
 ```
 
 Next, we set up our transformations.
@@ -231,6 +231,47 @@ Augmented files only appear in the training set:
 
 ### Model Initialization
 
+
+```python
+model = GINet(
+          num_layer=5,
+          emb_dim=256,
+          feat_dim=512,
+          drop_ratio=0,
+          pool='mean'
+)
+```
+
+`GINet` arguments:
+- `num_layer` (int): the number of GNN layers
+- `emb_dim` (int): dimensionality of embeddings
+- `feat_dim` (int): dimensionality of feature
+- `drop_ratio` (float): dropout rate
+- `pool` (str): One of 'mean', 'add', 'max'
+
+
+```python
+model = GCN(
+          task='regression',
+          emb_dim=300,
+          feat_dim=256,
+          num_layer=5,
+          pool='mean',
+          drop_ratio=0,
+          output_dim=None
+)
+```
+
+`GCN` arguments:
+- `task` (str, default=Classification): task, either regression or classification, assumes single target
+- `emb_dim` (int, default=300) dimensionality of embeddings
+- `feat_dim` (int, default=256): dimensionality of feature
+- `num_layer` (int, default=5): the number of GNN layers
+- `drop_ratio` (float, default=0): dropout rate
+- `pool` (str, default='mean'): One of 'mean', 'add', 'max'
+- `output_dim` (int, default=1): dimensionality of output, can be adjusted for multi-target, or classification.
+
+NOTE: SchNet is no longer officially supported. However, the model is still available to use.
 ```python
 model = SchNet(
           hidden_channels=128,
@@ -277,25 +318,6 @@ model = SchNet(
     Expects a vector of shape :obj:`(max_atomic_number, )`.
 
 Our SchNet implementation comes from [here](http://www.quantum-machine.org/datasets/trained_schnet_models.zip)
-
-```python
-model = GINet(
-          num_layer=5,
-          emb_dim=256,
-          feat_dim=512,
-          drop_ratio=0,
-          pool='mean'
-)
-```
-
-`GINet` arguments:
-- `num_layer` (int): the number of GNN layers
-- `emb_dim` (int): dimensionality of embeddings
-- `feat_dim` (int): dimensionality of feature
-- `drop_ratio` (float): dropout rate
-- `pool` (str): One of 'mean', 'add', 'max'
-
-
 ### Training
 
 From here, we are ready to train using standard PyTorch training procedure.
