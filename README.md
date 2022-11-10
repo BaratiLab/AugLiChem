@@ -97,20 +97,26 @@ Rishikesh Magar\*, Yuyang Wang\*, Cooper Lorsung\*, Hariharan Ramasubramanian, C
 
 ## Paper
 
-Our paper can be found [here](https://arxiv.org/abs/2111.15112)
+Our paper can be found [here](https://iopscience.iop.org/article/10.1088/2632-2153/ac9c84)
 
 ## Citation
 
 If you use AugLiChem in your work, please cite:
 
 ```
-@misc{magar2021auglichem,
-      title={AugLiChem: Data Augmentation Library ofChemical Structures for Machine Learning}, 
-      author={Rishikesh Magar and Yuyang Wang and Cooper Lorsung and Chen Liang and Hariharan Ramasubramanian and Peiyuan Li and Amir Barati Farimani},
-      year={2021},
-      eprint={2111.15112},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@article{Magar_2022,
+doi = {10.1088/2632-2153/ac9c84},
+url = {https://dx.doi.org/10.1088/2632-2153/ac9c84},
+year = {2022},
+month = {nov},
+publisher = {IOP Publishing},
+volume = {3},
+number = {4},
+pages = {045015},
+author = {Rishikesh Magar and Yuyang Wang and Cooper Lorsung and Chen Liang and Hariharan Ramasubramanian and Peiyuan Li and Amir Barati Farimani},
+title = {AugLiChem: data augmentation library of chemical structures for machine learning},
+journal = {Machine Learning: Science and Technology},
+abstract = {Machine learning (ML) has demonstrated the promise for accurate and efficient     property prediction of molecules and crystalline materials. To develop highly accurate ML models     for chemical structure property prediction, datasets with sufficient samples are required. Howev    er, obtaining clean and sufficient data of chemical properties can be expensive and time-consumin    g, which greatly limits the performance of ML models. Inspired by the success of data augmentatio    ns in computer vision and natural language processing, we developed AugLiChem: the data augmentat    ion library for chemical structures. Augmentation methods for both crystalline systems and molecu    les are introduced, which can be utilized for fingerprint-based ML models and graph neural networ    ks (GNNs). We show that using our augmentation strategies significantly improves the performance     of ML models, especially when using GNNs. In addition, the augmentations that we developed can be     used as a direct plug-in module during training and have demonstrated the effectiveness when imp    lemented with different GNN models through the AugliChem library. The Python-based package for ou    r implementation of Auglichem: Data augmentation library for chemical structures, is publicly ava    ilable at: https://github.com/BaratiLab/AugLiChem.},highly accurate ML models for chemical str$
 }
 ```
 
