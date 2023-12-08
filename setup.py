@@ -24,7 +24,7 @@ setuptools.setup(
   install_requires = ['numpy>=1.21.1',
                       'pytest>=6.0.1',
                       'pytest-cov',
-                      'sklearn',
+                      'scikit-learn',
                       'pandas>=1.3.1',
                       'matplotlib>=3.4.2',
                       'pyyaml>=5.4.1',
