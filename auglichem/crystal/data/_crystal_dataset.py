@@ -503,6 +503,15 @@ class CrystalDataset(Dataset):
             return self._getitem_knn(idx)
 
 
+    def len(self):
+        pass
+    
+
+    def get(self):
+        pass
+
+
+
 class CrystalDatasetWrapper(CrystalDataset):
     def __init__(self, dataset, transform=None, split="random", batch_size=64, num_workers=0,
                  valid_size=0.1, test_size=0.1, data_path=None, target=None, kfolds=0,
@@ -750,4 +759,12 @@ class CrystalDatasetWrapper(CrystalDataset):
 
             
         return train_loader, valid_loader, test_loader
+
+
+    def len(self):
+        pass
     
+
+    def get(self):
+        pass
+

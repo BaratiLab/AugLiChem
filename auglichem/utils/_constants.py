@@ -1,8 +1,9 @@
 from rdkit import Chem
 from rdkit.Chem.rdchem import BondType as BT
 
-ATOM_LIST = list(range(1,120)) # Includes mask token
-NUM_ATOM_TYPE = len(ATOM_LIST)
+ATOM_LIST = list(range(0,120)) # Includes mask token
+#ATOM_LIST = list(range(1,120)) # Includes mask token
+NUM_ATOM_TYPE = len(ATOM_LIST) + 1
 
 CHIRALITY_LIST = [
     Chem.rdchem.ChiralType.CHI_UNSPECIFIED,

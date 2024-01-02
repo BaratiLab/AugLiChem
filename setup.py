@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 setuptools.setup(
   name = 'auglichem',
   packages=setuptools.find_packages(exclude=("docs","examples",)), 
-  version = '0.1.8',
+  version = '0.1.9',
   license = 'MIT',
   description = 'Data augmentation of molecules and crystals.',
   long_description = long_description,
@@ -24,7 +24,7 @@ setuptools.setup(
   install_requires = ['numpy>=1.21.1',
                       'pytest>=6.0.1',
                       'pytest-cov',
-                      'sklearn',
+                      'scikit-learn',
                       'pandas>=1.3.1',
                       'matplotlib>=3.4.2',
                       'pyyaml>=5.4.1',
@@ -36,5 +36,7 @@ setuptools.setup(
 
                       'rdkit-pypi',
                       'tensorboard>=2.4.1',
+                      'jupyter>=1.0.0',
+                      'chardet>=4.0.0',
                      ],
 )

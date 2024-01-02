@@ -34,7 +34,7 @@ from ._load_sets import read_smiles
 
 class MoleculeDataset(Dataset):
     def __init__(self, dataset, data_path=None, transform=None, smiles_data=None, labels=None,
-                 task=None, test_mode=False, aug_time=0, atom_mask_ratio=[0, 0.25],
+                 task=None, test_mode=False, aug_time=1, atom_mask_ratio=[0, 0.25],
                  bond_delete_ratio=[0, 0.25], target=None, class_labels=None, seed=None,
                  augment_original=False, _training_set=False, _train_warn=True, **kwargs):
         '''
@@ -96,8 +96,6 @@ class MoleculeDataset(Dataset):
         self.seed = seed
         if(seed is not None):
             np.random.seed(self.seed)
-        self.reproduce_seeds = list(range(self.__len__()))
-        np.random.shuffle(self.reproduce_seeds)
 
         # Store mask ratios
         self.atom_mask_ratio = atom_mask_ratio
@@ -122,6 +120,10 @@ class MoleculeDataset(Dataset):
         self._training_set = _training_set
         self._train_warn = _train_warn
         self._handle_motifs()
+
+        # Calculate length and seeds after motif removal
+        self.reproduce_seeds = list(range(self.__len__()))
+        np.random.shuffle(self.reproduce_seeds)
 
 
     def _handle_motifs(self):
@@ -176,7 +178,7 @@ class MoleculeDataset(Dataset):
         type_idx, chirality_idx, atomic_number = [], [], []
 
         # Gather atom data
-        for atom in mol.GetAtoms():
+        for idx, atom in enumerate(mol.GetAtoms()):
             try:
                 type_idx.append(ATOM_LIST.index(atom.GetAtomicNum()))
                 chirality_idx.append(CHIRALITY_LIST.index(atom.GetChiralTag()))
@@ -354,9 +356,17 @@ class MoleculeDataset(Dataset):
         return len(self.smiles_data) * (self.aug_time + 1) # Original + augmented
 
 
+    def get(self):
+        pass
+
+
+    def len(self):
+        pass
+
+
 class MoleculeDatasetWrapper(MoleculeDataset):
     def __init__(self, dataset, transform=None, split="scaffold", batch_size=64, num_workers=0,
-                 valid_size=0.1, test_size=0.1, aug_time=0, data_path=None, seed=None):
+                 valid_size=0.1, test_size=0.1, aug_time=1, data_path=None, seed=None):
         '''
             Input:
             ---
@@ -475,4 +485,12 @@ class MoleculeDatasetWrapper(MoleculeDataset):
         )
 
         return train_loader, valid_loader, test_loader
+
+
+    def get(self):
+        pass
+
+
+    def len(self):
+        pass
 
