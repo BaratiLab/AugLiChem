@@ -40,6 +40,8 @@ Once you have `pytorch` and `torch_geometric` installed, installing AugLiChem ca
 
 ### MacOS ARM64 Architecture
 
+*Note:* recent updates to torch and auglichem have made installation on MacOS ARM64 architecture (M1 chip) more challenging. As of now, it is not officially supported. If you would like support, feel free to open an issue or pull request.
+
 A more involved install is required to run on the new M1 chips since some of the packages do not     have official support yet.
 We are working on a more elegant solution given the current limitations.
 
