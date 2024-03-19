@@ -10,7 +10,12 @@ from tqdm import tqdm
 
 import torch
 import torch.nn.functional as F
-from torch_geometric.data import Dataset, DataLoader
+
+try:
+    from torch_geometric.data import Dataset, DataLoader
+except ImportError:
+    from torch_geometric.loader import Dataset, DataLoader
+
 from torch_geometric.data import Data as PyG_Data
 
 
@@ -69,7 +74,7 @@ class MoleculeDataset(Dataset):
         # Handle incorrectly passed in transformations
         if(isinstance(transform, list)):
             transform = Compose(transform)
-        elif(not(isinstance(transform, Compose))):
+        elif(not(isinstance(transform, Compose)) and (transform is not None)):
             transform = Compose([transform])
         self.transform = transform
 
@@ -129,7 +134,7 @@ class MoleculeDataset(Dataset):
     def _handle_motifs(self):
         # MotifRemoval adds multiple new SMILES strings to our data, and must be done
         # upon training set initialization
-        if(self._training_set):
+        if(not self.test_mode):
             if(self._train_warn): # Catches if not set through get_data_loaders()
                 raise ValueError(
                     "_training_set is for internal use only. " + \
