@@ -76,6 +76,8 @@ class MoleculeDataset(Dataset):
             transform = Compose(transform)
         elif(not(isinstance(transform, Compose)) and (transform is not None)):
             transform = Compose([transform])
+        elif(transform is None):
+            transform = Compose([])
         self.transform = transform
 
         if(smiles_data is None):
@@ -134,7 +136,7 @@ class MoleculeDataset(Dataset):
     def _handle_motifs(self):
         # MotifRemoval adds multiple new SMILES strings to our data, and must be done
         # upon training set initialization
-        if(not self.test_mode):
+        if(self._training_set):
             if(self._train_warn): # Catches if not set through get_data_loaders()
                 raise ValueError(
                     "_training_set is for internal use only. " + \
